@@ -92,42 +92,7 @@ public class Isabella
 
 //AW:USERINIT
 		// Code here will be run once, after the algorithm object is created.
-                try{
-                    
-
-                    //irrigation = new TreeMap< Date, ArrayList< Double > >();
-                    // These actually should be run every time we run the comp
-                    //actual_irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);
-                    //normal_irrigation = WaterControlDiagram.get_irrigation_data(normal_demand_file);
-                    // load
-                    
-                    /*
-                    File f = new File(irrigation_demand_file);
-                    if(!f.exists())
-                        throw new DbCompException("No iriigation demand file, this project requires one");
-                    BufferedReader reader = new BufferedReader( new FileReader(f) );
-                    String line=null;
-                    df = new SimpleDateFormat("MM/dd/yyyy");
-                    while( (line = reader.readLine()) != null )
-                    {
-                        String parts[] = line.split(",");
-                        Date d = df.parse(parts[1]);
-                        ArrayList<Double> tmp = new ArrayList<Double>();
-                        for( int i=2; i <parts.length; i++)
-                        {
-                            tmp.add( Double.parseDouble(parts[i])); // values are stored in thousands of ac-ft
-                        }
-                        irrigation.put(d, tmp);
-                    }
-                    reader.close();
-                    */
-                }
-                catch( Exception e)
-                {
-                    debug3( "Failed to initialize comp: \n" + e.getMessage() );
-                    debug3( "Aborting computation");
-                    throw new DbCompException("Fail to initialize comp");
-                }
+                
 //AW:USERINIT_END
 	}
 	
