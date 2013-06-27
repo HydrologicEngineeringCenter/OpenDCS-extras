@@ -177,6 +177,10 @@ public class FlowResIn
                     }
                     in = outputConv.convert(in);
                 
+                    /* TODO: change this
+                     * should have the reports show the 0's
+                     * or maybe make it configurable.
+                     */
                     if( in >= 0.0)
                     {
                         setOutput( ResIn, in );

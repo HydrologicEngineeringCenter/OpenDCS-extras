@@ -151,8 +151,6 @@ public class PineFlatFlowNat
             debug3("Natrual flow: " + natural_flow );
 
             setOutput(FlowNat, natural_flow);
-
-
             //AW:TIMESLICE_END
 
 	}

@@ -37,9 +37,11 @@ import java.util.TreeMap;
 public class Terminus
 	extends decodes.tsdb.algo.AW_AlgorithmBase
 {
+        // that should say RainFloodControlParamter....however there is a 24 character limit in that field.
 //AW:INPUTS
-	public double RemainingRunoff;	//AW:TYPECODE=i	
-	String _inputNames[] = { "RemainingRunoff" };
+	public double RemainingRunoff;	//AW:TYPECODE=i
+        public double RainFCP;    //AW:TYPECODE=i
+	String _inputNames[] = { "RemainingRunoff", "RainFCP" };
 //AW:INPUTS_END
 
 //AW:LOCALVARS
@@ -64,7 +66,7 @@ public class Terminus
 //AW:PROPERTIES
         public String graph_file = "";
         public boolean StorAll = true;
-        public String irrigation_demand_file;
+        public String irrigation_demand_file = "";
 	String _propertyNames[] = { "graph_file", "StorAll", "irrigation_demand_file" };
 //AW:PROPERTIES_END
 
@@ -97,6 +99,9 @@ public class Terminus
                     debug3( "loading graph");
                     graph = new WaterControlDiagram( graph_file );                
                     irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);
+                    /*
+                     * Maybe a timeout for reload? E.g we load once and check once an hour or something...
+                     */
                 }
                 catch( Exception e)
                 {
@@ -112,7 +117,7 @@ public class Terminus
 	}
 
 	/**
-	 * Sections in comments refere to the Water Control Diagram.
+	 * Section numbers in comments refer to the Water Control Diagram.
 	 *
 	 * @throws DbCompException (or subclass thereof) if execution of this
 	 *        algorithm is to be aborted.
@@ -139,7 +144,7 @@ public class Terminus
                 try{
                     // get the initial top con value
                     debug2( "Getting Base TCS value" );
-                    double tcs_rain = graph.get_allowed_storage(wy_day - 1, 0.0);// all of the graphs are zero based
+                    double tcs_rain = graph.get_allowed_storage(wy_day - 1, RainFCP);// all of the graphs are zero based
                     debug3("*************************");
                     debug3("*************************");
                     double tcs_snow = graph.get_allowed_storage(wy_day - 1, RemainingRunoff, true );
@@ -152,10 +157,18 @@ public class Terminus
                     // we now adjust the top con
                     //adjustment = calculate_irrigation();
                     adjustment = graph.normal_irrigation(_timeSliceBaseTime);
-                    if( wy_day > 124 && wy_day <304)
-                        allowed_storage_unbounded = tcs_snow + adjustment;
-                    else
-                        allowed_storage_unbounded = tcs_rain;
+                    /*
+                     *  TODO: Change this to be between Nov15th and Mar 1
+                     *        Just the Rain Space, other wise the minimum of the two
+                     * (10th November, ~2nd April)
+                     */                    
+                    if( wy_day > 41 && wy_day <184){
+                        allowed_storage_unbounded = tcs_snow;
+                    }else{
+                        allowed_storage_unbounded = Math.min( tcs_snow + adjustment, tcs_rain );
+                    }
+                        
+                    
                     debug3( " unbounded storage is " + allowed_storage_unbounded );
                     debug3 ( "Applying bounds to storage" );
                    

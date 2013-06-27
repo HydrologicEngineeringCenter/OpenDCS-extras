@@ -482,7 +482,8 @@ public class WaterControlDiagram
                                    
             int day_remaining = cal.getActualMaximum(cal.DAY_OF_MONTH) - cur_day;
             demand = day_remaining*irrigation.get(month)*1.9835;
-            for( int i=month+1; i <= Calendar.JUNE; i++ ) // go to 30 june
+            // TODO: check that this is valid for everything
+            for( int i=month+1; i <= Calendar.JUNE; i++ ) // go to 30 june                
             {
                 cal.set( cal.MONTH, i);
                 demand += irrigation.get( cal.get(Calendar.MONTH))*cal.getActualMaximum(Calendar.DAY_OF_MONTH)*1.9835;
