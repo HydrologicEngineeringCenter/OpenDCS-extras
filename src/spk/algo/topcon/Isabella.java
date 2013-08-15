@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import spk.algo.support.Dates;
+import spk.algo.support.IrrigationDemands;
 //AW:IMPORTS_END
 
 //AW:JAVADOC
@@ -50,7 +52,8 @@ public class Isabella
 //AW:LOCALVARS
 	// Enter any local class variables needed by the algorithm.
         WaterControlDiagram graph = null;
-        TreeMap< Date, ArrayList< Double > > actual_irrigation;
+        IrrigationDemands actual_irrigation;
+        Dates dates;
         TreeMap< Date, ArrayList< Double > > normal_irrigation;
         SimpleDateFormat df;
         // These are used for upstream storage( see section 3b1 of WC Diagram )
@@ -107,7 +110,7 @@ public class Isabella
                 debug3( "loading graph");
                 graph = new WaterControlDiagram( graph_file );
                 actual_irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);
-                normal_irrigation = WaterControlDiagram.get_irrigation_data(normal_demand_file);
+                normal_irrigation = WaterControlDiagram.get_normal_irrigation_data(normal_demand_file);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Isabella.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
@@ -135,6 +138,7 @@ public class Isabella
 		throws DbCompException
 	{
 //AW:TIMESLICE
+                dates = new Dates( _timeSliceBaseTime );
                 double adjustment = 0.0;                
                 double normal_irrigation_today = 0.0;
                 double actual_irrigation_today = 0.0;
@@ -166,13 +170,13 @@ public class Isabella
                     
                     // we now adjust the top con
                     normal_irrigation_today = calculate_irrigation( normal_irrigation );
-                    actual_irrigation_today = calculate_irrigation( actual_irrigation );
+                    actual_irrigation_today = calculate_irrigation(  );
                     adjustment = actual_irrigation_today - normal_irrigation_today;
                     debug3( "***Irrigation ****");
                     debug3( "Normal Demand is: " + normal_irrigation_today );
                     debug3( "Actual Demand is: " + actual_irrigation_today );
                     debug3( "Normal - Actual (Adjusment) " + adjustment );
-                    if( wy_day > 124 && wy_day <304)
+                    if( wy_day > dates.February01 && wy_day < dates.July31)
                         allowed_storage_unbounded = tcs_snow + adjustment;
                     else
                         allowed_storage_unbounded = tcs_rain;
@@ -243,6 +247,24 @@ public class Isabella
 	{
 		return _propertyNames;
 	}
+        
+         /*
+          * Sum the demands until the 30th of June.
+          */
+         public double calculate_irrigation()throws Exception{
+            
+            int wy_julian_day = DateTime.to_wy_julian(_timeSliceBaseTime);
+            double demands[] = actual_irrigation.getDemands(_timeSliceBaseTime);
+            double demand = 0.0;
+            if( wy_julian_day <= dates.June30 ){
+                for( int i = wy_julian_day; i <= dates.June30; i++){
+                    demand += demands[i];
+                }
+            }
+            return demand*1.9835;
+        }
+        
+        
         /*
          * 
          */
