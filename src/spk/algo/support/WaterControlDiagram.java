@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import static spk.algo.support.Logging.*;
 
@@ -37,9 +38,10 @@ public class WaterControlDiagram
         HashMap< Double, ArrayList<Double> > snow_graph = null;
         ArrayList< Double > lower_bound = null;
         ArrayList< Double > upper_bound = null;
-	ArrayList< Double >             times = null;
-	ArrayList< Double>  irrigation = null;
-        double                      gross_pool = 0.0;
+	ArrayList< Double >       times = null;
+	ArrayList< Double>   irrigation = null;
+        double               gross_pool = 0.0;
+        double            max_snowspace = 0.0;
         ExponentialEquation           equation = null;
 
         
@@ -157,6 +159,12 @@ public class WaterControlDiagram
                         {
                             irrigation.add( Double.parseDouble(v));
                         }
+                    }
+                    else if( section.equals( "equation") ){
+                        equation = new ExponentialEquation(parts[1].trim());
+                    }
+                    else if( section.equals( "max_snowspace")){
+                        this.max_snowspace = Double.parseDouble(parts[1]);
                     }
                 }
 
@@ -469,7 +477,9 @@ public class WaterControlDiagram
             return value;
         }
 
-        
+        /*
+         * TODO: rebuild for new full water year array format
+         */
         public double normal_irrigation( Date basetime)
         {
             GregorianCalendar cal = new GregorianCalendar();
@@ -492,8 +502,17 @@ public class WaterControlDiagram
             return demand;
         }
         
-        public static TreeMap< Date, ArrayList< Double > > get_irrigation_data( String filename ) throws DbCompException, FileNotFoundException, IOException, ParseException
-        {
+        public static IrrigationDemands get_irrigation_data( String filename ) throws DbCompException, FileNotFoundException, IOException, ParseException{
+            try {
+                return new IrrigationDemands( filename );
+            } catch (org.json.simple.parser.ParseException ex) {
+                Logger.getLogger(WaterControlDiagram.class.getName()).log(Level.SEVERE, null, ex);
+                throw new DbCompException( "Could not load irrigation demand data");
+            }
+        }
+        
+        public static TreeMap< Date, ArrayList< Double > > get_normal_irrigation_data( String filename ) throws DbCompException, FileNotFoundException, IOException, ParseException{
+        
             TreeMap< Date, ArrayList< Double > > irr_data = new TreeMap< Date, ArrayList< Double > >();
             File f = new File(filename);
             if(!f.exists())
@@ -514,6 +533,13 @@ public class WaterControlDiagram
             }
             reader.close();
             return irr_data;
+        }
+
+    
+
+
+        public double get_allowed_storage_equation(int wy_day, double runoff) {
+            return this.max_snowspace - equation.calculate(wy_day)*runoff;
         }
         
 }

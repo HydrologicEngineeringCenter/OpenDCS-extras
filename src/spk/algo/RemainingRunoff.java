@@ -177,7 +177,7 @@ public class RemainingRunoff
                         double sum = 0.0;
                         for( double val: data )
                         {
-                            sum += val;
+                            sum += Math.max(0, val); // make sure we don't add water to the mountain.
                         }
                         data = null;
                         sum=sum*1.9835;

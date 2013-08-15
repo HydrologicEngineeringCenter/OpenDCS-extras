@@ -181,6 +181,8 @@ public class FlowResIn
                      * should have the reports show the 0's
                      * or maybe make it configurable.
                      */
+                    setOutput( ResIn, in );
+                    /*
                     if( in >= 0.0)
                     {
                         setOutput( ResIn, in );
@@ -190,6 +192,7 @@ public class FlowResIn
                         warning("Inflow set to 0 because the calculation came out to less than 0");
                         setOutput( ResIn, 0 );
                     }
+                    */
                 }
                 catch( DecodesException ex)
                 {

@@ -151,6 +151,9 @@ public class RainFloodControlParameter
 		{
 			debug3( "begining first run procedures");
                         previous_fcp = this.getPrevValue("FloodControlParameter", _timeSliceBaseTime );
+                        if(isMissing(previous_fcp)){
+                            previous_fcp=0.0;
+                        }
            		first_run = false;                        
 		}
 		if( resetDate != null )

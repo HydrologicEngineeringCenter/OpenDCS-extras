@@ -64,7 +64,7 @@ public class ExponentialEquation {
      */
     ExponentialEquation( String equation )
     {
-        String parts[] = equation.split(",");
+        String parts[] = equation.split("\\s+");
         A = Double.parseDouble(parts[0]);
         B = Double.parseDouble(parts[1]);
         C = Double.parseDouble(parts[2]);

@@ -17,6 +17,7 @@ import spk.algo.support.DateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.lang.Math;
+import spk.algo.support.Dates;
 //AW:IMPORTS_END
 
 //AW:JAVADOC
@@ -116,6 +117,7 @@ public class BlackButte
 		throws DbCompException
 	{
 //AW:TIMESLICE
+                Dates dates = new Dates( _timeSliceBaseTime);
                 double stony = 0.0;
                 double east = 0.0;
                 double adjustment = 0.0;
@@ -148,7 +150,7 @@ public class BlackButte
                     // Section 3b
                     //
                     debug3( "Calculating Stony Gorge Allowed Storage" );
-                    if( wy_day > 336 || wy_day < 124 )
+                    if( wy_day > dates.September01 || wy_day < dates.February01 )
                     {// section 3b1 is in effect
                         stony = 28400.0 - StonyGorge;
                         debug3( " stony gorge available (3b1) is " + stony );

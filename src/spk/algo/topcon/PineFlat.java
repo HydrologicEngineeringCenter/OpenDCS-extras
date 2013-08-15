@@ -30,31 +30,28 @@ import spk.algo.support.IrrigationDemands;
 
 //AW:JAVADOC
 /**
- * Calculate the Top Con for Isabella
+ * Calculate the Top Con for PineFlat
  *
  * @author L2EDDMAN
  *
  */
 //AW:JAVADOC_END
-public class Terminus
+public class PineFlat
 	extends decodes.tsdb.algo.AW_AlgorithmBase
 {
-        // that should say RainFloodControlParamter....however there is a 24 character limit in that field.
 //AW:INPUTS
-	public double RemainingRunoff;	//AW:TYPECODE=i
-        public double RainFCP;    //AW:TYPECODE=i
-	String _inputNames[] = { "RemainingRunoff", "RainFCP" };
+	public double RemainingRunoff;	//AW:TYPECODE=i	      
+        public double Wishon;   //AW:TYPECODE=i
+        public double Courtright; //AW:TYPECODE=i
+	String _inputNames[] = { "RemainingRunoff", "Wishon", "Courtright" };
 //AW:INPUTS_END
 
 //AW:LOCALVARS
 	// Enter any local class variables needed by the algorithm.
         WaterControlDiagram graph = null;
         IrrigationDemands irrigation;
-        Dates dates;
         SimpleDateFormat df;
-        // These are used for upstream storage( see section 3b1 of WC Diagram )
-        //Date sep = null;
-        //Date feb = null;
+        Dates dates; // holds important times
 //AW:LOCALVARS_END
 
 //AW:OUTPUTS
@@ -63,7 +60,8 @@ public class Terminus
         public NamedVariable AllowedStorage = new NamedVariable("AllowedStorage", 0);
         public NamedVariable AllowedStorageRain = new NamedVariable("AllowedStorageRain", 0);
         public NamedVariable AllowedStorageSnow = new NamedVariable("AllowedStorageSnow", 0);
-	String _outputNames[] = { "AllowedStorage", "AllowedStorageUnbound","AllowedStorageRain", "AllowedStorageSnow", "Adjustment"  };
+        public NamedVariable Upstream = new NamedVariable("Upstream", 0);
+	String _outputNames[] = { "AllowedStorage", "AllowedStorageUnbound","AllowedStorageRain", "AllowedStorageSnow", "Adjustment", "Upstream"  };
 //AW:OUTPUTS_END
 
 //AW:PROPERTIES
@@ -86,25 +84,12 @@ public class Terminus
 //AW:INIT_END
 
 //AW:USERINIT
-		
-//AW:USERINIT_END
-	}
-	
-	/**
-	 * This method is called once before iterating all time slices.
-	 */
-        
-	protected void beforeTimeSlices()
-		throws DbCompException
-	{
-//AW:BEFORE_TIMESLICES
+		// Code here will be run once, after the algorithm object is created.
                 try{
                     debug3( "loading graph");
-                    graph = new WaterControlDiagram( graph_file );                
+                    graph = new WaterControlDiagram( graph_file );
+
                     irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);
-                    /*
-                     * Maybe a timeout for reload? E.g we load once and check once an hour or something...
-                     */
                 }
                 catch( Exception e)
                 {
@@ -112,6 +97,16 @@ public class Terminus
                     debug3( "Aborting computation");
                     throw new DbCompException("Fail to initialize comp");
                 }
+//AW:USERINIT_END
+	}
+	
+	/**
+	 * This method is called once before iterating all time slices.
+	 */
+	protected void beforeTimeSlices()
+		throws DbCompException
+	{
+//AW:BEFORE_TIMESLICES
 		// This code will be executed once before each group of time slices.
 		// For TimeSlice algorithms this is done once before all slices.
 		// For Aggregating algorithms, this is done before each aggregate
@@ -120,7 +115,7 @@ public class Terminus
 	}
 
 	/**
-	 * Section numbers in comments refer to the Water Control Diagram.
+	 * Sections in comments refer to the Water Control Diagram.
 	 *
 	 * @throws DbCompException (or subclass thereof) if execution of this
 	 *        algorithm is to be aborted.
@@ -128,30 +123,35 @@ public class Terminus
 	protected void doAWTimeSlice()
 		throws DbCompException
 	{
-//AW:TIMESLICE
-                dates = new Dates(_timeSliceBaseTime);
+//AW:TIMESLICE                
+                
+                double upstream = 0.0;
                 double adjustment = 0.0;
                 double allowed_storage_unbounded = 0.0;
                 double allowed_storage = 0.0;
+                double tcs_rain = Double.NEGATIVE_INFINITY;
+                dates = new Dates(_timeSliceBaseTime);
 		// Enter code to be executed at each time-slice.
+                // per PNF WC Diagram (USE OF DIAGRAM) paragraph 2
+                upstream = (Wishon + Courtright) - 20000; 
+                
                 
                 int wy_day = DateTime.to_wy_julian(_timeSliceBaseTime); 
                 debug3( "******************************");
                 debug3( "******************************");
                 debug3( "Calculating TCS for date(julian):" + _timeSliceBaseTime + " ( " + wy_day + " )" );
-                if( isMissing( RemainingRunoff ))
-                {
-                    info( "Current Implementation does not handle missing values, moving to next timeslice" );
-                    return;
-                }
+                
                 try{
                     // get the initial top con value
                     debug2( "Getting Base TCS value" );
-                    double tcs_rain = graph.get_allowed_storage(wy_day - 1, RainFCP);// all of the graphs are zero based
+                    tcs_rain = graph.get_allowed_storage(wy_day - 1, 0.0);// all of the graphs are zero based
                     debug3("*************************");
                     debug3("*************************");
-                    double tcs_snow = graph.get_allowed_storage(wy_day - 1, RemainingRunoff, true );
                     debug3( " TCS for rain is " + tcs_rain );
+                    
+                    //double tcs_snow = graph.get_allowed_storage(wy_day - 1, RemainingRunoff, true );
+                    double tcs_snow = graph.get_allowed_storage_equation( wy_day - 1, RemainingRunoff);
+                    
                     debug3( " TCS for snow is " + tcs_snow );
                     
                     
@@ -159,23 +159,17 @@ public class Terminus
                     
                     // we now adjust the top con
                     //adjustment = calculate_irrigation();
-                    adjustment = graph.normal_irrigation(_timeSliceBaseTime);
-                    /*
-                     *  TODO: Change this to be between Nov15th and Mar 1
-                     *        Just the Rain Space, other wise the minimum of the two
-                     * (10th November, ~2nd April)
-                     */                    
-                    if( wy_day > dates.November10 && wy_day < dates.March01){
-                        allowed_storage_unbounded = tcs_snow;
-                    }else{
-                        allowed_storage_unbounded = Math.min( tcs_snow + adjustment, tcs_rain );
+                    adjustment = this.calculate_irrigation(); //0.0;//graph.normal_irrigation(_timeSliceBaseTime);
+
+                    if( wy_day >= dates.February01 && wy_day <= dates.July31){
+                        allowed_storage_unbounded = tcs_snow + adjustment + upstream;
                     }
-                        
-                    
+                    else{                        
+                        allowed_storage_unbounded = tcs_rain + upstream;                        
+                    }
                     debug3( " unbounded storage is " + allowed_storage_unbounded );
                     debug3 ( "Applying bounds to storage" );
-                   
-                    
+                                       
                     allowed_storage = graph.bound(wy_day-1, allowed_storage_unbounded );
                     debug3( " bounded storage is " + allowed_storage );
                     
@@ -186,6 +180,7 @@ public class Terminus
                         setOutput(AllowedStorageRain, tcs_rain);
                         setOutput(AllowedStorageSnow, tcs_snow);
                         setOutput(AllowedStorageUnbound, allowed_storage_unbounded);
+                        setOutput(Upstream, upstream);
                     }
 
                 }
@@ -237,22 +232,120 @@ public class Terminus
 	{
 		return _propertyNames;
 	}
+        
         /*
-         * 
+         * Cacluate the irritation to 10th of June until 26th of May.
+         * After the 26th of May sum the sort of 15days or until the 31st of July
          */
-         public double calculate_irrigation()throws Exception{
+        public double calculate_irrigation()throws Exception{
             
             int wy_julian_day = DateTime.to_wy_julian(_timeSliceBaseTime);
             double demands[] = irrigation.getDemands(_timeSliceBaseTime);
             double demand = 0.0;
             int end_time = -1;
-            if( wy_julian_day <= dates.June30)
-            for( int i = wy_julian_day; i <= dates.June30; i++){
+            if( wy_julian_day >= dates.July31 - 15){
+                end_time = dates.July31;
+            }
+            else if( wy_julian_day >= dates.May26 ){
+                end_time = wy_julian_day+15; // next 15 days
+            }
+            else{
+                end_time = dates.June10;
+            }
+                
+            for( int i = wy_julian_day; i <= end_time; i++){
                 demand += demands[i];
             }
             
             return demand*1.9835;
         }
         
+        /*
+         * 
+         */
+        public double calculate_irrigation(TreeMap< Date, ArrayList< Double > > irrigation )
+        {
+            /*
+             * All per paragraph 3 of (USE OF DIAGRAM) Pine Flat Water Control Diagram
+             * 
+             */
+            /*
+             * Dates for use in all of the logic
+             */
+            int july31 = 304;
+            int july16 = 289;
+            int june10 = 253;
+            int may26  = 238;                    
+            
+            GregorianCalendar cal = new GregorianCalendar();
+            cal.setTime(_timeSliceBaseTime);
+            int julian_day = DateTime.to_wy_julian(_timeSliceBaseTime);
+            int month = cal.get( Calendar.MONTH);
+            int cur_day = cal.get(Calendar.DAY_OF_MONTH);
+            int year = cal.get(Calendar.YEAR);
+            
+            if( cal.isLeapYear(year) )
+            {
+                july31 +=1;
+                july16 +=1;
+                june10 +=1;
+                may26  +=1;
+            }            
+            double demand = 0.0;
+            if( month < Calendar.FEBRUARY || month > Calendar.JULY )
+                return 0.0; // we don't worry about irrigation at this time
+            Date nearest = irrigation.floorKey(_timeSliceBaseTime);
+            // demands array starts with 0=January, matches with java time
+            ArrayList<Double> demands = (ArrayList<Double>)irrigation.get(nearest);
+            int day_remaining = cal.getActualMaximum(cal.DAY_OF_MONTH) - cur_day + 1; // we include the current day            
+            /* check date, then do every thing */
+            if( julian_day >= july16 && julian_day <= july31) // it is now closer to 31July than 15 days
+            {                               
+                demand = day_remaining*demands.get(month)*1.9835;
+            }
+            else if( julian_day <= july16 && month == Calendar.JULY)
+            {
+                demand = demands.get(month)*15*1.9835; // just grab the next fifteen days
+            }
+            else if( julian_day >= may26) // after 26 may it is just the next fiften days, which will never cross more than one month
+            {
+                demand = day_remaining*demands.get(month)*1.9835;
+                demand += (15-day_remaining)*demands.get(month+1)*1.9835;                
+            }
+            else if( julian_day < may26 )
+            {
+                demand = day_remaining*demands.get(month)*1.9835; // get the rest of this month
+                for( int i = month+1; i < Calendar.JULY; i++ ) // go until june
+                {
+                    if( i != Calendar.JUNE)
+                    {
+                        demand =+ demands.get(i)*cal.getActualMaximum(i)*1.9835;
+                    }
+                    else if( i == Calendar.JUNE)
+                    {
+                        demand += demands.get(i)*10; // just until the tenth of June, so ten days in June.
+                    }
+                }
+            }
+            else
+            {
+                warning("one of the time conditions was not met during irrigation demand calculation");
+            }
+            
+            
+            // setup the Julian dates for the calendar
+            
+            /*
+             *  Per "Use of Diagram" on Pine Flat water control diagram
+             *  before 26 May calculate runoff to 10 June
+             * After 26 May,  /  Next 15 days
+             *   min of      -|
+             *                \  to 31 July
+             */
+            
+            
         
+
+            return demand;
+        }
 }
