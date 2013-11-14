@@ -9,6 +9,7 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 
 import decodes.hdb.HdbFlags;
+import decodes.sql.DbKey;
 import decodes.tsdb.BadTimeSeriesException;
 import decodes.tsdb.DbAlgorithmExecutive;
 import decodes.tsdb.DbCompException;
@@ -815,7 +816,8 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
     public abstract String[] getPropertyNames();
     
     protected double getCoeff(String rolename) throws DbCompException {
-	long sdi = getSDI(rolename);
+	DbKey sdi = getSDI(rolename);
+        
 	String interval = getInterval(rolename);
 	String ts = getTableSelector(rolename);
 	double coeff;
