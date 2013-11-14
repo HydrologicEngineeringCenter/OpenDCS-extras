@@ -15,7 +15,12 @@ import decodes.tsdb.algo.AWAlgoType;
 import decodes.cwms.CwmsFlags;
 import decodes.db.EngineeringUnit;
 import decodes.db.UnitConverter;
+import decodes.tsdb.ParmRef;
+import decodes.tsdb.algo.AggregatePeriod;
 import decodes.util.DecodesException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 //AW:IMPORTS_END
 
@@ -38,7 +43,8 @@ import java.util.concurrent.TimeUnit;
  */
 //AW:JAVADOC_END
 public class FlowResIn
-	extends decodes.tsdb.algo.AW_AlgorithmBase
+	//extends decodes.tsdb.algo.AW_AlgorithmBase
+        extends spk.algo.support.AlgBaseNew
 {
 //AW:INPUTS
 	public double ResOut;	//AW:TYPECODE=i
@@ -140,8 +146,34 @@ public class FlowResIn
                 }
                 else if( interval.equals( "1day") || interval.equals( "~1day") )
                 {
-
-                    conversion = 0.50417;
+                    
+                    //long time_difference = (_aggregatePeriodEnd.getTime() - _aggregatePeriodBegin.getTime())/(1000*60*60);
+                    //long time_difference = 24;
+                    GregorianCalendar t1 = new GregorianCalendar();
+                    GregorianCalendar t2 = new GregorianCalendar();
+                    t1.setTimeZone(aggTZ);
+                    t2.setTimeZone(aggTZ);
+                    t1.setTime(_timeSliceBaseTime);
+                    t2.setTime(_timeSliceBaseTime);
+                    t2.add(Calendar.DAY_OF_MONTH, 1);
+                    
+                    // since these are the UTC values we'll get the right time difference
+                    long time_difference = ( t2.getTimeInMillis() - t1.getTimeInMillis() )/ (1000*60*60);
+                    
+                    if( time_difference == 24 )
+                    {
+                        conversion = 0.50417;
+                    }
+                    else if( time_difference == 23){
+                        conversion = 0.052609;
+                    }
+                    else if( time_difference == 25){
+                        conversion = 0.48400;
+                    }
+                    else{
+                        throw new DbCompException( "You have entered some weird daylight savings that adjusts by more than an hour...if this is true, 1st: sorry. 2nd: see the programmer about expanding this section of the code" );
+                    }
+                        
                 }
                 debug3( "Conversion factor = " + conversion);
                 
@@ -169,7 +201,7 @@ public class FlowResIn
                     }
                     else
                     {
-                        debug3("performaing calculation without evap");
+                        debug3("performing calculation without evap");
                         debug3( "Dstor = " + Dstor + ", Outflow = " + ResOut);
                         debug3( " Dstor  in cfs = " + (Dstor*conversion) );
                         // The 15 minute and hourly calculation do not use evap
@@ -180,8 +212,14 @@ public class FlowResIn
                     /* TODO: change this
                      * should have the reports show the 0's
                      * or maybe make it configurable.
+                     * 
+                     * TODO:
+                     *    or create some sort of smoothing algorithm
+                     *      check previous value
+                     *      if large dip, put in queue
                      */
                     setOutput( ResIn, in );
+                    
                     /*
                     if( in >= 0.0)
                     {
@@ -212,6 +250,18 @@ public class FlowResIn
 		// For TimeSlice algorithms this is done once after all slices.
 		// For Aggregating algorithms, this is done after each aggregate
 		// period.
+                
+                /*
+                 * smoothing
+                 * 
+                 * go through queue, interpolate between data.
+                 * 
+                 * get the previous value, get the next value interpolate.
+                 * ( this works if the value is stored or if we can get it within
+                 * the address space of this function.
+                 * 
+                 * 
+                 */                 
 //AW:AFTER_TIMESLICES_END
 	}
 
