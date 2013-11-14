@@ -151,6 +151,7 @@ public class Terminus
                     debug3("*************************");
                     debug3("*************************");
                     double tcs_snow = graph.get_allowed_storage(wy_day - 1, RemainingRunoff, true );
+                    double tcs_snow2 = graph.get_allowed_storage_equation(wy_day, RemainingRunoff);
                     debug3( " TCS for rain is " + tcs_rain );
                     debug3( " TCS for snow is " + tcs_snow );
                     
@@ -160,16 +161,13 @@ public class Terminus
                     // we now adjust the top con
                     //adjustment = calculate_irrigation();
                     adjustment = graph.normal_irrigation(_timeSliceBaseTime);
-                    /*
-                     *  TODO: Change this to be between Nov15th and Mar 1
-                     *        Just the Rain Space, other wise the minimum of the two
-                     * (10th November, ~2nd April)
-                     */                    
-                    if( wy_day > dates.November10 && wy_day < dates.March01){
-                        allowed_storage_unbounded = tcs_snow;
-                    }else{
-                        allowed_storage_unbounded = Math.min( tcs_snow + adjustment, tcs_rain );
+                    
+                    if( wy_day >= dates.March31 && wy_day <= dates.July31){
+                            allowed_storage_unbounded = tcs_snow + adjustment;
+                    } else{
+                        allowed_storage_unbounded = tcs_rain;
                     }
+                    
                         
                     
                     debug3( " unbounded storage is " + allowed_storage_unbounded );
