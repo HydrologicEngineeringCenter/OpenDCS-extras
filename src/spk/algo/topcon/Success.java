@@ -24,11 +24,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
+import spk.algo.support.Dates;
+import spk.algo.support.IrrigationDemands;
 //AW:IMPORTS_END
 
 //AW:JAVADOC
 /**
- * Calculate the Top Con for Isabella
+ * Calculate the Top Con for Success
  *
  * @author L2EDDMAN
  *
@@ -37,16 +39,18 @@ import java.util.TreeMap;
 public class Success
 	extends decodes.tsdb.algo.AW_AlgorithmBase
 {
+        // that should say RainFloodControlParamter....however there is a 24 character limit in that field.
 //AW:INPUTS
-	public double RemainingRunoff;	//AW:TYPECODE=i	
-        public double RainFloodControlParameter; //AW:TYPECODE=i
-	String _inputNames[] = { "RemainingRunoff", "RainFloodControlParameter" };
+	public double RemainingRunoff;	//AW:TYPECODE=i
+        public double RainFCP;    //AW:TYPECODE=i
+	String _inputNames[] = { "RemainingRunoff", "RainFCP" };
 //AW:INPUTS_END
 
 //AW:LOCALVARS
 	// Enter any local class variables needed by the algorithm.
-        WaterControlDiagram graph = null;
-        TreeMap< Date, ArrayList< Double > > irrigation;
+        WaterControlDiagram graph = null;       
+        IrrigationDemands irrigation;
+        Dates dates;
         SimpleDateFormat df;
         // These are used for upstream storage( see section 3b1 of WC Diagram )
         //Date sep = null;
@@ -65,7 +69,7 @@ public class Success
 //AW:PROPERTIES
         public String graph_file = "";
         public boolean StorAll = true;
-        public String irrigation_demand_file;
+        public String irrigation_demand_file = "";
 	String _propertyNames[] = { "graph_file", "StorAll", "irrigation_demand_file" };
 //AW:PROPERTIES_END
 
@@ -82,32 +86,26 @@ public class Success
 //AW:INIT_END
 
 //AW:USERINIT
-		// Code here will be run once, after the algorithm object is created.
+		
+//AW:USERINIT_END
+	}
+	
+	/**
+	 * This method is called once before iterating all time slices.
+	 */
+        
+	protected void beforeTimeSlices()
+		throws DbCompException
+	{
+//AW:BEFORE_TIMESLICES
                 try{
                     debug3( "loading graph");
-                    graph = new WaterControlDiagram( graph_file );
-
-                    irrigation = new TreeMap< Date, ArrayList< Double > >();
-                    // load
-                    File f = new File(irrigation_demand_file);
-                    if(!f.exists())
-                        throw new DbCompException("No iriigation demand file, this project requires one");
-                    BufferedReader reader = new BufferedReader( new FileReader(f) );
-                    String line=null;
-                    df = new SimpleDateFormat("MM/dd/yyyy");
-                    while( (line = reader.readLine()) != null )
-                    {
-                        String parts[] = line.split(",");
-                        Date d = df.parse(parts[1]);
-                        ArrayList<Double> tmp = new ArrayList<Double>();
-                        for( int i=2; i <parts.length; i++)
-                        {
-                            tmp.add( Double.parseDouble(parts[i])); // values are stored in thousands of ac-ft
-                        }
-                        irrigation.put(d, tmp);
-                    }
-                    reader.close();
-
+                    graph = new WaterControlDiagram( graph_file );                
+                    irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);
+                    /*
+                     * Maybe a timeout for reload? E.g we load once and check once an hour or something...
+                     * Or not, this doesn't actually take that many resources.
+                     */
                 }
                 catch( Exception e)
                 {
@@ -115,16 +113,6 @@ public class Success
                     debug3( "Aborting computation");
                     throw new DbCompException("Fail to initialize comp");
                 }
-//AW:USERINIT_END
-	}
-	
-	/**
-	 * This method is called once before iterating all time slices.
-	 */
-	protected void beforeTimeSlices()
-		throws DbCompException
-	{
-//AW:BEFORE_TIMESLICES
 		// This code will be executed once before each group of time slices.
 		// For TimeSlice algorithms this is done once before all slices.
 		// For Aggregating algorithms, this is done before each aggregate
@@ -133,7 +121,7 @@ public class Success
 	}
 
 	/**
-	 * Sections in comments refere to the Water Control Diagram.
+	 * Section numbers in comments refer to the Water Control Diagram.
 	 *
 	 * @throws DbCompException (or subclass thereof) if execution of this
 	 *        algorithm is to be aborted.
@@ -142,18 +130,20 @@ public class Success
 		throws DbCompException
 	{
 //AW:TIMESLICE
-                double stony = 0.0;
-                double east = 0.0;
+                dates = new Dates(_timeSliceBaseTime); // allow for named dates for both clarity and the handling of leap year.
                 double adjustment = 0.0;
                 double allowed_storage_unbounded = 0.0;
                 double allowed_storage = 0.0;
+                double space_required = 0.0;
 		// Enter code to be executed at each time-slice.
                 
+                // wy_day has 1 substracted from it in the graph function because 
+                // all of the graph data is 0 based (e.g. 0 = 01Oct )
                 int wy_day = DateTime.to_wy_julian(_timeSliceBaseTime); 
                 debug3( "******************************");
                 debug3( "******************************");
                 debug3( "Calculating TCS for date(julian):" + _timeSliceBaseTime + " ( " + wy_day + " )" );
-                if( isMissing( RemainingRunoff ))
+                if( isMissing( RemainingRunoff ) && wy_day >= dates.March31 && wy_day <= dates.July31 )
                 {
                     info( "Current Implementation does not handle missing values, moving to next timeslice" );
                     return;
@@ -161,10 +151,13 @@ public class Success
                 try{
                     // get the initial top con value
                     debug2( "Getting Base TCS value" );
-                    double tcs_rain = graph.get_allowed_storage(wy_day - 1, 0.0);// all of the graphs are zero based
+                    double tcs_rain = graph.get_allowed_storage(wy_day - 1, RainFCP);// all of the graphs are zero based
                     debug3("*************************");
-                    debug3("*************************");
-                    double tcs_snow = graph.get_allowed_storage(wy_day - 1, RemainingRunoff, true );
+                    debug3("*************************");                    
+                    double tcs_snow = graph.get_allowed_storage_equation(wy_day - 1, RemainingRunoff);
+                    
+                    // The equation never actually applied to this project
+                    //double tcs_snow2 = graph.get_allowed_storage_equation(wy_day, RemainingRunoff);
                     debug3( " TCS for rain is " + tcs_rain );
                     debug3( " TCS for snow is " + tcs_snow );
                     
@@ -172,12 +165,21 @@ public class Success
                     debug3( "Calculating Irrigation Demand Adjustment" );
                     
                     // we now adjust the top con
-                    //adjustment = calculate_irrigation();
-                    adjustment = graph.normal_irrigation(_timeSliceBaseTime);
-                    if( wy_day > 124 && wy_day <304)
-                        allowed_storage_unbounded = tcs_snow + adjustment;
-                    else
+                    
+                    adjustment = calculate_irrigation();
+                    //adjustment = graph.normal_irrigation(_timeSliceBaseTime);
+                    
+                    if( wy_day >= dates.March31 && wy_day <= dates.July31){
+                            allowed_storage_unbounded = tcs_snow + adjustment;
+                            space_required = Math.max( 0.0, tcs_snow - adjustment  );
+                            // This is allowed to go below zero, it will be bounded below
+                            allowed_storage_unbounded =  graph.get_max_snowspace() - space_required;
+                    } else{
                         allowed_storage_unbounded = tcs_rain;
+                    }
+                    
+                        
+                    
                     debug3( " unbounded storage is " + allowed_storage_unbounded );
                     debug3 ( "Applying bounds to storage" );
                    
@@ -246,55 +248,44 @@ public class Success
         /*
          * 
          */
-        public double calculate_irrigation(TreeMap< Date, ArrayList< Double > > irrigation )
-        {
-            GregorianCalendar cal = new GregorianCalendar();
-            cal.setTime(_timeSliceBaseTime);
-            int month = cal.get( Calendar.MONTH);
-            int cur_day = cal.get(Calendar.DAY_OF_MONTH);
+         public double calculate_irrigation()throws Exception{
+            
+            int wy_julian_day = DateTime.to_wy_julian(_timeSliceBaseTime);
+            double demands[] = irrigation.getDemands(_timeSliceBaseTime);
             double demand = 0.0;
-            if( month < Calendar.FEBRUARY || month > Calendar.JULY )
-                return 0.0; // we don't worry about irrigation at this time
-            Date nearest = irrigation.floorKey(_timeSliceBaseTime);
-            // demands array starts with 0=January, matches with java time
-            ArrayList<Double> demands = (ArrayList<Double>)irrigation.get(nearest);
-            int day_remaining = cal.getActualMaximum(cal.DAY_OF_MONTH) - cur_day + 1; // we include the current day
-            demand = day_remaining*demands.get(month)*1.9835;
-
+            int end_time = -1;
+            
             /*
-             *  Per Wacky looking graph on Success Water Control Diagram:
-             * Irrigation is from _timeSliceBaseTime to 31 May
-             * After 31 May,  /  Next 20 days
-             *   min of      -|
-             *                \  to 31 July
+             * until 10 may demand throught 31 may
+             * on/after 10 may next 20 days
+             * on/after 10 july through july 31
              */
-            for( int i=month+1; i <= Calendar.JULY; i++ ) // go to 31 July
+            
+            
+            if( wy_julian_day >= dates.February01 && wy_julian_day < dates.May10)
             {
-                cal.set( cal.MONTH, i);
-                if( month <= Calendar.MAY && i > Calendar.MAY)
-                {
-                    break;// We only add to 31 May if we are before may
-                } 
-                else
-                {
-                    if( month == Calendar.JULY && cur_day >= 11 )
-                    {
-                        break; // we've already calculated this sum
-                    }
-                    else if( month > Calendar.MAY)
-                    {
-                        // we already have the current months value
-                        // so we just add that little bit extra
-                        demand += demands.get( cal.get(Calendar.MONTH))*(20-day_remaining)*1.9835; 
-                    }
-                    else
-                    {
-                        // normal calculation
-                        demand += demands.get( cal.get(Calendar.MONTH))*cal.getActualMaximum(Calendar.DAY_OF_MONTH)*1.9835;
-                    }
-                }
+                end_time = dates.May31;
             }
-
-            return demand;
+            else if( wy_julian_day >= dates.May10 && wy_julian_day < dates.July10 )
+            {
+                end_time = wy_julian_day + 20; // next 20 days
+            }
+            else if( wy_julian_day >= dates.July10 && wy_julian_day <= dates.July31)
+            {
+                end_time = dates.July31;
+            }
+            else
+            {
+                return 0;
+            }
+                
+            for( int i = wy_julian_day; i <= end_time; i++){
+                    demand += demands[i];
+            }
+                    
+                    
+            return demand*1.9835;
         }
+        
+        
 }

@@ -7,6 +7,7 @@ import ilex.var.NamedVariable;
 import decodes.tsdb.DbAlgorithmExecutive;
 import decodes.tsdb.DbCompException;
 import decodes.tsdb.DbIoException;
+import decodes.tsdb.ParmRef;
 import decodes.tsdb.TimeSeriesIdentifier;
 import decodes.tsdb.VarFlags;
 import decodes.tsdb.algo.AWAlgoType;
@@ -28,6 +29,11 @@ import java.util.GregorianCalendar;
  * Takes the runoff from the CDEC B120 report ( or some other estimate of runoff ) and an Inflow time series and calculates the remaining runoff.
  * The algorithm will query data back to the last snowmelt forcast point, and as such will likely be "slow"; since it's only daily data shouldn't
  * be that big of a deal.
+ * 
+ * Expect ac-ft or cfs.
+ * 
+ * if cfs sum gets converted to Ac-ft, otherwise it gets used as is
+ * 
  */
 //AW:JAVADOC_END
 public class RemainingRunoff
@@ -87,7 +93,8 @@ public class RemainingRunoff
             
             TimeSeriesIdentifier tsid = getParmTsId( "inflow" );
             debug3("getting project nmuemonic for: " + tsid.getSiteName());
-            String proj = tsid.getSiteName().split("\\s+")[0];
+            String _parts[] = tsid.getSiteName().split("\\s+");
+            String proj = _parts[1].split("-")[0];
             String fname = this.runoff_dir + "/"+proj.toUpperCase() + ".runoff";
             debug3( "getting data file: " + fname);
             File f = new File( fname );
@@ -145,50 +152,59 @@ public class RemainingRunoff
 	{
 //AW:TIMESLICE
 		// Enter code to be executed at each time-slice.
-                df.setTimeZone(aggTZ);
-                debug3( "Evalutating runoff for " + df.format(_timeSliceBaseTime));
-                double remain = Double.MIN_VALUE;
-                GregorianCalendar cal = new GregorianCalendar();
-                cal.setTimeZone(aggTZ);
-                cal.setTime(_timeSliceBaseTime);
-                int day = cal.get( Calendar.DAY_OF_MONTH);
-                int month = cal.get( Calendar.MONTH);
-                // Jan 31st at 0800 GMT shows up as Feb1 0000
-                if( month < Calendar.FEBRUARY || month > Calendar.JULY || (month == Calendar.FEBRUARY && day == 1 ) )
-                {
-                    debug3("we are not in the runoff season, so not calculating runoff");
-                    remain = 0.0;
-                }
-                else
-                {
-                    if( !isMissing( inflow ) )
+                try{
+                    df.setTimeZone(aggTZ);
+                    debug3( "Evalutating runoff for " + df.format(_timeSliceBaseTime));
+                    double remain = Double.MIN_VALUE;
+                    GregorianCalendar cal = new GregorianCalendar();
+                    cal.setTimeZone(aggTZ);
+                    cal.setTime(_timeSliceBaseTime);
+                    int day = cal.get( Calendar.DAY_OF_MONTH);
+                    int month = cal.get( Calendar.MONTH);
+                    // Jan 31st at 0800 GMT shows up for Feb1 0000
+                    if( month < Calendar.FEBRUARY || month > Calendar.JULY || (month == Calendar.FEBRUARY && day == 1 ) )
                     {
-                        // get the nearest runoff date
-
-                        Date d = this.getRunoffDate( _timeSliceBaseTime );
-                        debug3( "Evalutating runoff for " + df.format(_timeSliceBaseTime));
-                        debug3( "Nearest forecast point is " + df.format(d) );
-
-                        debug3( "getting the forecasted runoff value for that date");
-                        double runoff = this.getRunoff( d );
-                        debug3( "aquired runoff value = " + runoff);
-                        double data[] = this.getPrevValues("inflow", d, _timeSliceBaseTime);
-                        debug3( "Number of flows we will sum: " + data.length);
-                        double sum = 0.0;
-                        for( double val: data )
-                        {
-                            sum += Math.max(0, val); // make sure we don't add water to the mountain.
-                        }
-                        data = null;
-                        sum=sum*1.9835;
-                        debug3( "sum of flow is " + sum);
-                        remain = Math.max( 0, runoff-sum ); // snow melt doesn't keep happening after it's already melted
-                        debug3("runoff remaining =" + remain);
-
+                        debug3("we are not in the runoff season, so not calculating runoff");
+                        remain = 0.0;
                     }
-                }
-                setOutput(runoff_remaining, remain);
+                    else
+                    {
+                        if( !isMissing( inflow ) )
+                        {
+                            // get the nearest runoff date
 
+                            Date d = this.getRunoffDate( _timeSliceBaseTime );
+                            debug3( "Evalutating runoff for " + df.format(_timeSliceBaseTime));
+                            debug3( "Nearest forecast point is " + df.format(d) );
+
+                            debug3( "getting the forecasted runoff value for that date");
+                            double runoff = this.getRunoff( d );
+                            debug3( "aquired runoff value = " + runoff);
+                            double data[] = this.getPrevValues("inflow", d, _timeSliceBaseTime);
+                            debug3( "Number of flows we will sum: " + data.length);
+                            double sum = 0.0;
+                            for( double val: data )
+                            {
+                                sum += Math.max(0, val); // make sure we don't add water to the mountain.
+                            }
+                            data = null;
+                            ParmRef ref = this.getParmRef("inflow");
+                            if( ref.timeSeries.getUnitsAbbr().equalsIgnoreCase( "cfs" ) ){
+                                sum=sum*1.9835;
+                            }// otherwise use sum as is
+                            //sum=sum*1.9835;
+                            debug3( "sum of flow is " + sum);
+                            remain = Math.max( 0, runoff-sum ); // snow melt doesn't keep happening after it's already melted
+                            debug3("runoff remaining =" + remain);
+
+                        }
+                    }
+                    setOutput(runoff_remaining, remain);
+                }
+                catch( Exception e )
+                {
+                    debug3("Could no calculate time slice: " + e.getMessage() );
+                }
 //AW:TIMESLICE_END
 	}
 

@@ -58,7 +58,7 @@ public class ExponentialEquation {
     private double min_days_to_assume;
 
     /**
-     * A space seperating string containing all of the variables
+     * A space separated string containing all of the variables
      *
      * @param equation
      */

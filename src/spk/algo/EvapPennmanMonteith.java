@@ -88,6 +88,7 @@ public class EvapPennmanMonteith
          * and the algorithm initialization function will convert to radians
          */
         public double radian_latitude = 0.0; // site latitude in radians
+        public double radian_latitude_center_tz = 0.0; // site latitude in radians
 
         /**
          * total solar energy into the system
@@ -140,8 +141,14 @@ public class EvapPennmanMonteith
         /*
          *  Stefan-Boltzmann constant 4.903*0.000000001 (MJ/k4/m2/d)
          */
-        public final double sigma = 4.903*0.000000001; // Stefan-Boltzmann constant (MJ/k4/m2/d)
+        public final double sigma =    4.903*0.000000001; // Stefan-Boltzmann constant (MJ/k4/m2/d)
+        public final double sigma_hr = sigma/24;
 
+        /*
+         *  We need to know if we're on an hourly time step
+         */
+        public boolean isHourly = false;
+        
         /* helper stuff
          *
          */
@@ -161,7 +168,8 @@ public class EvapPennmanMonteith
         public double  Albedo = 0.06;
         public double  MinSamples = 72; // assume okay if we have more than 75% of the values
         public double  latitude = 0.0;
-	String _propertyNames[] = { "UsingNetRadiation", "Elevation", "WindSpeedHeight", "Albedo", "latitude" };
+        public double  latitude_center_tz = 120.0;
+	String _propertyNames[] = { "UsingNetRadiation", "Elevation", "WindSpeedHeight", "Albedo", "latitude", "MinSamples", "latitude_center_tz" };
 //AW:PROPERTIES_END
 
 	// Allow javac to generate a no-args constructor.
@@ -178,7 +186,13 @@ public class EvapPennmanMonteith
                 // this variable will determine the output interval
 		_aggPeriodVarRoleName = "Evap";
                 
-                radian_latitude = (Math.PI/180)*latitude;
+                radian_latitude = (Math.PI/180.0)*latitude;
+                radian_latitude_center_tz = (Math.PI/180.0)*latitude_center_tz;
+                String interval = getInterval("Evap");
+                isHourly = interval.equalsIgnoreCase("1hour");
+                if(isHourly){
+                    C_n = 37;
+                }
                 
 //AW:INIT_END
 
@@ -326,7 +340,8 @@ public class EvapPennmanMonteith
                 double T = (max_temp+min_temp)*0.5;
 
                 debug3("Median Temp( Celsius ): " + T);
-
+                avg_temp = avg_temp/count_temp_values;
+                debug3("Average Temp( Celsius): " + avg_temp);
                 
                 double P = avg_pressure/avg_pressure_counts;  // 101.3*Math.pow( (293-0.0065*Elevation)/293, 5.26  );
                 debug3("Atmo Pressure at station leval (kPa):" + P);
@@ -349,10 +364,22 @@ public class EvapPennmanMonteith
                 double Rns = (  (1-Albedo)*total_radiation)/1000000.0; // convert the Joules per m^2 to megajoules per m^2 per day
                 debug3( " Net Short wave Rad (MJ/m^2/day): " + Rns);
 
+                double r_a;
                 // calculate the net longwave radiation
-                double r_a = r_a( this.julian(_timeSliceBaseTime));
+                if(isHourly){
+                    r_a = r_a_hr(this.julian(_aggregatePeriodBegin));
+                }else{
+                    r_a = r_a( this.julian(_timeSliceBaseTime));
+                }
+                    
+                
                 double r_so = r_so(r_a);
-                double Rnl = r_nl(max_temp+273.16, min_temp+273.16, total_radiation/1000000.0, r_so, e_a);
+                double Rnl;
+                if(isHourly){
+                    Rnl = r_nl(avg_temp+273.16, total_radiation/1000000.0, r_so, e_a);
+                }else{
+                    Rnl = r_nl(max_temp+273.16, min_temp+273.16, total_radiation/1000000.0, r_so, e_a);
+                }
                 debug3( " Net Long Wave Radiation (MJ/m^2/day): " + Rnl);
                 debug3( "   Computed from R_a = " + r_a + " and R_so = " + r_so);
 
@@ -364,8 +391,31 @@ public class EvapPennmanMonteith
                 double u2 = uz*(  4.87/Math.log(67.8*WindSpeedHeight-5.42));
                 debug3( " WindSpeedAvg went from " + uz + " to " + u2 + "   (m/s)");
 
+                /*
+                // determine C_d (if hourly)
+                if( isHourly ){
+                                        
+                }*/
+                
+                
                 // according to documentation solar heat flux influx ( G ) is allowed to be zero for daily data
-                double numerator = 0.408*delta*Rn + psychrometric_constant*(C_n/(T+273) )*u2*(e_s-e_a);
+                double numerator = 0.0;
+                if( isHourly ){
+                    // minor variation with hourly data
+                    // can't ignore G
+                    // NOTE: this is for soil flux, we care about water. Will likely need to do more research
+                    // but right now I'm just testing.
+                    double G;
+                    if( Rn < 0 ){
+                        G = .5*Rn; //Night
+                    } else{
+                        G = .1*Rn; //Daylight
+                    }
+                    debug3( " Hourly TimeStemp, Soil Flux( G )  " + G );
+                    numerator = 0.408*delta*(Rn-G) + psychrometric_constant*(C_n/(T+273) )*u2*(e_naught(avg_temp)-e_a);
+                }else{
+                    numerator = 0.408*delta*Rn + psychrometric_constant*(C_n/(T+273) )*u2*(e_s-e_a);
+                }
                 double denomenator = delta + psychrometric_constant*(1+C_d*u2);
 
                 debug3( " Numerator Calc: " + numerator );
@@ -384,6 +434,7 @@ public class EvapPennmanMonteith
                 {
                     warning( "We did not have an equal number of data sets across an values, number likely bogus");
                 }
+                
                 if( count >= MinSamples )
                 {
                     
@@ -445,20 +496,22 @@ public class EvapPennmanMonteith
          * @param date
          * @return julian day of the year
          */
-        public int julian( Date date )
+        public double julian( Date date )
         {
             // fortunately, java handles date/time better than an ASCE document
             // this replaces equation 25 in the above referenced document
-            GregorianCalendar cal = new GregorianCalendar( );
-            cal.setTime(date);            
-            return cal.get( Calendar.DAY_OF_YEAR);
+            GregorianCalendar cal = new GregorianCalendar( this.aggTZ);
+            cal.setTime(date);      
+            double tmp = cal.get( Calendar.DAY_OF_YEAR);
+            //tmp += cal.get( Calendar.HOUR_OF_DAY)/24.0 + cal.get(Calendar.MINUTE)/60.0 + cal.get( Calendar.SECOND)/60.0;
+            return tmp;
         }
         /**
          *
          * @param J julian day of the year
          * @return inverse distance factor used int the R_a calculation
          */
-        public double inverse_distance_factor( int J )
+        public double inverse_distance_factor( double J )
         {
             return 1+0.033*Math.cos( ( (2*Math.PI)/365 )*J );
         }
@@ -468,7 +521,7 @@ public class EvapPennmanMonteith
          * @param J julian day of the year
          * @return solar declination for the given day
          */
-        public double solar_declination( int J )
+        public double solar_declination( double J )
         {
             return 0.409*Math.sin( ((2*Math.PI)/365 )*J - 1.39   );
         }
@@ -489,7 +542,7 @@ public class EvapPennmanMonteith
          * @param J julian day of the year
          * @return extraterrestrial radiation
          */
-        public double r_a( int J )
+        public double r_a( double J )
         {
             double d_r = inverse_distance_factor(J);
             double delta = solar_declination(J);
@@ -501,6 +554,60 @@ public class EvapPennmanMonteith
             debug3("     J      : " + J + " (julian day of the year)");
 
             return (24/Math.PI)*Gsc*d_r*( omega_s*Math.sin(radian_latitude)*Math.sin(delta) + Math.cos(radian_latitude)*Math.cos(delta)*Math.sin(omega_s)  );
+        }
+        /**
+         * calculates the estimated extraterrestrial radiation ( solar radiation before getting into our atmosphere )
+         * @param J julian day of the year
+         * @return extraterrestrial radiation
+         */
+        public double r_a_hr( double J )
+        {
+            double d_r = inverse_distance_factor(J);
+            double delta = solar_declination(J);
+            double omega_s = sunset_hour_angle(radian_latitude,delta);
+            debug3("   ***calculating R_a (hourly)***");
+            debug3("     d_r    : " + d_r + " (inverse relative distance factor ( sqaured ))");
+            debug3("     delta  : " + delta + " (solar declination in radians)");
+            debug3("     omega_s: " + omega_s + " (sunset hour angle in radians)");
+            debug3("     J      : " + J + " (julian day of the year)");
+            
+            GregorianCalendar cal = new GregorianCalendar(this.aggTZ);
+            cal.setTime(this._aggregatePeriodBegin);
+            int t1 = cal.get(Calendar.HOUR_OF_DAY);
+            cal.setTime(this._aggregatePeriodEnd);
+            int t2 = cal.get(Calendar.HOUR_OF_DAY);
+            double t = (t1+t2)/2.0;
+            if( t2 == 0 && t1 == 23){
+                t = 23.5;
+            }
+            debug3("     t1= " + t1);
+            debug3("     t2= " + t2);
+            debug3("     t = " + t);
+            /* determine S_c */
+            double b = 2.0*Math.PI*(J-81)/364.0;
+            double S_c = .1645*Math.sin(2*b)-.1255*Math.cos(b)-Math.sin(b);
+            double omega = (Math.PI/12.0)*(  (t+.06667*(radian_latitude_center_tz-radian_latitude)+S_c)-12 );
+            double omega_1 = omega - Math.PI/24.0;
+            double omega_2 = omega + Math.PI/24.0;                        
+            debug3("     omega  = " + omega );
+            debug3("     omega_s-.79 < omega < omega_s -.52 = " + ( (omega_s-.79 <= omega) && (omega <= omega_s-0.52 )  )  );
+            debug3("     before bounds");
+            debug3("     omega_1 = " + omega_1);
+            debug3("     omega_2 = " + omega_2);
+            debug3("     S_c     = " + S_c );
+            
+            /* now we bound omeage 1 and 2 */
+            if( omega_1 < -omega_s) omega_1 = -omega_s;           
+            if( omega_2 < -omega_s) omega_2 = -omega_s;
+            if( omega_1 >  omega_s) omega_1 = omega_s;
+            if( omega_2 >  omega_s) omega_2 = omega_s;            
+            if( omega_1 >  omega_2) omega_1 = omega_2;
+            debug3("     after bounds");
+            debug3("     omega_1 = " + omega_1);
+            debug3("     omega_2 = " + omega_2);
+            double tmp = (12/Math.PI)*Gsc*d_r*( (omega_2-omega_1)*Math.sin(radian_latitude)*Math.sin(delta) + Math.cos(radian_latitude)*Math.cos(delta)*(Math.sin(omega_2)-Math.sin(omega_1) )  );
+            debug3("     r_a     = " + tmp );
+            return tmp;
         }
 
         /**
@@ -516,16 +623,18 @@ public class EvapPennmanMonteith
          * Calculates the net long wave radiation
          * @param T_k_max   max temperature in Kelvin
          * @param T_k_min   min       "      "    "
-         * @param r_s       measured shortwave radiation
+         * @param r_s       measured short wave radiation
          * @param r_so      estimated clear sky radiation
          * @param e_a       actual vapor pressure
          * @return          estimated net long wave radiation
          */
         public double r_nl( double T_k_max, double T_k_min, double r_s, double r_so, double e_a){
-            double rs_rso = Math.max(.25+Double.MIN_VALUE, Math.min(1.0, r_s/r_so) ); // ratio of r_s/r_so bounded to (.25,1.0]
+            double rs_rso = Math.max(.25+Double.MIN_VALUE, Math.min(1.0, r_s/r_so) ); // ratio of r_s/r_so bounded to (.25,1.0]                                    
             double T_max_fourth = Math.pow(T_k_max,4);
             double T_min_fourth = Math.pow(T_k_min,4);
             debug3( "   ***Calculating Rnl***");
+            debug3( "   Rs      :  " + r_s );
+            debug3( "   Rso     :  " + r_so );
             debug3( "   Rs/Rso  :  " + rs_rso);
             debug3( "   TMax^4  :  " + T_max_fourth);
             debug3( "   TMin^4  :  " + T_min_fourth);
@@ -534,6 +643,48 @@ public class EvapPennmanMonteith
             double p2 =  0.34 - 0.14*Math.sqrt(e_a) ;
             double p3 = 1.35*rs_rso-0.35;
             debug3( "   sigma*( Tmax^4 + Tmin^4)/2:  " + p1);
+            debug3( "   0.34 - 0.14*sqrt(e_a)     :  " + p2);
+            debug3( "   1.35*r_s/r_so-0.35)       :  " + p3);
+            return p1*p2*p3;
+        }
+        /**
+         * Calculates the net long wave radiation (Hourly Time Step)
+         * @param T_k_max   max temperature in Kelvin
+         * @param T_k_min   min       "      "    "
+         * @param r_s       measured short wave radiation
+         * @param r_so      estimated clear sky radiation
+         * @param e_a       actual vapor pressure
+         * @return          estimated net long wave radiation
+         */
+        public double r_nl( double T_hr, double r_s, double r_so, double e_a){
+            double rs_rso;//= Math.max(.25+Double.MIN_VALUE, Math.min(1.0, r_s/r_so) ); // ratio of r_s/r_so bounded to (.25,1.0]            
+            if( r_s == 0.0 ){
+                /* it's night, assume a value */
+                /*
+                 * The ASCE manual suggests .7 to .8 for arid/semi arid climates, which is correct for CA.
+                 * This should be moved to a user configurable parameter after testing
+                 * (Plus maybe we can find an average of all the "night" values of this number which that manual says is 2-3 hours before sunset)
+                 */
+                rs_rso = .75;
+            } else if( r_so == 0.0){
+                rs_rso = 1.0;
+            } else{
+                rs_rso = Math.max(.25+Double.MIN_VALUE, Math.min(1.0, r_s/r_so) ); // ratio of r_s/r_so bounded to (.25,1.0]            
+            }
+            double T_avg_fourth = Math.pow(T_hr,4);
+            
+            debug3( "   ***Calculating Rnl (hourly)***");
+            debug3( "   Rs      :  " + r_s );
+            debug3( "   Rso     :  " + r_so );
+            debug3( "   Rs/Rso  :  " + rs_rso);
+            debug3( "   Tavg    :  " + T_hr );
+            debug3( "   Tavg^4  :  " + T_avg_fourth);
+            
+            debug3( "   sigma   :  " + sigma_hr);
+            double p1 = sigma_hr*T_avg_fourth;
+            double p2 =  0.34 - 0.14*Math.sqrt(e_a) ;
+            double p3 = 1.35*rs_rso-0.35;
+            debug3( "   sigma*( Tavg^4):  " + p1);
             debug3( "   0.34 - 0.14*sqrt(e_a)     :  " + p2);
             debug3( "   1.35*r_s/r_so-0.35)       :  " + p3);
             return p1*p2*p3;

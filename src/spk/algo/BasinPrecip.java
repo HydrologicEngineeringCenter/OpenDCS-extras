@@ -22,7 +22,7 @@ import decodes.cwms.CwmsFlags;
  * ignored, set the nap value to 0 and delete that time series from the list.
  * If 1 or more stations are missing, that time slice will be marked
  * questionable. All input timeseries should have missing values ignored,
- * the algorithm take care of those cases.
+ * the algorithm designed for those cases.
  *
  * @author L2EDDMAN
 
@@ -38,7 +38,9 @@ public class BasinPrecip
 	public double rain4;	//AW:TYPECODE=i
 	public double rain5;	//AW:TYPECODE=i
 	public double rain6;	//AW:TYPECODE=i
-	String _inputNames[] = { "rain1", "rain2", "rain3", "rain4", "rain5", "rain6" };
+        public double rain7;    //AW:TYPECODE=i
+        public double rain8;    //AW:TYPECODE=i
+	String _inputNames[] = { "rain1", "rain2", "rain3", "rain4", "rain5", "rain6", "rain7", "rain8" };
 //AW:INPUTS_END
 
 //AW:LOCALVARS
@@ -61,7 +63,9 @@ public class BasinPrecip
 	public double nap4 = 0.0;
 	public double nap5 = 0.0;
 	public double nap6 = 0.0;
-	String _propertyNames[] = { "bnap", "nap1", "nap2", "nap3", "nap4", "nap5", "nap6" };
+        public double nap7 = 0.0;
+        public double nap8 = 0.0;
+	String _propertyNames[] = { "bnap", "nap1", "nap2", "nap3", "nap4", "nap5", "nap6", "nap7", "nap8" };
 //AW:PROPERTIES_END
 
 	// Allow javac to generate a no-args constructor.
@@ -82,7 +86,7 @@ public class BasinPrecip
 		{
 			throw new DbCompException( "You must specify a non zero bnap value." );
 		}
-		if( nap1 == 0.0 && nap2 == 0.0 && nap3 == 0.0 && nap4 == 0.0 && nap5 == 0.0 && nap6 == 0.0 )
+		if( nap1 == 0.0 && nap2 == 0.0 && nap3 == 0.0 && nap4 == 0.0 && nap5 == 0.0 && nap6 == 0.0 && nap7 == 0.0 && nap8 == 0.0 )
 		{
 			throw new DbCompException( "You must specifiy at least 1 non zero nap value" );
 		}
@@ -126,7 +130,9 @@ public class BasinPrecip
 		    isMissing( rain3 ) &&
 		    isMissing( rain4 ) &&
 		    isMissing( rain5 ) &&
-		    isMissing( rain6 ) )
+		    isMissing( rain6 ) &&
+                    isMissing( rain7 ) &&
+                    isMissing( rain8 ))
 		    {
 		    	// if all of the data are missing there is no point in running the calculation
 			warning( "All rain inputs are missing or all input data was deleted" );
@@ -211,6 +217,32 @@ public class BasinPrecip
 			else
 			{
 				debug3("rain 6 is missing for this timeslice" );
+				setFlagBits( BasinPrecip, CwmsFlags.VALIDITY_QUESTIONABLE );
+			}
+		}
+                if( nap7 != 0.0 )
+		{
+			if( !isMissing( rain7 ) )
+			{
+				station_precip += rain7;
+				stations_normal_precip += nap7;
+			}
+			else
+			{
+				debug3("rain 7 is missing for this timeslice" );
+				setFlagBits( BasinPrecip, CwmsFlags.VALIDITY_QUESTIONABLE );
+			}
+		}
+                if( nap8 != 0.0 )
+		{
+			if( !isMissing( rain8 ) )
+			{
+				station_precip += rain8;
+				stations_normal_precip += nap8;
+			}
+			else
+			{
+				debug3("rain 8 is missing for this timeslice" );
 				setFlagBits( BasinPrecip, CwmsFlags.VALIDITY_QUESTIONABLE );
 			}
 		}

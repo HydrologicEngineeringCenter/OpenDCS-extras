@@ -30,7 +30,7 @@ import spk.algo.support.IrrigationDemands;
 
 //AW:JAVADOC
 /**
- * Calculate the Top Con for Isabella
+ * Calculate the Top Con for Terminus
  *
  * @author L2EDDMAN
  *
@@ -139,7 +139,7 @@ public class Terminus
                 debug3( "******************************");
                 debug3( "******************************");
                 debug3( "Calculating TCS for date(julian):" + _timeSliceBaseTime + " ( " + wy_day + " )" );
-                if( isMissing( RemainingRunoff ))
+                if( isMissing( RemainingRunoff ) && wy_day >= dates.March31 && wy_day <= dates.July31 )
                 {
                     info( "Current Implementation does not handle missing values, moving to next timeslice" );
                     return;
@@ -151,7 +151,9 @@ public class Terminus
                     debug3("*************************");
                     debug3("*************************");
                     double tcs_snow = graph.get_allowed_storage(wy_day - 1, RemainingRunoff, true );
-                    double tcs_snow2 = graph.get_allowed_storage_equation(wy_day, RemainingRunoff);
+                    
+                    // The equation never actually applied to this project
+                    //double tcs_snow2 = graph.get_allowed_storage_equation(wy_day, RemainingRunoff);
                     debug3( " TCS for rain is " + tcs_rain );
                     debug3( " TCS for snow is " + tcs_snow );
                     

@@ -1,6 +1,4 @@
-/* AW_AlgorithmBase - Decompiled by JODE
- * Visit http://jode.sourceforge.net/
- */
+
 package spk.algo.support;
 import java.lang.reflect.Field;
 import java.util.Date;
@@ -461,6 +459,7 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
 		}
 	    }
 	}
+        
 	if (!_missing_found) {
 	    if (_sliceInputsDeleted)
 		_aggInputsDeleted = true;
@@ -1051,5 +1050,97 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
         return ( Math.abs( delta) < 3000);
     }
 
+    /**
+     * Retrieve the current value (the provided tsbasetime ) of a given time series
+     * @param parmRefName The Time Series for which to get data
+     * @param tsbasetime The time period  we want
+     * @return The value one period previous to the provided base time
+     */
+    public double getCurrentValue( String parmRefName, Date tsbasetime)
+    {
+        double value = Double.NEGATIVE_INFINITY; // initialize to missing
+        double val2 = Double.NEGATIVE_INFINITY;
+        
+        debug3( "Getting output parameter reference");        
+        ParmRef pr = getParmRef(parmRefName);
+                       
+        
+        decodes.tsdb.CTimeSeries ts = new decodes.tsdb.CTimeSeries(pr.compParm);
+
+        try{
+                ts.setUnitsAbbr(pr.timeSeries.getUnitsAbbr());
+                debug3("Querying database");
+                    // tsdb is the generic interface to the database backend of the CCP
+                    // having the start date and end date the time gets us one value
+
+
+                    if( tsdb.fillTimeSeries( ts, tsbasetime, tsbasetime) == 0 )
+                    {
+                        warning( "Could not access output timeseries, assuming it doesn't exist and we are starting at 0");                        
+                    }
+                    
+                    // this gets us an individual value from within the retreived time series
+                    //TimedVariable tv = tsdb.getPreviousValue(ts, tsbasetime);
+                    
+                    TimedVariable tv = ts.findWithin(tsbasetime, roundSec);
+                    
+                    
+                    try{
+                        if( tv != null )
+                        {
+                            value = tv.getDoubleValue();                            
+                        }
+                        else
+                        {
+                            warning( "no existing data, starting at 0.0" );                            
+                        }
+                    }
+                    catch( NoConversionException e)
+                    {
+                        warning( "could not convert data from provided  time series");
+                    
+                    }
+                }
+                catch( DbIoException e)
+                {
+                    warning( "Could not access timeseries, returning missing val");
+                    
+                }
+                catch( BadTimeSeriesException e )
+                {
+                    warning( "Could not access timeseries, returning missing val");
+                    
+                }
+
+
+                
+                return value;
+    }
+    
+    /**
+     * Is the variable assigned
+     * @param parmRefName The time series we're checking     
+     * @return true if the time series is configured
+     */
+    public boolean isAssigned( String parmRefName ){
+        ParmRef pr = getParmRef(parmRefName);
+        if( pr == null ){
+            return false;
+        }
+        else{
+            return true;
+        }                        
+    }
+    
+    public Date getStartDate(){
+        return (Date)this.baseTimes.first();
+    }
+    
+    public Date getEndDate(){
+        return (Date)this.baseTimes.last();
+    }
+    
+    
+    
 }
 

@@ -20,7 +20,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import spk.algo.support.DateTime;
 /**
- *
+ * This class create an irrigation demand array that can be used by the Top of Conservation 
+ * calculations. For any given day, it gives you a list of demands to the end of what is available
+ * in the demand information.
+ * 
+ * The demands file format is defined by what is used in the web interface.
+ * 
  * @author L2EDDMAN
  */
 public class IrrigationDemands {

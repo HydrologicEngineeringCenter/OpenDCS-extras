@@ -41,6 +41,7 @@ public class WaterControlDiagram
 	ArrayList< Double >       times = null;
 	ArrayList< Double>   irrigation = null;
         double               gross_pool = 0.0;
+        double          restricted_pool = Double.NEGATIVE_INFINITY;
         double            max_snowspace = 0.0;
         ExponentialEquation           equation = null;
 
@@ -74,6 +75,7 @@ public class WaterControlDiagram
          */
 	public void load_graph( String graph_file ) throws java.lang.Exception
 	{
+            
             File f = new File( graph_file );
             if( !f.exists() )
             {
@@ -160,14 +162,20 @@ public class WaterControlDiagram
                             irrigation.add( Double.parseDouble(v));
                         }
                     }
-                    else if( section.equals( "equation") ){
+                    else if( section.equals("equation") ){
                         equation = new ExponentialEquation(parts[1].trim());
                     }
-                    else if( section.equals( "max_snowspace")){
+                    else if( section.equals("max_snowspace")){
                         this.max_snowspace = Double.parseDouble(parts[1]);
+                    }
+                    else if( section.equals("restricted_pool")){
+                        this.restricted_pool = Double.parseDouble(parts[1]);
+                
                     }
                 }
 
+                
+                
                 debug3( "load_graph: finished loading graph");
             }
             catch( java.io.IOException e )
@@ -398,19 +406,63 @@ public class WaterControlDiagram
             debug3( "lower bound value is " + lbval);
             debug3( "upper bound value is " + ubval);
             debug3( "value " + value + " will be contrained within those bounds");
+            double tmp = value;
             if( value > ubval)
             {
-                return ubval;
+                tmp = ubval;
             }
             else if( value < lbval)
             {
-                return lbval;
+                tmp = lbval;
             }
-            else
-            {
-            return value;
+            /*
+             * Absolute final bounds check
+             */
+            if( this.restricted_pool != Double.NEGATIVE_INFINITY ){
+                tmp = Math.min( tmp, this.restricted_pool );
             }
+            return tmp;
+            
         }
+        
+        /** get the upper bound value
+         * @param day the water year julian day
+         */
+        public double get_upper_bound( int day ) throws InterpolationException, ArrayIndexOutOfBoundsException
+        {
+            // need to check this for leap year, will only be wrong for last day of WY in this case anyways
+            if( day > 365 && day != 366 )
+            {
+                throw new ArrayIndexOutOfBoundsException( "day must be between 0 and 366" );
+            }
+            else if( day == 366 )
+            {
+                day = 365;
+            }
+            
+            Double []ubound = (Double[])upper_bound.toArray(new Double[upper_bound.size()]);
+            
+            return this.interpolate_curve( day, ubound);
+        }
+        
+        /** get the lower bound value
+         * @param day the water year julian day
+         */
+        public double get_lower_bound( int day ) throws InterpolationException, ArrayIndexOutOfBoundsException
+        {
+            if( day > 365 && day != 366 )
+            {
+                throw new ArrayIndexOutOfBoundsException( "day must be between 0 and 366" );
+            }
+            else if( day == 366 )
+            {
+                day = 365;
+            }
+            Double []lbound = (Double[])lower_bound.toArray(new Double[lower_bound.size()]);
+            return this.interpolate_curve( day, lbound);
+        }
+        
+        
 
         /**
          * Interpolates along a single curve
@@ -539,7 +591,11 @@ public class WaterControlDiagram
 
 
         public double get_allowed_storage_equation(int wy_day, double runoff) {
-            return this.max_snowspace - equation.calculate(wy_day)*runoff;
+            return equation.calculate(wy_day)*runoff;
+        }
+        
+        public double get_max_snowspace(){
+            return this.max_snowspace;
         }
         
 }

@@ -30,20 +30,20 @@ import spk.algo.support.IrrigationDemands;
 
 //AW:JAVADOC
 /**
- * Calculate the Top Con for PineFlat
- *
+ * Calculate the Top Con for Friant
+ *   Friant has Snowmelt, irrigation demands, and adjustments to upstream storage
  * @author L2EDDMAN
  *
  */
 //AW:JAVADOC_END
-public class PineFlat
+public class Friant
 	extends decodes.tsdb.algo.AW_AlgorithmBase
 {
 //AW:INPUTS
 	public double RemainingRunoff;	//AW:TYPECODE=i	      
-        public double Wishon;   //AW:TYPECODE=i
-        public double Courtright; //AW:TYPECODE=i
-	String _inputNames[] = { "RemainingRunoff", "Wishon", "Courtright" };
+        public double Mammoth;   //AW:TYPECODE=i
+        public double TotalUpstream; //AW:TYPECODE=i
+	String _inputNames[] = { "RemainingRunoff", "Mammoth", "TotalUpstream" };
 //AW:INPUTS_END
 
 //AW:LOCALVARS
@@ -69,12 +69,15 @@ public class PineFlat
         public String graph_file = "";
         public boolean StorAll = true;
         public String irrigation_demand_file = "";
-        public double pineflat_gross_pool = 1000000;
-        public double wishon_gross_pool = 128600;
-        public double courtright_gross_pool = 123300;
-	String _propertyNames[] = { "graph_file", "StorAll", "irrigation_demand_file", "pineflat_gross_pool", "wishon_gross_pool", "courtright_gross_pool" };
+        public double max_credit = 100000.0;
+        public double credit_decay = -0.15;   
+        public double decay_offset = 304.5;
+        public double mammoth_gross_pool = 122700;
+        public double total_gross_pool = 628500; 
+	String _propertyNames[] = { "graph_file", "StorAll", "irrigation_demand_file", "max_credit", "credit_decay", "decay_offset", "mammoth_gross_pool", "total_gross_pool" };
 //AW:PROPERTIES_END
-
+        // total_gross_pool should probably be 622530, if you add all of the reservoirs on the daily reports. 
+        
 	// Allow javac to generate a no-args constructor.
 
 	/**
@@ -131,18 +134,32 @@ public class PineFlat
                 
                 double upstream = 0.0;
                 double adjustment = 0.0;
-                double space_required = 0.0;
                 double allowed_storage_unbounded = 0.0;
                 double allowed_storage = 0.0;
                 double tcs_rain = Double.NEGATIVE_INFINITY;
+                double space_required = 0.0;
                 dates = new Dates(_timeSliceBaseTime);
 		// Enter code to be executed at each time-slice.
                 // per PNF WC Diagram (USE OF DIAGRAM) paragraph 2
-                // According to Kevin Richardson ( 21Apr2014 ) available upstream storage never goes below 0
-                upstream = Math.max( 0.0, ( (wishon_gross_pool - Wishon) + (courtright_gross_pool-Courtright) ) - 20000 ); 
+                //upstream = (Wishon + Courtright) - 20000; 
                 
                 
-                int wy_day = DateTime.to_wy_julian(_timeSliceBaseTime); 
+                int wy_day = DateTime.to_wy_julian(_timeSliceBaseTime);
+                
+                // per graph at top right of water control diagram
+                // and section 1
+                debug3( "Calculating available upstream storage");
+                if( wy_day >= dates.February01 && wy_day < dates.July31){
+                    upstream = total_gross_pool - (TotalUpstream - max_credit*(1-Math.exp( credit_decay*(decay_offset - (double)wy_day))));
+                }
+                
+                else{
+                    // per "Use of Diagram, section 3" this is the in excess of 85000 bit.
+                    // Talking to Kevin richardson, the bounding lines in the diagram allow for Top Con
+                    // during the rain flood season to go 85000 higher than the line on the diagram.
+                    upstream = mammoth_gross_pool- Mammoth;//TotalUpstream - max_credit;
+                }
+                
                 debug3( "******************************");
                 debug3( "******************************");
                 debug3( "Calculating TCS for date(julian):" + _timeSliceBaseTime + " ( " + wy_day + " )" );
@@ -161,23 +178,21 @@ public class PineFlat
                     debug3( " TCS for snow is " + tcs_snow );
                     
                     
-                    debug3( "Calculating Irrigation Demand Adjustment" );
-                    
-                    // we now adjust the top con
-                    //adjustment = calculate_irrigation();
                     adjustment = this.calculate_irrigation(); //0.0;//graph.normal_irrigation(_timeSliceBaseTime);
 
                     if( wy_day >= dates.February01 && wy_day <= dates.July31){
+                        debug3( "Calculating Irrigation Demand Adjustment" );
                         
                         space_required = Math.max( 0.0, tcs_snow - adjustment - upstream );
-                        // This is allowed to go below zero, it will be bounded below
-                        allowed_storage_unbounded =  graph.get_max_snowspace() - space_required;
+                        
+                        allowed_storage_unbounded = graph.get_max_snowspace()-space_required;
                     }
                     else{                        
                         allowed_storage_unbounded = tcs_rain + upstream;                        
                     }
+                    
                     debug3( " unbounded storage is " + allowed_storage_unbounded );
-                    debug3 ( "Applying final bounds to storage" );
+                    debug3 ( "Applying bounds to storage" );
                                        
                     allowed_storage = graph.bound(wy_day-1, allowed_storage_unbounded );
                     debug3( " bounded storage is " + allowed_storage );
@@ -253,14 +268,14 @@ public class PineFlat
             double demands[] = irrigation.getDemands(_timeSliceBaseTime);
             double demand = 0.0;
             int end_time = -1;
-            if( wy_julian_day >= dates.July31 - 20){
+            if( wy_julian_day >= dates.July31 - 15){
                 end_time = dates.July31;
             }
-            else if( wy_julian_day >= dates.June16 ){
-                end_time = wy_julian_day+20; // next 15 days
+            else if( wy_julian_day >= dates.May26 ){
+                end_time = wy_julian_day+15; // next 15 days
             }
             else{
-                end_time = dates.June16;
+                end_time = dates.June10;
             }
                 
             for( int i = wy_julian_day; i <= end_time; i++){
@@ -271,36 +286,45 @@ public class PineFlat
         }
         
         /*
-         * 
+         * @deprecated
          */
         public double calculate_irrigation(TreeMap< Date, ArrayList< Double > > irrigation )
         {
-            /*
+            /* 
              * All per paragraph 3 of (USE OF DIAGRAM) Pine Flat Water Control Diagram
              * 
              */
             /*
              * Dates for use in all of the logic
+             * we you the timeslice generated dates
              */
+            /*
             int july31 = 304;
             int july16 = 289;
+            int june15 = 258;
             int june10 = 253;
-            int may26  = 238;                    
-            
+            int may26  = 238;       
+            int aug31 = 335;
+            int aug16 = 320;
+            int may31
+            */
             GregorianCalendar cal = new GregorianCalendar();
             cal.setTime(_timeSliceBaseTime);
             int julian_day = DateTime.to_wy_julian(_timeSliceBaseTime);
             int month = cal.get( Calendar.MONTH);
             int cur_day = cal.get(Calendar.DAY_OF_MONTH);
             int year = cal.get(Calendar.YEAR);
-            
+            /*
             if( cal.isLeapYear(year) )
             {
+                aug31 +=1;
+                aug16 +=1;
                 july31 +=1;
                 july16 +=1;
+                june15 +=1;
                 june10 +=1;
                 may26  +=1;
-            }            
+            } */           
             double demand = 0.0;
             if( month < Calendar.FEBRUARY || month > Calendar.JULY )
                 return 0.0; // we don't worry about irrigation at this time
@@ -309,23 +333,23 @@ public class PineFlat
             ArrayList<Double> demands = (ArrayList<Double>)irrigation.get(nearest);
             int day_remaining = cal.getActualMaximum(cal.DAY_OF_MONTH) - cur_day + 1; // we include the current day            
             /* check date, then do every thing */
-            if( julian_day >= july16 && julian_day <= july31) // it is now closer to 31July than 15 days
+            if( julian_day >= dates.July16 && julian_day <= dates.August01) // it is now closer to 31July than 15 days
             {                               
                 demand = day_remaining*demands.get(month)*1.9835;
             }
-            else if( julian_day <= july16 && month == Calendar.JULY)
+            else if( julian_day < dates.July16 && month == Calendar.JULY)
             {
                 demand = demands.get(month)*15*1.9835; // just grab the next fifteen days
             }
-            else if( julian_day >= may26) // after 26 may it is just the next fiften days, which will never cross more than one month
+            else if( julian_day >= dates.May31) // after 31 may it is just the next fiften days, which will never cross more than one month
             {
                 demand = day_remaining*demands.get(month)*1.9835;
                 demand += (15-day_remaining)*demands.get(month+1)*1.9835;                
             }
-            else if( julian_day < may26 )
+            else if( julian_day < dates.May31 )
             {
                 demand = day_remaining*demands.get(month)*1.9835; // get the rest of this month
-                for( int i = month+1; i < Calendar.JULY; i++ ) // go until june
+                for( int i = month+1; i <= Calendar.JUNE; i++ ) // go until june
                 {
                     if( i != Calendar.JUNE)
                     {
@@ -333,7 +357,7 @@ public class PineFlat
                     }
                     else if( i == Calendar.JUNE)
                     {
-                        demand += demands.get(i)*10; // just until the tenth of June, so ten days in June.
+                        demand += demands.get(i)*15; // just until the tenth of June, so ten days in June.
                     }
                 }
             }

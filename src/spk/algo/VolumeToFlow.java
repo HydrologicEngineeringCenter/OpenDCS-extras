@@ -1,4 +1,4 @@
-package spk.algo.inflow;
+package spk.algo;
 
 import java.util.Date;
 
@@ -42,15 +42,13 @@ import java.util.concurrent.TimeUnit;
  *
  */
 //AW:JAVADOC_END
-public class FlowResIn
+public class VolumeToFlow
 	//extends decodes.tsdb.algo.AW_AlgorithmBase
         extends spk.algo.support.AlgBaseNew
 {
-//AW:INPUTS
-	public double ResOut;	//AW:TYPECODE=i
-	public double Evap;	//AW:TYPECODE=i
-	public double Dstor;	//AW:TYPECODE=id
-	String _inputNames[] = { "ResOut", "Evap", "Dstor" };
+//AW:INPUTS	
+	public double stor;	//AW:TYPECODE=id
+	String _inputNames[] = { "stor" };
 //AW:INPUTS_END
 
 //AW:LOCALVARS
@@ -62,13 +60,13 @@ public class FlowResIn
 //AW:LOCALVARS_END
 
 //AW:OUTPUTS
-	public NamedVariable ResIn = new NamedVariable("ResIn", 0);
-	String _outputNames[] = { "ResIn" };
+	public NamedVariable flow = new NamedVariable("flow", 0);
+	String _outputNames[] = { "flow" };
 //AW:OUTPUTS_END
 
 //AW:PROPERTIES
-        public boolean UseEvap = false;
-	String _propertyNames[] = { "UseEvap" };
+        
+	String _propertyNames[] = { };
 //AW:PROPERTIES_END
 
 	// Allow javac to generate a no-args constructor.
@@ -99,17 +97,11 @@ public class FlowResIn
 		// For TimeSlice algorithms this is done once before all slices.
 		// For Aggregating algorithms, this is done before each aggregate
 		// period.
-                EngineeringUnit storUnits = EngineeringUnit.getEngineeringUnit(getParmRef("Dstor").timeSeries.getUnitsAbbr());
-                EngineeringUnit flowUnits = EngineeringUnit.getEngineeringUnit(getParmRef("ResOut").timeSeries.getUnitsAbbr());
-                EngineeringUnit outputUnits = EngineeringUnit.getEngineeringUnit(getParmRef("ResIn").timeSeries.getUnitsAbbr());
+                EngineeringUnit storUnits = EngineeringUnit.getEngineeringUnit(getParmRef("stor").timeSeries.getUnitsAbbr());                
+                EngineeringUnit outputUnits = EngineeringUnit.getEngineeringUnit(getParmRef("flow").timeSeries.getUnitsAbbr());
 
-                if( UseEvap)
-                {
-                    EngineeringUnit evapUnits = EngineeringUnit.getEngineeringUnit(getParmRef("Evap").timeSeries.getUnitsAbbr());
-                    evapConv = decodes.db.CompositeConverter.build( evapUnits, EngineeringUnit.getEngineeringUnit("ac-ft"));
-                }
-                storConv = decodes.db.CompositeConverter.build(storUnits, EngineeringUnit.getEngineeringUnit("ac-ft"));
-                flowConv = decodes.db.CompositeConverter.build(flowUnits, EngineeringUnit.getEngineeringUnit("cfs"));
+                
+                storConv = decodes.db.CompositeConverter.build(storUnits, EngineeringUnit.getEngineeringUnit("ac-ft"));                
                 outputConv = decodes.db.CompositeConverter.build(EngineeringUnit.getEngineeringUnit("cfs"), outputUnits );
 //AW:BEFORE_TIMESLICES_END
 	}
@@ -131,7 +123,7 @@ public class FlowResIn
 		// Enter code to be executed at each time-slice.
 		double in = 0;
                 double conversion = 1.0;
-                String interval = this.getInterval("ResOut").toLowerCase();
+                String interval = this.getInterval("flow").toLowerCase();
                 debug3( "Finding conversion for internval: " + interval );
                 if( interval.equals( "15minutes"))
                 {
@@ -155,14 +147,9 @@ public class FlowResIn
                     t2.setTimeZone(aggTZ);
                     t1.setTime(_timeSliceBaseTime);
                     t2.setTime(_timeSliceBaseTime);
-                    /*
-                     * TODO: This might need to be t1-1day
-                     */
+                    // this might need to be -1 and on T1, investigate monday with PH1 and PH2 of englebright
+                    t2.add(Calendar.DAY_OF_MONTH, 1);
                     
-                    
-                    t1.add(Calendar.DAY_OF_MONTH, -1);
-                    debug3("Start of Interval " +  t1.getTime() );
-                    debug3("End of Interval " + t2.getTime() );
                     // since these are the UTC values we'll get the right time difference
                     long time_difference = ( t2.getTimeInMillis() - t1.getTimeInMillis() )/ (1000*60*60);
                     
@@ -171,7 +158,7 @@ public class FlowResIn
                         conversion = 0.50417;
                     }
                     else if( time_difference == 23){
-                        conversion = 0.52609;
+                        conversion = 0.052609;
                     }
                     else if( time_difference == 25){
                         conversion = 0.48400;
@@ -181,63 +168,18 @@ public class FlowResIn
                     }
                         
                 }
+                else{
+                    throw new DbCompException("The interval you have used is not supported at this time");
+                }
                 debug3( "Conversion factor = " + conversion);
                 
                 try{
                     debug3("Convert the units");
-                    Dstor = storConv.convert(Dstor);
-                    ResOut = flowConv.convert(ResOut);
-                    
-                    if( UseEvap )
-                    {
-                        // note there are notes with the WC manuals that indicate
-                        // that on the 23 and 25 hours days ( because of daylight savings)
-                        // other factors should be used. This is an initial test
-                        // so that will be taken into account later, or
-                        // i'll keep fighting for doing everything in PST
-                        // like the memo that was found says to.
-                        // M. Neilson. 2011Nov16.
-                        Evap = evapConv.convert(Evap);
-                        
-                        double flow = (Dstor+Evap)*conversion;
-                        debug3("performing calculation with evap");
-                        debug3( "Dstor = " + Dstor + ", Evap = " + Evap + ", Outflow = " + ResOut);
-                        debug3( " Dstor + Evap = " + (Dstor+Evap) + " ---> " + flow);
-                        in = flow + ResOut;
-                    }
-                    else
-                    {
-                        debug3("performing calculation without evap");
-                        debug3( "Dstor = " + Dstor + ", Outflow = " + ResOut);
-                        debug3( " Dstor  in cfs = " + (Dstor*conversion) );
-                        // The 15 minute and hourly calculation do not use evap
-                        in = Dstor*conversion + ResOut;
-                    }
-                    
-                    in = outputConv.convert(in);
-                    debug3("Inflow = " + in + " " + outputConv.getToAbbr() );
-                    /* TODO: change this
-                     * should have the reports show the 0's
-                     * or maybe make it configurable.
-                     * 
-                     * TODO:
-                     *    or create some sort of smoothing algorithm
-                     *      check previous value
-                     *      if large dip, put in queue
-                     */
-                    setOutput( ResIn, in );
-                    
-                    /*
-                    if( in >= 0.0)
-                    {
-                        setOutput( ResIn, in );
-                    }
-                    else
-                    {
-                        warning("Inflow set to 0 because the calculation came out to less than 0");
-                        setOutput( ResIn, 0 );
-                    }
-                    */
+                    stor = storConv.convert(stor);
+                    in = stor*conversion;                    
+                    in = outputConv.convert(in);                                    
+                    setOutput( flow, in );
+                                        
                 }
                 catch( DecodesException ex)
                 {

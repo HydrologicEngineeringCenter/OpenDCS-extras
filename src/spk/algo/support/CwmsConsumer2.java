@@ -160,6 +160,8 @@ public class CwmsConsumer2 extends DataConsumer{
                         }
                     }
                     cts.setDisplayName(tsid);
+                    String units = ts.getUnits(); 
+                    Logging.debug3("Units ->" + units);
                     cts.setUnitsAbbr(ts.getUnits());
 
 
@@ -180,7 +182,7 @@ public class CwmsConsumer2 extends DataConsumer{
 
                     Logging.debug3("There are " + cts.size() + " values to store" );
 
-                    db2.store(db.getDbOfficeId(), tsid, ts.getUnits(), times, values, quals, ts.size(), "REPLACE ALL", true, null);
+                    db2.store(db.getDbOfficeId(), tsid, units, times, values, quals, ts.size(), "REPLACE ALL", true, null);
 
 
                     //db.fillTimeSeriesMetadata(cts);
