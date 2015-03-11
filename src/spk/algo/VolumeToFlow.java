@@ -158,7 +158,7 @@ public class VolumeToFlow
                         conversion = 0.50417;
                     }
                     else if( time_difference == 23){
-                        conversion = 0.052609;
+                        conversion = 0.52609;
                     }
                     else if( time_difference == 25){
                         conversion = 0.48400;
