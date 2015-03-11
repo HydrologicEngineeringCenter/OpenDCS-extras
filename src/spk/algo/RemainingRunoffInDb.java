@@ -178,8 +178,10 @@ public class RemainingRunoffInDb
 
                  HashSet<Integer> recs = this.comp.getTriggeringRecNums();
                  boolean TriggeredByRunoff = false;
-                 PreparedStatement stmt;
+                 PreparedStatement stmt = null;
+                 ResultSet rs = null;
                  try {
+                    
                     stmt = this.tsdb.getConnection().prepareStatement("select site_datatype_id from ccp.cp_comp_tasklist where record_num = ?");
                     //stmt = this.tsdb.getConnection().prepareStatement("select record_num from ccp.cp_comp_tasklist");
                     debug3("Statement Prepared");
@@ -191,7 +193,8 @@ public class RemainingRunoffInDb
                          //ResultSet rs = this.tsdb.doQuery( );                         
                          stmt.setLong(1, recs.iterator().next().longValue() );
                          debug3("Executing tasklist query");
-                         ResultSet rs = stmt.executeQuery();
+                         rs = stmt.executeQuery();
+                         
                          debug3("Looping Through tasklist");
                          if( rs.next() ){
                              
@@ -214,8 +217,24 @@ public class RemainingRunoffInDb
                     debug3(ex.getMessage());
                     Logger.getLogger(RemainingRunoffInDb.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (DbIoException ex) {
-                Logger.getLogger(RemainingRunoffInDb.class.getName()).log(Level.SEVERE, null, ex);
-                } 
+                    Logger.getLogger(RemainingRunoffInDb.class.getName()).log(Level.SEVERE, null, ex);
+                } finally{
+                     if( stmt != null ){
+                         try {
+                             stmt.close();
+                         } catch (SQLException ex) {
+                             Logger.getLogger(RemainingRunoffInDb.class.getName()).log(Level.SEVERE, null, ex);
+                         }
+                     }
+                     
+                     if( rs != null ){
+                         try {
+                             rs.close();
+                         } catch (SQLException ex) {
+                             Logger.getLogger(RemainingRunoffInDb.class.getName()).log(Level.SEVERE, null, ex);
+                         }
+                     }
+                 }
                  
                  
                  
