@@ -34,7 +34,7 @@ import java.util.GregorianCalendar;
 
 /**
  * Slightly modified version of CCP Algorithm base
- * to avoid the DST issue. Also includes additional helper functions
+ * to avoid the DST issue (An issue with Inc Precip). Also includes additional helper functions
  * @author L2EDDMAN
  */
 public abstract class AlgBaseNew extends DbAlgorithmExecutive
@@ -52,7 +52,7 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
     protected boolean _sliceInputsDeleted = false;
     protected boolean _aggInputsDeleted = false;
     private boolean _deleteOutputCalled = false;
-    TreeSet baseTimes = null;
+    protected TreeSet baseTimes = null; // changed to protected so that algorithms can look at this if needed, a Test of SubSample required it.
     protected boolean noAggregateFill = false;
     protected String aggPeriodInterval = null;
     protected int debugLevel = 0;
