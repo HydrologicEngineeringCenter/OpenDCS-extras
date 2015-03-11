@@ -19,7 +19,7 @@ import ilex.util.FileLogger;
 //AW:JAVADOC
 /**
  * TrapezoidalIntegrationAverage implements the trapezoidal integration method
- * of average current used in DSS for instaneous data. It makes sense but
+ * of average current used in DSS for instantaneous data. It makes sense but
  * the only reference I've found is a statement in a USGS manual that it will
  * be used.
  *
