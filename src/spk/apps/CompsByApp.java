@@ -48,17 +48,14 @@ public class CompsByApp extends TsdbAppTemplate {
                 + "(select b.loading_application_name from ccp.hdb_loading_application b where a.loading_application_id=b.loading_application_id) AS App,"
                 + "count(site_datatype_id) as num_comps "
                 + "from ccp.cp_comp_tasklist a group by a.loading_application_id order by num_comps desc");
-        System.out.println("AppID\tApp Name\tNum Comps");
+        System.out.printf("%10s %-20s %10s\n", "AppID", "App Name","Num Comps");
         while( rs.next() )
         {
             int id = rs.getInt(1);
             String name = rs.getString(2);
             int count = rs.getInt(3);
-            System.out.print(id);
-            System.out.print("\t");
-            System.out.print(name);
-            System.out.print("\t");
-            System.out.println(count);
+            System.out.printf("%10d %-20s %10d\n", id,name,count);
+            
             
         }
         
