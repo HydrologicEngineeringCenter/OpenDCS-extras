@@ -42,7 +42,8 @@ public class TrapezoidalIntegrationAverage
 	Date first_time;
 	double previous_value;
 	double tally;
-
+        long start_t;
+        long end_t;
 //AW:LOCALVARS_END
 
 //AW:OUTPUTS
@@ -96,6 +97,7 @@ public class TrapezoidalIntegrationAverage
 		String inUnits = getInputUnitsAbbr("input");
 		if (inUnits != null && inUnits.length() > 0)
 			setOutputUnitsAbbr("average", inUnits);
+                start_t = java.lang.System.nanoTime();
 //AW:BEFORE_TIMESLICES_END
 	}
 
@@ -170,6 +172,11 @@ public class TrapezoidalIntegrationAverage
 			if (_aggInputsDeleted)
 				deleteOutput(average);
 		}
+                end_t = java.lang.System.nanoTime();
+                long diff = end_t - start_t;
+                double diff_ms = diff/1000000.0;
+                info(" Elapsed Time (ns) " + diff );
+                info("              (ms) " + diff_ms);
 //AW:AFTER_TIMESLICES_END
 	}
 

@@ -200,7 +200,12 @@ public class RemainingRunoffInDb
                              
                              debug3("Getting Record Num");
                              long sdi = rs.getLong(1);
-                             String ts = this.tsdb.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();
+                             
+                             //String ts = this.tsdb.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();
+                             
+                             String ts = tsdb.getSiteById(DbKey.createDbKey(sdi)).getUniqueName();
+                             
+                             
                              debug3( "Time Series name = " + ts );                             
                              if( ts.equalsIgnoreCase( getParmRef("forecasted_runoff").timeSeries.getTimeSeriesIdentifier().getUniqueString() ) ){
                                  // Was Triggered by a runoff entry

@@ -95,8 +95,9 @@ public class DataCheck
 		String station_name = site_name.split("\\-")[0].split("\\ ")[1];
 		ParmRef pr = getParmRef("input");
 		DbCompParm parm = pr.compParm;
-		SiteDatatype sdt = parm.getSiteDatatype();
-		String param = sdt.getDataType().getCode();
+                //parm.get
+		//SiteDatatype sdt = parm.getSiteDatatype();               
+		String param = parm.getDataType().getCode();
 		debug3( "Checking limits at: " + site_name + "(Station Name: " +station_name + ") with parameter: " + param );
 		String filename = EnvExpander.expand( limitFileDir + "/" + station_name + ".limits" );
 		debug3( "Using '" + filename + "' for limits" );

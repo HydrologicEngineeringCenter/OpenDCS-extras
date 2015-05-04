@@ -146,7 +146,7 @@ public class CwmsConsumer2 extends DataConsumer{
 
                     /*  need to change this to handle brand new sites/time series */
 
-                    Logging.debug3(" " + db.canCreateTimeSeries() );
+                    
                     //long test = db.createTimeSeriesInDb(id);
                     try{
                         cts = db.makeTimeSeries(tsid);
