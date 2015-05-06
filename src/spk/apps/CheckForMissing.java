@@ -1,20 +1,30 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ *  As a work of the United States Government, this package 
+ *  is in the public domain within the United States. Additionally, 
+ *  We waive copyright and related rights in the work worldwide
+ *  through the CC0 1.0 Universal Public Domain Dedication 
+ *  (which can be found at https://creativecommons.org/publicdomain/zero/1.0/).
+
  */
 package spk.apps;
+import decodes.sql.DbKey;
+import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.TsdbAppTemplate;
 import decodes.tsdb.DbComputation;
 import decodes.tsdb.DbAlgorithmExecutive;
+import decodes.tsdb.TimeSeriesHelper;
 import decodes.util.CmdLineArgs;
 import ilex.cmdline.StringToken;
 import ilex.cmdline.TokenOptions;
 import java.io.PrintStream;
 import java.sql.ResultSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Set;
+import ilex.util.Logger;
+import java.util.Date;
 import lrgs.gui.DecodesInterface;
-
+import spk.apps.support.Alarms.AlarmCondition;
+import spk.apps.support.Alarms.AlarmList;
+import spk.apps.support.Alarms.AlarmResponse;
 
 
 
@@ -26,38 +36,59 @@ import lrgs.gui.DecodesInterface;
 public class CheckForMissing extends TsdbAppTemplate {
 
     //private StringToken compname = new StringToken("C","Computation to Run","", TokenOptions.optSwitch, "" );
+    private StringToken alarmfile = new StringToken("A","File with list of alarms","",TokenOptions.optSwitch,"");
     
     public CheckForMissing(){
-        super("compsbyapp.log");
-     
+        super("checkformissing.log");
+        
     }
     
     
     @Override
     protected void addCustomArgs( CmdLineArgs cmdLineArgs){
         
-     
-        appNameArg.setDefaultValue("compsbyapp");
+        cmdLineArgs.addToken(alarmfile);
+        appNameArg.setDefaultValue("checkformissing");
     }
     
     
     @Override
     protected void runApp() throws Exception {
         //System.out.println( this.compname.getValue() );                             
-        System.out.println( "Query Database");
-        ResultSet rs = theDb.doQuery( "select a.loading_application_id, "
-                + "(select b.loading_application_name from ccp.hdb_loading_application b where a.loading_application_id=b.loading_application_id) AS App,"
-                + "count(site_datatype_id) as num_comps "
-                + "from ccp.cp_comp_tasklist a group by a.loading_application_id order by num_comps desc");
-        System.out.printf("%10s %-20s %10s\n", "AppID", "App Name","Num Comps");
-        while( rs.next() )
-        {
-            int id = rs.getInt(1);
-            String name = rs.getString(2);
-            int count = rs.getInt(3);
-            System.out.printf("%10d %-20s %10d\n", id,name,count);
+        AlarmList alarms = new AlarmList();
+        alarms.load_alarms( AlarmCondition.CHECK_MISSING, alarmfile.getValue() );
+        Set<String> timeseries = alarms.get_timeseries_names();
+        
+        while(true){
             
+                for( String ts_name: timeseries){
+                    try{
+                        DbKey key = theDb.getKey(ts_name);
+
+                        CTimeSeries cts = theDb.makeTimeSeries(ts_name);
+
+                        Date end = new Date();
+
+                        int duration = alarms.get_duration(ts_name);
+                        Date start = new Date( end.getTime() - duration*1000);
+                        theDb.fillTimeSeries(cts, start, end);
+                        AlarmResponse res = alarms.check_timeseries(cts);
+
+
+
+                        if( res != null ){
+                            // send alarm onto the mailer/storage daemon
+                            Logger.instance().info(cts.getNameString());
+                            Logger.instance().info( res.toString() );
+                        }
+                    } catch( Exception err){
+                        Logger.instance().info( err.toString() );
+                    }
+
+
+                }
             
+            Thread.sleep(60*1000);            
         }
         
         
@@ -71,7 +102,8 @@ public class CheckForMissing extends TsdbAppTemplate {
             //DecodesInterface.setGUI(false);
             byapp.execute(args);
         } catch (Exception ex) {
-            Logger.getLogger(CheckForMissing.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.instance().fatal(ex.toString());
+            //Logger.getLogger(CheckForMissing.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
