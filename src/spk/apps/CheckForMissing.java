@@ -25,8 +25,7 @@ import lrgs.gui.DecodesInterface;
 import spk.apps.support.Alarms.AlarmCondition;
 import spk.apps.support.Alarms.AlarmList;
 import spk.apps.support.Alarms.AlarmResponse;
-
-
+import java.net.Socket;
 
 /**
  * This software will, on some interval, scan through a list of time series and check if any are missing
@@ -36,7 +35,9 @@ import spk.apps.support.Alarms.AlarmResponse;
 public class CheckForMissing extends TsdbAppTemplate {
 
     //private StringToken compname = new StringToken("C","Computation to Run","", TokenOptions.optSwitch, "" );
-    private StringToken alarmfile = new StringToken("A","File with list of alarms","",TokenOptions.optSwitch,"");
+    private StringToken alarmfile = new StringToken("A","File with list of alarms","",TokenOptions.optSwitch|TokenOptions.optRequired,"");
+    private StringToken socketfile = new StringToken("S","Unix domain socket were we send the alarms","",TokenOptions.optSwitch|TokenOptions.optRequired,"");
+    
     
     public CheckForMissing(){
         super("checkformissing.log");
@@ -48,6 +49,7 @@ public class CheckForMissing extends TsdbAppTemplate {
     protected void addCustomArgs( CmdLineArgs cmdLineArgs){
         
         cmdLineArgs.addToken(alarmfile);
+        cmdLineArgs.addToken(socketfile);
         appNameArg.setDefaultValue("checkformissing");
     }
     
@@ -74,12 +76,17 @@ public class CheckForMissing extends TsdbAppTemplate {
                         theDb.fillTimeSeries(cts, start, end);
                         AlarmResponse res = alarms.check_timeseries(cts);
 
+                        
 
 
                         if( res != null ){
                             // send alarm onto the mailer/storage daemon
                             Logger.instance().info(cts.getNameString());
                             Logger.instance().info( res.toString() );
+                            
+                            Socket s = new Socket("spk-wmlocal1.spk.usace.army.mil",51900);
+                            s.getOutputStream().write(res.toString().getBytes() );
+                            s.close();
                         }
                     } catch( Exception err){
                         Logger.instance().info( err.toString() );
@@ -94,6 +101,7 @@ public class CheckForMissing extends TsdbAppTemplate {
         
     }
     
+
     
 
     public static void main( String args[]){

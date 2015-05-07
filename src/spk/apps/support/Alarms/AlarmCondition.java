@@ -16,6 +16,7 @@ import ilex.var.NoConversionException;
 import ilex.var.TimedVariable;
 import java.util.ArrayList;
 import java.util.Date;
+import spk.algo.AWAggTemplate;
 
 
 
@@ -139,73 +140,75 @@ public class AlarmCondition {
             }
             return false; // no alarm, if a missing check isn't defined somewhere else, we don't care.
         }
-        TimedVariable first = ts.sampleAt(0);
+        int index_of_first = -1;
+        TimedVariable first = null;
+        
+        
         TimedVariable last = ts.sampleAt( ts.size() - 1 );
+        
         double last_val = last.getDoubleValue();
         Date last_date = last.getTime();
+        
+        if( duration == 0){
+            ts.sampleAt(0);
+        } else{
+            index_of_first = indexOfDurationStart(duration, last_date, ts, check);
+            if( index_of_first >=0){
+                ts.sampleAt(index_of_first);
+            } else{
+                //insufficient data
+                return false;
+            }
+        }
+        
         
         double first_val = first.getDoubleValue();
         Date first_date = first.getTime();
         
         
         
-        switch( check ){
-        
+        switch( check ){        
             case CHECK_GREATER:{
-                if( duration == 0){
-                    if( last_val > a ){
+                    if( last_val > a && first_val > a){
                         return true;
-                    }
-                }
-                
-                int i = indexOfDurationStart(duration,last_date,ts, 859);
-                if( i >= 0){
-                    
-                } else{
-                    return false; // insufficient data
-                }
-                
+                    }                
                 break;
             }
-            case CHECK_LESS:{
-                if( duration == 0 ){
-                    if( last_val < a ){
-                        return true;
-                    }
+            case CHECK_LESS:{                
+                if( last_val < a && first_val < a ){
+                    return true;
                 }
-                
-                int i = indexOfDurationStart(duration,last_date,ts, 859);
-                if( i >= 0){
-                    
-                } else{
-                    return false; // insufficient data
-                }
-                
-                break;
-                
+                break;                
             }
-            case CHECK_EQUALS:{
-                if( duration == 0 ){
-                    if( last_val == a ){
-                        return true;
-                    }
+            case CHECK_EQUALS:{                
+                if( last_val == a && first_val == a){
+                    return true;
                 }
+                
                 break;
             }            
             case CHECK_STATIC:{
-                if( !( last_date.getTime() - first_date.getTime() == duration*1000 ) ){
-                    // find the correct first _value for this check
-                    // just the starting index
-                }         
+                double max = Double.NEGATIVE_INFINITY;
+                double min = Double.POSITIVE_INFINITY;
+                for(int i=0;i<ts.size(); i++ ){
+                    TimedVariable tv2 = ts.sampleAt(i);
+                    double v = tv2.getDoubleValue();
+                    if( v > max){
+                        max = v;
+                    }
+                    if( v < min){
+                        min = v;
+                    }
+                }
+                if( Math.abs(max-min) < a){
+                    return true;
+                }
                 // a is tolerance for this check
                 // need to do some sort of variance check or something
                 break;
             }
             case CHECK_ROC:{
-                if( !( last_date.getTime() - first_date.getTime() == duration*1000 ) ){
-                    // find the correct first _value for this check
-                }         
-                
+                                
                 double diff = last_val - first_val;
                 if( diff >= 0){
                     if( diff > a){
@@ -228,9 +231,24 @@ public class AlarmCondition {
         return this.check_str;
     }
     
+    
+    
     public int get_duration(){
         return this.duration;
     }
+    
+    protected boolean isMissing(double var) {
+	return var == 4.9E-324 || var == Double.NEGATIVE_INFINITY;
+    }
+    
+    protected boolean isMissing(long var) {
+	return var == -9223372036854775808L;
+    }
+    
+    protected boolean isMissing(String var) {
+	return var == null;
+    }
+    
     
     final public static int CHECK_MISSING = 1;
     final public static int CHECK_GREATER = 1 << 2;
