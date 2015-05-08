@@ -95,7 +95,14 @@ public class AlarmComp
                 // TODO: for testing the alarm list is short, long term this should be changed to only load on change, like DatChk
                 alarms.load_alarms(AlarmCondition.CHECK_EQUALS | AlarmCondition.CHECK_GREATER | AlarmCondition.CHECK_LESS | AlarmCondition.CHECK_MISSING | AlarmCondition.CHECK_ROC | AlarmCondition.CHECK_STATIC, alarm_file);
                 
-                ts = new CTimeSeries(this.getParmRef("input").compParm );
+                
+                ts = new CTimeSeries( getSDI("input"), this.getInterval("input"), this.getTableSelector("input") );
+                
+                // TODO: I'm quite sure not a single line below should actually BE needed...but it is.
+                ts.setTimeSeriesIdentifier(getParmTsId("input"));
+                ts.setUnitsAbbr(getParmUnitsAbbr("input"));
+                debug3( getParmTsUniqueString("input"));
+                debug3( getParmTsId("input").getUniqueString());
                 
                 
 //AW:BEFORE_TIMESLICES_END
@@ -139,6 +146,7 @@ public class AlarmComp
 		// For Aggregating algorithms, this is done after each aggregate
 		// period.
                 ts.sort();
+                
                 AlarmResponse res = alarms.check_timeseries(ts);
                 if( res != null){
                     debug3( ts.getNameString() );

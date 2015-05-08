@@ -11,6 +11,7 @@ package spk.apps.support.Alarms;
 import decodes.tsdb.BadTimeSeriesException;
 import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.TimeSeriesDb;
+import decodes.tsdb.TimeSeriesHelper;
 import ilex.var.NoConversionException;
 import ilex.var.TimedVariable;
 import java.util.Date;
@@ -46,6 +47,11 @@ public class Alarm {
     
     public AlarmResponse check( CTimeSeries ts ) throws BadTimeSeriesException, NoConversionException{
         // 
+        String ts_units = ts.getUnitsAbbr();
+        if( ts_units.compareToIgnoreCase(this.units) != 0) {
+            TimeSeriesHelper.convertUnits(ts, units);
+        }
+        
         boolean in_alarm =  this.condition.check( ts );
         if( in_alarm ){
             AlarmResponse response = this.buildResponse();

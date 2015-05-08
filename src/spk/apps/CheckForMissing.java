@@ -95,7 +95,7 @@ public class CheckForMissing extends TsdbAppTemplate {
 
                 }
             
-            Thread.sleep(60*1000);            
+            Thread.sleep(60*5*1000);            
         }
         
         
@@ -107,7 +107,8 @@ public class CheckForMissing extends TsdbAppTemplate {
     public static void main( String args[]){
         CheckForMissing byapp = new CheckForMissing();
         try {
-            //DecodesInterface.setGUI(false);
+            DecodesInterface.setGUI(false);
+            
             byapp.execute(args);
         } catch (Exception ex) {
             Logger.instance().fatal(ex.toString());

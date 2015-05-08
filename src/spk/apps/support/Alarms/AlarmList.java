@@ -84,18 +84,23 @@ public class AlarmList {
         Assume calling program has gotten all data
         */
         try{
+            
             ArrayList<Alarm> myalarms = alarms.get(ts.getTimeSeriesIdentifier().getUniqueName() );
             ArrayList<AlarmResponse> responses = new ArrayList<AlarmResponse>();
             for( Alarm a: myalarms){
-                responses.add( a.check( ts ) );
+                AlarmResponse res = a.check(ts);
+                if( res != null ){
+                    responses.add( res );
+                }
             }
             Collections.sort(responses);
             // check responses and return the highest priority
-            
-            return responses.get(responses.size()-1); // get the highest priority alarm
+            if( responses.size() > 0 ){
+                return responses.get(responses.size()-1); // get the highest priority alarm
+            }
             
         } catch( Exception err){
-            
+            Logger.instance().warning( err.toString() );
         }
         return null; // no alarm
     }

@@ -49,7 +49,11 @@ public class AlarmResponse implements Comparable<AlarmResponse>{
         buf.append( "\t\"project\": \"" + project + "\",\n" );
         buf.append( "\t\"condition\": \"" + condition + "\",\n");
         buf.append( "\t\"color\": \"" + color + "\",\n");
-        buf.append( "\t\"value\": " + value + ",\n");
+        if( value == Double.NEGATIVE_INFINITY ){
+            buf.append( "\t\"value\": null,\n");
+        }else{    
+            buf.append( "\t\"value\": " + value + ",\n");
+        }
         buf.append( "\t\"timestamp\": \"" + timestamp + "\",\n");
         buf.append( "\t\"timeseries\": \"" + timeseries + "\",\n");
         buf.append( "\t\"units\": \"" + units + "\",\n");

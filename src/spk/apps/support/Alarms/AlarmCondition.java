@@ -150,11 +150,11 @@ public class AlarmCondition {
         Date last_date = last.getTime();
         
         if( duration == 0){
-            ts.sampleAt(0);
+            first = last;
         } else{
             index_of_first = indexOfDurationStart(duration, last_date, ts, check);
             if( index_of_first >=0){
-                ts.sampleAt(index_of_first);
+                first = ts.sampleAt(index_of_first);
             } else{
                 //insufficient data
                 return false;
@@ -190,7 +190,7 @@ public class AlarmCondition {
             case CHECK_STATIC:{
                 double max = Double.NEGATIVE_INFINITY;
                 double min = Double.POSITIVE_INFINITY;
-                for(int i=0;i<ts.size(); i++ ){
+                for(int i=index_of_first;i<ts.size(); i++ ){
                     TimedVariable tv2 = ts.sampleAt(i);
                     double v = tv2.getDoubleValue();
                     if( v > max){

@@ -31,6 +31,11 @@ public class CompsByApp extends TsdbAppTemplate {
      
     }
     
+    @Override
+    public void initDecodes(){
+        //skip this
+        
+    }
     
     @Override
     protected void addCustomArgs( CmdLineArgs cmdLineArgs){
@@ -67,7 +72,8 @@ public class CompsByApp extends TsdbAppTemplate {
     public static void main( String args[]){
         CompsByApp byapp = new CompsByApp();
         try {
-            //DecodesInterface.setGUI(false);
+            DecodesInterface.setGUI(false);
+            
             byapp.execute(args);
         } catch (Exception ex) {
             Logger.getLogger(CompsByApp.class.getName()).log(Level.SEVERE, null, ex);
