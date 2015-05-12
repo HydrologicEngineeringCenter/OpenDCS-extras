@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import opendcs.dai.TimeSeriesDAI;
 
 import spk.algo.support.DateTime;
 import spk.algo.support.Dates;
@@ -202,8 +203,9 @@ public class RemainingRunoffInDb
                              long sdi = rs.getLong(1);
                              
                              //String ts = this.tsdb.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();
+                             TimeSeriesDAI tdai = tsdb.makeTimeSeriesDAO();
+                             String ts = tdai.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();
                              
-                             String ts = tsdb.getSiteById(DbKey.createDbKey(sdi)).getUniqueName();
                              
                              
                              debug3( "Time Series name = " + ts );                             

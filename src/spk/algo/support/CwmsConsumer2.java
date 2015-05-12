@@ -7,6 +7,7 @@ package spk.algo.support;
 import cwmsdb.CwmsTsJdbc;
 import decodes.consumer.DataConsumer;
 import decodes.consumer.DataConsumerException;
+import decodes.cwms.CwmsConstants;
 import ilex.var.TimedVariable;
 import decodes.db.Platform;
 import decodes.decoder.DecodedMessage;
@@ -121,7 +122,7 @@ public class CwmsConsumer2 extends DataConsumer{
                     
                     String sensor = s.getName();                
                     String s2 = s.getDisplayName();
-                    Iterator<DataType> dts = s.configSensor.getDataTypes();
+                    Iterator<DataType> dts = s.configSensor.getDataTypes();                    
                     while(dts.hasNext()){
                         DataType dt = dts.next();
                         if( dt.getStandard().equalsIgnoreCase("cwms") ){
@@ -132,6 +133,8 @@ public class CwmsConsumer2 extends DataConsumer{
                     int interval = ts.getTimeInterval();
                     Logging.debug3("Interval: " + interval);
                     String interval_s = this.interval_str(interval);
+                    //String type = s.getProperty(CwmsConstants.CWMS_PARAM_TYPE);
+                    
                     Logging.debug3("Interval: " + interval_s);
                     //ConfigSensor config = p.getConfig().getSensor(s.getNumber());
                     //config.g

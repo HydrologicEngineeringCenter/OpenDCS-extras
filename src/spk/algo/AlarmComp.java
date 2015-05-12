@@ -2,6 +2,7 @@ package spk.algo;
 
 
 
+import decodes.tsdb.BadTimeSeriesException;
 import decodes.tsdb.CTimeSeries;
 import java.util.Date;
 
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import opendcs.dai.TimeSeriesDAI;
 import spk.apps.support.Alarms.AlarmCondition;
 import spk.apps.support.Alarms.AlarmList;
 import spk.apps.support.Alarms.AlarmResponse;
@@ -96,18 +98,20 @@ public class AlarmComp
                 alarms.load_alarms(AlarmCondition.CHECK_EQUALS | AlarmCondition.CHECK_GREATER | AlarmCondition.CHECK_LESS | AlarmCondition.CHECK_MISSING | AlarmCondition.CHECK_ROC | AlarmCondition.CHECK_STATIC, alarm_file);
                 
                 
-                ts = new CTimeSeries( getSDI("input"), this.getInterval("input"), this.getTableSelector("input") );
-                
+                //ts = new CTimeSeries( getParmRef("input").compParm );
+                ts = getParmRef("input").timeSeries;
+                //TimeSeriesDAI tdai = tsdb.makeTimeSeriesDAO();
+                //tdai.fillTimeSeriesMetadata(ts);
                 // TODO: I'm quite sure not a single line below should actually BE needed...but it is.
-                ts.setTimeSeriesIdentifier(getParmTsId("input"));
-                ts.setUnitsAbbr(getParmUnitsAbbr("input"));
+                //ts.setTimeSeriesIdentifier(getParmTsId("input"));
+                //ts.setUnitsAbbr(getParmUnitsAbbr("input"));
                 debug3( getParmTsUniqueString("input"));
-                debug3( getParmTsId("input").getUniqueString());
+                //debug3( getParmTsId("input").getUniqueString());
                 
                 
 //AW:BEFORE_TIMESLICES_END
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(AlarmComp.class.getName()).log(Level.SEVERE, null, ex);
+                debug3( ex.toString() );
             }
 	}
 
@@ -131,6 +135,7 @@ public class AlarmComp
                 tv.setTime( _timeSliceBaseTime);
                 tv.setValue(input);
 		ts.addSample(tv);
+                
 //AW:TIMESLICE_END
 	}
 
