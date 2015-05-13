@@ -11,7 +11,11 @@ package spk.apps.support.Alarms;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONException;
+import org.json.JSONWriter;
+import org.json.JSONObject;
 /**
  *
  * @author L2EDDMAN
@@ -44,21 +48,43 @@ public class AlarmResponse implements Comparable<AlarmResponse>{
     
     @Override      
     public String toString(){
-        StringBuilder buf = new StringBuilder();
-        buf.append( "\"" + site + "\":{\n");
-        buf.append( "\t\"project\": \"" + project + "\",\n" );
-        buf.append( "\t\"condition\": \"" + condition + "\",\n");
-        buf.append( "\t\"color\": \"" + color + "\",\n");
-        if( value == Double.NEGATIVE_INFINITY ){
-            buf.append( "\t\"value\": null,\n");
-        }else{    
-            buf.append( "\t\"value\": " + value + ",\n");
+        try {
+            JSONObject json = new JSONObject();
+            json.append("site_name", site);
+            json.append("project", project);
+            json.append("condition", condition);
+            json.append("color", color);
+            json.append("timestamp", timestamp);
+            json.append("timeseries", project);
+            json.append("units", units);
+            if( value == Double.NEGATIVE_INFINITY ){
+                json.append("value", null);
+            } else{
+                json.append("value", value);
+            }
+            /*
+            StringBuilder buf = new StringBuilder();
+            buf.append( "{\"site_name\": \"" + site + "\",\n");
+            buf.append( "\t\"project\": \"" + project + "\",\n" );
+            buf.append( "\t\"condition\": \"" + condition + "\",\n");
+            buf.append( "\t\"color\": \"" + color + "\",\n");
+            if( value == Double.NEGATIVE_INFINITY ){
+                buf.append( "\t\"value\": null,\n");
+            }else{
+                buf.append( "\t\"value\": " + value + ",\n");
+            }
+            
+            buf.append( "\t\"timestamp\": \"" + timestamp + "\",\n");
+            buf.append( "\t\"timeseries\": \"" + timeseries + "\",\n");
+            buf.append( "\t\"units\": \"" + units + "\"\n");
+            buf.append("}\n");
+            return buf.toString();
+                    */
+            return json.toString();
+        } catch (JSONException ex) {
+            Logger.getLogger(AlarmResponse.class.getName()).log(Level.SEVERE, null, ex);
         }
-        buf.append( "\t\"timestamp\": \"" + timestamp + "\",\n");
-        buf.append( "\t\"timeseries\": \"" + timeseries + "\",\n");
-        buf.append( "\t\"units\": \"" + units + "\",\n");
-        buf.append("}\n");
-        return buf.toString();
+        return "Unable to format";
     }
     
     @Override
