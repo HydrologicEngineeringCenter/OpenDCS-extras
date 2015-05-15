@@ -58,7 +58,7 @@ public class AlarmComp
 
 //AW:PROPERTIES	
         public String address = "spk-wmlocal1";
-        public int    port    = 51900;
+        public long    port    = 51900;
         public String alarm_file = "/shared/config/alarms/alarms.txt";
 	String _propertyNames[] = { "address", "port", "alarm_file" };
         
@@ -159,7 +159,7 @@ public class AlarmComp
                             
                     Socket s;
                     try {
-                        s = new Socket("spk-wmlocal1.spk.usace.army.mil",51900);
+                        s = new Socket("spk-wmlocal1.spk.usace.army.mil",(int)51900);
                         s.getOutputStream().write(res.toString().getBytes() );
                         s.close();
                     } catch (IOException ex) {
