@@ -91,7 +91,7 @@ public class WaterControlDiagram
                 {
                     if( line.trim().equals("") || line.trim().charAt(0) == '#' ) continue; // comment or blank line, skip
                     parts = line.split( "\\:");
-                    section = parts[0].toLowerCase();
+                    section = parts[0].toLowerCase().trim();
                     if( section.equals( "rain_times" ))
                     {
                         debug3( "load_graph: reading in times array");
