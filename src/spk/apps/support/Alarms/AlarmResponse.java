@@ -50,17 +50,19 @@ public class AlarmResponse implements Comparable<AlarmResponse>{
     public String toString(){
         try {
             JSONObject json = new JSONObject();
-            json.append("site_name", site);
-            json.append("project", project);
-            json.append("condition", condition);
-            json.append("color", color);
-            json.append("timestamp", timestamp);
-            json.append("timeseries", project);
-            json.append("units", units);
+            
+            json.put("site_name", site);
+            json.put("project", project);
+            json.put("condition", condition);
+            json.put("color", color);
+            json.put("timestamp", timestamp);
+            json.put("timeseries", timeseries);
+            json.put("units", units);
             if( value == Double.NEGATIVE_INFINITY ){
-                json.append("value", null);
+                json.put("value",(Object) null);
+                
             } else{
-                json.append("value", value);
+                json.put("value", value);
             }
             /*
             StringBuilder buf = new StringBuilder();
