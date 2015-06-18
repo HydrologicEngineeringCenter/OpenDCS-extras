@@ -203,10 +203,17 @@ public class RemainingRunoffInDb
                              long sdi = rs.getLong(1);
                              
                              //String ts = this.tsdb.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();
-                             TimeSeriesDAI tdai = tsdb.makeTimeSeriesDAO();
-                             String ts = tdai.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();
+                             String ts ="TDAI creation/get failed";
+                             TimeSeriesDAI tdai = null;
+                             try{
+                                tdai = tsdb.makeTimeSeriesDAO();
+                                ts = tdai.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();
                              
-                             
+                             }finally{
+                                 if( tdai != null ){
+                                    tdai.close();
+                                 }
+                             }
                              
                              debug3( "Time Series name = " + ts );                             
                              if( ts.equalsIgnoreCase( getParmRef("forecasted_runoff").timeSeries.getTimeSeriesIdentifier().getUniqueString() ) ){
@@ -412,12 +419,12 @@ public class RemainingRunoffInDb
                 }
                 catch( DbIoException e)
                 {
-                    warning( "Could not access timeseries, returning empty array");
+                    warning( "Could not access timeseries, returning empty array: " + e.toString() );
 
                 }
                 catch( BadTimeSeriesException e )
                 {
-                    warning( "Could not access timeseries, returning empty array");
+                    warning( "Could not access timeseries, returning empty array: " + e.toString() );
 
                 }
 
