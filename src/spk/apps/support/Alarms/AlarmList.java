@@ -48,28 +48,31 @@ public class AlarmList {
             
             String line;
             while( ( line = reader.readLine()  ) != null   ){
-               Logger.instance().debug3("Processing: " + line);
-               if( line.trim().length() == 0 ) continue;
-               if( line.trim().charAt(0) == '#') continue;
-               // done with comments and blank space
-               
-               String parts[] = line.split(",");        
-               String ts_units = parts[0];
-               String ts = ts_units.split(";")[0];
-               Alarm a = new Alarm(line);
-               
-               ArrayList<Alarm> list = alarms.get(ts);
-               if( list == null){
-                   Logger.instance().debug3("Creating new list for Time Seires: " + ts);
-                   list = new ArrayList<Alarm>();
-                   alarms.put( ts, list);
-                   longest_duration.put(ts, 0);
-               }
-               list.add(a);
-               if( a.get_condition().get_duration() > longest_duration.get(ts ) ){
-                   longest_duration.put(ts, a.get_condition().get_duration());
-               }
-               
+                Logger.instance().debug3("Processing: " + line);
+                if( line.trim().length() == 0 ) continue;
+                if( line.trim().charAt(0) == '#') continue;
+                // done with comments and blank space
+
+                String parts[] = line.split(",");        
+                String ts_units = parts[0];
+                String ts = ts_units.split(";")[0];
+                Alarm a = new Alarm(line);
+
+                ArrayList<Alarm> list = alarms.get(ts);
+                if( list == null){
+                    Logger.instance().debug3("Creating new list for Time Seires: " + ts);
+                    list = new ArrayList<Alarm>();
+                    alarms.put( ts, list);
+                    longest_duration.put(ts, 0);
+                }
+                int result = type_mask & a.get_condition().get_check_type();
+                Logger.instance().debug3("Mask check: " + result);
+                if(( type_mask & a.get_condition().get_check_type() ) > 0){
+                       list.add(a);
+                    if( a.get_condition().get_duration() > longest_duration.get(ts ) ){
+                       longest_duration.put(ts, a.get_condition().get_duration());
+                    }
+                }
             }
             
             
@@ -88,6 +91,7 @@ public class AlarmList {
             ArrayList<Alarm> myalarms = alarms.get(ts.getTimeSeriesIdentifier().getUniqueName() );
             ArrayList<AlarmResponse> responses = new ArrayList<AlarmResponse>();
             for( Alarm a: myalarms){
+                Logger.instance().debug3("Testing" + a.get_condition() );
                 AlarmResponse res = a.check(ts);
                 if( res != null ){
                     responses.add( res );
