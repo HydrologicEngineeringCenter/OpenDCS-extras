@@ -101,6 +101,12 @@ public class AlarmCondition {
                 } else{
                     this.check = CHECK_STATIC;
                     this.a = Double.parseDouble( str.substring(2));
+                    /*
+                    TODO: if a is < 0. Check will be if outside the tolerance zone.
+                    as in, this value should stay static, or increase/decrease very slowly.
+                    Or it just has a specific range it should stay within.
+                    (this would be shorthand for a combined greater than, less than check
+                    */
                 }
                 break;
             }
@@ -231,7 +237,9 @@ public class AlarmCondition {
         return this.check_str;
     }
     
-    
+    public int get_check_type(){
+        return this.check;
+    }
     
     public int get_duration(){
         return this.duration;
