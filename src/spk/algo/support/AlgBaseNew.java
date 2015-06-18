@@ -223,9 +223,9 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
 		    afterTimeSlices();
 		}
 	    }
-	} catch (Exception object) {
+	} finally{
 	    Logger.instance().setMinLogPriority(defLogPriority);
-	    throw (DbCompException)object;
+	   // throw object;
 	}
 	Logger.instance().setMinLogPriority(defLogPriority);
     }
