@@ -18,10 +18,10 @@ import decodes.cwms.CwmsFlags;
 //AW:JAVADOC
 /**
  * Computes the Basin Precip with up to 6 stations and the Station Normal Annual
- * Precipitations and Basin Normal Annual Precipitation. To have an input value
+ * Precipitation and Basin Normal Annual Precipitation. To have an input value
  * ignored, set the nap value to 0 and delete that time series from the list.
  * If 1 or more stations are missing, that time slice will be marked
- * questionable. All input timeseries should have missing values ignored,
+ * questionable. All input time series should have missing values ignored,
  * the algorithm designed for those cases.
  *
  * @author L2EDDMAN
