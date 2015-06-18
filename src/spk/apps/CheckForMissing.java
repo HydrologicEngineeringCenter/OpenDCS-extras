@@ -61,6 +61,7 @@ public class CheckForMissing extends TsdbAppTemplate {
         alarms.load_alarms( AlarmCondition.CHECK_MISSING, alarmfile.getValue() );
         Set<String> timeseries = alarms.get_timeseries_names();
         
+        //TODO: setup the comp lock stuff for this
         while(true){
             
                 for( String ts_name: timeseries){
