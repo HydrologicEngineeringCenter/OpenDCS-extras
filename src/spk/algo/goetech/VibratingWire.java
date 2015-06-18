@@ -32,8 +32,9 @@ public class VibratingWire
 //AW:INPUTS
         public double digits;   //AW:TYPECODE=i
         public double temp; //AW:TYPECODE=i
+        public double pressure; //AW:TYPECODE=i
         // input values, declare a variable, and add the string of the variable name to the _inputNames array
-	String _inputNames[] = { "digits", "temp" };
+	String _inputNames[] = { "digits", "temp", "pressure" };
 //AW:INPUTS_END
 
 //AW:LOCALVARS
@@ -50,8 +51,11 @@ public class VibratingWire
 //AW:PROPERTIES	
         public boolean use_polynomial = false;
         public boolean temp_compensation = true;
+        public boolean pressure_compensation = true;
         public String file = "fillthis";
-	String _propertyNames[] = { "use_polynomial", "temp_compensation", "file", };
+        public String temp_MISSING = "ignore";
+        public String pressure_MISSING = "ignore";
+	String _propertyNames[] = { "use_polynomial", "temp_compensation", "pressure_compensation", "file", "temp_MISSING", "pressure_MISSING" };
 //AW:PROPERTIES_END
 
 	// Allow javac to generate a no-args constructor.
@@ -128,7 +132,17 @@ public class VibratingWire
                         setFlagBits(psi,CwmsFlags.VALIDITY_QUESTIONABLE);
                     }
                 }
-                                
+                
+                if( pressure_compensation ) {
+                    if( !isMissing(pressure) ) {
+                        P -= (pressure - s.P0);
+                    }
+                    else{
+                        warning("Pressure Compensation Requested but pressure not available, flagging data as questionable");
+                        setFlagBits(psi,CwmsFlags.VALIDITY_QUESTIONABLE);
+                    }
+                }
+                       
                 // should probably add baro compensation at some point
                 setOutput(psi, P);
 //AW:TIMESLICE_END

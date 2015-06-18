@@ -50,8 +50,8 @@ public class VibratingWireData {
                 s.K = Double.parseDouble(parts[6]);
                 s.R0 = Double.parseDouble(parts[7]);
                 s.T0 = Double.parseDouble(parts[8]);
-                
-                Date d = sdf.parse(parts[10].trim());
+                s.P0 = Double.parseDouble(parts[9]);
+                Date d = sdf.parse(parts[11].trim());
                 
                 if( !data.containsKey(location)){
                     data.put(location, new TreeMap<Date, VibratingWireSheet>() );
