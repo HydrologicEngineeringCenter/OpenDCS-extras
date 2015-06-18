@@ -218,6 +218,95 @@ public class HADA {
     }
     
     
+    /* (CONIC)
+    DO 150 IX=1,NX
+         IF (IQFLGX(IX).GT.2 ) THEN
+            TY(IX) = SMISSV(1)
+            IQFLGY(IX) = 3
+         ELSE IF ( IOPFLG(IX).GT.0 ) THEN
+         ELSE
+            IQFLGY(IX) = IQFLGX(IX)
+C
+C  PERFORM
+C
+        IF(LINSTO) THEN
+          CALL LUELEV(SFAC,NTBL-1,D1,PFY(1),PFX(2),PFY(2),TX(IX), ELEV,AREA,ISTAT)
+          IF(ISTAT.NE.0) GO TO 999
+          IF(LOAREA) THEN
+            TY(IX)=AREA
+          ELSE
+            TY(IX)=ELEV
+          ENDIF
+        ELSE
+          CALL LUSTOR(SFAC,NTBL-1,D1,PFY(1),PFX(2),PFY(2),TX(IX), STORAGE,AREA,ISTAT)
+          IF(ISTAT.NE.0) GO TO 999
+          IF(LOAREA) THEN
+            TY(IX)=AREA
+          ELSE
+            TY(IX)=STORAGE
+          ENDIF
+        ENDIF
+      ENDIF
+  150 CONTINUE
+C
+  999 CONTINUE
+      RETURN
+
+    
+    
+    */
+    
+    /*LUSTOR
+    (given, an elevation, initial conic depth ( from conic above), and a table of elevation->area.
+    
+    IF(EX.LT.E1) THEN
+C       ELEVATION IS BELOW RANGE OF LOOKUP TABLE
+        IRTN = -1
+        RETURN
+    ENDIF
+
+C     BEGIN LOOKUP LOOP
+      I = 0
+ 2000 CONTINUE
+        I = I+1
+        IF(I+1.GT.NEA) THEN
+          IRTN = -1
+          RETURN
+        ENDIF
+
+C       CURRENT ELEVATION BAND
+        E1 = E(I)
+        E2 = E(I+1)
+        A1 = A(I)
+        A2 = A(I+1)
+
+C       STORAGE AT BOTTOM AND TOP OF CURRENT ELEVATION BAND
+        IF(I.EQ.1) THEN
+          CB = C1
+          D = D1
+        ELSE
+          CB = CT
+      IF(A2.EQ.A1) A2=A2+.0000001
+          D = (E2-E1)/(SQRT(A2/A1)-1)
+        ENDIF
+        CT = (E2-E1+D)*A2/3 - D*A1/3 + CB
+
+        IF(EX.GT.E2.AND.I+1.LT.NEA) GO TO 2000
+C     END OF LOOKUP LOOP
+
+C     FOUND ELEVATION BAND FOR WHICH TO APPLY CONIC INTERPOLATION
+      AX = A2*(EX-E1+D)**2/(E2-E1+D)**2
+      CX = (EX-E1+D)*AX/3 - D*A1/3 + CB
+      STORAG = CX/SFAC
+      STORAG4 = STORAG
+      AX4 = AX
+
+      IRTN = 0
+      RETURN
+      END
+
+    
+    */
     
     
 }
