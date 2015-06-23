@@ -316,20 +316,27 @@ public class RemainingRunoffInDb
                      if( wy_day <= days.February01 || wy_day > days.August01){
                          setOutput(runoff_remaining, 0, d);
                      } else{
-                         Date runoff_date = getRunoffDate(d);
-                         double runoff = getRunoff(runoff_date);
-                         
-                         double flows[] = this.getPrevValues("inflow", runoff_date, d);
-                         sum=0;
-                         for( double f: flows){
-                             sum+= f;
-                         }                                                              
-                         ParmRef ref = this.getParmRef("inflow");
-                         if( ref.timeSeries.getUnitsAbbr().equalsIgnoreCase( "cfs" ) ){
-                            sum=sum*1.9835; // otherwise it's already in acre-ft
-                         }// otherwise use sum as is
-                         double remaining = runoff-(sum);
-                         setOutput( runoff_remaining, remaining, d);                                                  
+                        try{
+                            Date runoff_date = getRunoffDate(d);
+                            double runoff = getRunoff(runoff_date);
+
+                            double flows[] = this.getPrevValues("inflow", runoff_date, d);
+                            sum=0;
+                            for( double f: flows){
+                                if( f > 0){
+                                    sum+= f;
+                                }
+                            }                                                              
+                            ParmRef ref = this.getParmRef("inflow");
+                            if( ref.timeSeries.getUnitsAbbr().equalsIgnoreCase( "cfs" ) ){
+                               sum=sum*1.9835; // otherwise it's already in acre-ft
+                            }// otherwise use sum as is
+                            double remaining = runoff-(sum);
+                            setOutput( runoff_remaining, remaining, d);                                                  
+                        }
+                        catch( Exception err){
+                            debug3(err.getMessage() );
+                        }
                      }
 
                  } 
