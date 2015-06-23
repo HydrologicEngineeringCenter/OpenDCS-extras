@@ -92,7 +92,7 @@ public class MinMax
 	protected void doAWTimeSlice()
 		throws DbCompException
 	{
-//AW:TIMESLICE
+//AW:TIMESLICE                
 		if( isMissing( input ) )
 		{
 			debug3( "Value is missing, skipping" );		
