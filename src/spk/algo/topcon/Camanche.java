@@ -159,10 +159,7 @@ public class Camanche
                 try{
                 
                     dates = new Dates(_timeSliceBaseTime);
-                    // Enter code to be executed at each time-slice.
-                    // per PNF WC Diagram (USE OF DIAGRAM) paragraph 2
-                    //upstream = (Wishon + Courtright) - 20000; 
-
+  
 
                     int wy_day = DateTime.to_wy_julian(_timeSliceBaseTime);
 
