@@ -85,6 +85,10 @@ public class FlowResIn
 
 //AW:USERINIT
 		// Code here will be run once, after the algorithm object is created.
+                evapConv = null;
+                storConv = null;
+                flowConv = null;
+                outputConv = null;
 //AW:USERINIT_END
 	}
 	
@@ -99,18 +103,27 @@ public class FlowResIn
 		// For TimeSlice algorithms this is done once before all slices.
 		// For Aggregating algorithms, this is done before each aggregate
 		// period.
-                EngineeringUnit storUnits = EngineeringUnit.getEngineeringUnit(getParmRef("Dstor").timeSeries.getUnitsAbbr());
-                EngineeringUnit flowUnits = EngineeringUnit.getEngineeringUnit(getParmRef("ResOut").timeSeries.getUnitsAbbr());
-                EngineeringUnit outputUnits = EngineeringUnit.getEngineeringUnit(getParmRef("ResIn").timeSeries.getUnitsAbbr());
+                String abbr = getParmUnitsAbbr("Dstor");
+                EngineeringUnit storUnits = EngineeringUnit.getEngineeringUnit(getParmUnitsAbbr("Dstor"));
+                EngineeringUnit flowUnits = EngineeringUnit.getEngineeringUnit(getParmUnitsAbbr("ResOut"));
+                EngineeringUnit outputUnits = EngineeringUnit.getEngineeringUnit(getParmUnitsAbbr("ResIn"));
 
                 if( UseEvap)
                 {
-                    EngineeringUnit evapUnits = EngineeringUnit.getEngineeringUnit(getParmRef("Evap").timeSeries.getUnitsAbbr());
-                    evapConv = decodes.db.CompositeConverter.build( evapUnits, EngineeringUnit.getEngineeringUnit("ac-ft"));
+                    EngineeringUnit evapUnits = EngineeringUnit.getEngineeringUnit(getParmUnitsAbbr("Evap"));
+                    if( evapConv == null ){
+                        evapConv = decodes.db.CompositeConverter.build( evapUnits, EngineeringUnit.getEngineeringUnit("ac-ft"));
+                    }
                 }
-                storConv = decodes.db.CompositeConverter.build(storUnits, EngineeringUnit.getEngineeringUnit("ac-ft"));
-                flowConv = decodes.db.CompositeConverter.build(flowUnits, EngineeringUnit.getEngineeringUnit("cfs"));
-                outputConv = decodes.db.CompositeConverter.build(EngineeringUnit.getEngineeringUnit("cfs"), outputUnits );
+                if( storConv == null ){
+                    storConv = decodes.db.CompositeConverter.build(storUnits, EngineeringUnit.getEngineeringUnit("ac-ft"));
+                }
+                if( flowConv == null){
+                    flowConv = decodes.db.CompositeConverter.build(flowUnits, EngineeringUnit.getEngineeringUnit("cfs"));
+                }
+                if( outputConv == null){
+                    outputConv = decodes.db.CompositeConverter.build(EngineeringUnit.getEngineeringUnit("cfs"), outputUnits );
+                }
 //AW:BEFORE_TIMESLICES_END
 	}
 
