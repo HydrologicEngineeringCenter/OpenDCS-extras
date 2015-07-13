@@ -31,7 +31,7 @@ import spk.algo.support.IrrigationDemands;
 //AW:JAVADOC
 /**
  * Calculate the Top Con for Camanche
- *   Command has Snowmelt, and adjustments to upstream storage
+ *   Camache has Snowmelt, and adjustments to upstream storage
  * @author L2EDDMAN
  *
  */
@@ -103,8 +103,7 @@ public class Camanche
                 try{
                     debug3( "loading graph");
                     graph = new WaterControlDiagram( graph_file );
-
-                    //irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);
+                    
                 }
                 catch( Exception e)
                 {
@@ -200,7 +199,7 @@ public class Camanche
                             );
                     
                     // section 4 c
-                    double snow_credit = lower_bear_snow_credit + salt_springs_rain_credit;
+                    double snow_credit = lower_bear_snow_credit + salt_springs_snow_credit;
                     
                     // section 5
                     double credit = snow_credit + rain_credit;
