@@ -36,12 +36,8 @@ import javax.mail.internet.*;
 
 //AW:JAVADOC
 /**
- * Now that data has come into the database for release changes lets build a email
+ * Now that data has come into the database for release changes lets build an email
  * 
- * A few notes:
- *  This assumes all of the needed values are available at the time of creation.
- * ...Hopefully this actually proves true. Because I have to tell the system to ignore missing
- * values to be able to make this generic.
  */
 //AW:JAVADOC_END
 public class ReleaseChangeNotice

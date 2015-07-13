@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 //AW:JAVADOC
 /**
- * Remove the diurnal flucuations in the Rain data caused by temperature variations
+ * Remove the diurnal fluctuations in the Rain data caused by temperature variations
  * in the mineral oil used in our Catch Tubes ( some of the catch tubes have been painted white
  * which has eliminated the large +/- .2" swings in precip; there will still be some minor +/-.02 swings
  * due to temperature variation of all involved components )

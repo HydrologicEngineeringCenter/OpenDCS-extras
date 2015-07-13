@@ -23,7 +23,7 @@ import spk.algo.support.Dates;
 //AW:JAVADOC
 /**
  * Handle the upstream storage calculation as defined in the Black Butte Water
- * Control Diagram. Algorithm only provides adjustment.
+ * Control Diagram. 
  *
  * @author L2EDDMAN
  *

@@ -30,6 +30,9 @@ import java.net.Socket;
 /**
  * This software will, on some interval, scan through a list of time series and check if any are missing
  * for a specified interval. If they are missing, and message will be sent to the alarm processor
+ * 
+ * NOTE: this is not fully setup and while it works, it wont shut down unless you use the kill command on it.
+ * 
  * @author L2EDDMAN
  */
 public class CheckForMissing extends TsdbAppTemplate {

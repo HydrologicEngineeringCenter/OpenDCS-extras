@@ -16,7 +16,7 @@ import decodes.tsdb.algo.AWAlgoType;
 //AW:JAVADOC
 /**
  * Over the desired interval, computes the minimum and maximum of the input
- * timeseries for that range.
+ * time series for that range.
  *
  * @author L2EDDMAN
  */

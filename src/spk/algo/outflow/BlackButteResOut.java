@@ -20,10 +20,8 @@ import decodes.cwms.CwmsFlags;
 Calculates total reservoir outflow for black butte dam.
 total out = BLBQ + STD + Wackerman
 
-(note(16Nov2011), wackerman not yet automated, will include here and just check for missing and not add in that case(data will be flagged questionable), when the data gets automated, this algorithm will start to pick it up.
 
-recommended procedure, use this algorithm to calculate 15min flow-res out then use TrapzoidalIntegrationAverage to calculate 1hour and 1day values.
- * </pre>
+ </pre>
  * @author L2EDDMAN
  */
 //AW:JAVADOC_END

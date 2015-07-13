@@ -17,7 +17,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 import org.json.JSONObject;
 /**
- *
+ * The message that gets passed on for further processing. Use the JSON format for exchange.
  * @author L2EDDMAN
  */
 public class AlarmResponse implements Comparable<AlarmResponse>{

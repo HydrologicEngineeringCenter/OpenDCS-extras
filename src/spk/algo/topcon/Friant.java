@@ -147,14 +147,14 @@ public class Friant
                 int wy_day = DateTime.to_wy_julian(_timeSliceBaseTime);
                 
                 // per graph at top right of water control diagram
-                // and section 1
+                // and section 3 of the water control manaul.
                 debug3( "Calculating available upstream storage");
                 if( wy_day >= dates.February01 && wy_day < dates.July31){
                     upstream = total_gross_pool - (TotalUpstream - max_credit*(1-Math.exp( credit_decay*(decay_offset - (double)wy_day))));
                 }
                 
                 else{
-                    // per "Use of Diagram, section 3" this is the in excess of 85000 bit.
+                    // per "Use of Diagram, section 2" this is the in excess of 85000 bit.
                     // Talking to Kevin richardson, the bounding lines in the diagram allow for Top Con
                     // during the rain flood season to go 85000 higher than the line on the diagram.
                     upstream = mammoth_gross_pool- Mammoth;//TotalUpstream - max_credit;
@@ -178,7 +178,7 @@ public class Friant
                     debug3( " TCS for snow is " + tcs_snow );
                     
                     
-                    adjustment = this.calculate_irrigation(); //0.0;//graph.normal_irrigation(_timeSliceBaseTime);
+                    adjustment = this.calculate_irrigation(); 
 
                     if( wy_day >= dates.February01 && wy_day <= dates.July31){
                         debug3( "Calculating Irrigation Demand Adjustment" );
@@ -261,7 +261,8 @@ public class Friant
         /*
          * Cacluate the irritation to 10th of June until 26th of May.
          * After the 26th of May sum the sort of 15days or until the 31st of July
-         */
+         * See "Use of Diagram Section 3" for more information
+        */
         public double calculate_irrigation()throws Exception{
             
             int wy_julian_day = DateTime.to_wy_julian(_timeSliceBaseTime);

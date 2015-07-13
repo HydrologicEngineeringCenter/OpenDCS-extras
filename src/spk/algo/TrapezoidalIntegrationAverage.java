@@ -22,7 +22,9 @@ import ilex.util.FileLogger;
  * of average current used in DSS for instantaneous data. It makes sense but
  * the only reference I've found is a statement in a USGS manual that it will
  * be used.
- *
+ * 
+ * See any calculus text section on trapezoidal integration for more detail.
+ * 
  * @author L2EDDMAN
  *
  */

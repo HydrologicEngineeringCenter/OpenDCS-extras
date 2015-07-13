@@ -31,7 +31,7 @@ import spk.algo.support.IrrigationDemands;
 //AW:JAVADOC
 /**
  * Calculate the Top Con for Don Pedro Reservoir
- *   Don Pedro has Snowmelt and adjustments to upstream storage
+ *   Don Pedro has Snowmelt and adjustments for upstream storage
  * @author L2EDDMAN
  *
  */
@@ -109,8 +109,6 @@ public class DonPedro
                     debug3( "loading graph");
                     graph = new WaterControlDiagram( graph_file );
 
-                    
-                    //irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);
                 }
                 catch( Exception e)
                 {
@@ -138,7 +136,7 @@ public class DonPedro
                     double allowed_storage = 0.0;
                     double tcs_rain = Double.NEGATIVE_INFINITY;
                     double space_required = 0.0;
-                    // created the named dates for this dates water year ( Accounts for Leap Year in some calculations
+                    // create the named dates for this dates water year ( Accounts for Leap Year in some calculations )
                     dates = new Dates(_timeSliceBaseTime);
                     
 
@@ -165,10 +163,8 @@ public class DonPedro
                     
                     debug3( " TCS for rain is " + tcs_rain );
                     
-                    //double tcs_snow = graph.get_allowed_storage(wy_day - 1, RemainingRunoff, true );
-                    // The snow lines in the diagram all end up to 0
                     double tcs_snow = graph.get_allowed_storage(wy_day-1, RemainingRunoff, true);
-                    //double tcs_snow = graph.get_allowed_storage_equation( wy_day - 1, RemainingRunoff);
+                    
                     
                     debug3( " TCS for snow is " + tcs_snow );
                     

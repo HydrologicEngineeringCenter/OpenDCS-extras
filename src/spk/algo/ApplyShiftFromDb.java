@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 
 //AW:JAVADOC
 /**
- * Reads shift information from and file and applies the number to the appropriate time slices.
+ * Reads shift information from the database and applies the number to the appropriate time slices.
  * @author L2EDDMAN
  */
 //AW:JAVADOC_END

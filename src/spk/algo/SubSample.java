@@ -64,6 +64,7 @@ import decodes.tsdb.algo.AWAlgoType;
 Convert a short interval to a longer interval by taking the first value equal-to or after the longer-period timestamp.
 Example: Convert 10min data to 30min data by taking data on the hour and half-hour
 
+* This was copied from original OpenDCS source to fix a daylight savings bug.
  */
 //AW:JAVADOC_END
 public class SubSample

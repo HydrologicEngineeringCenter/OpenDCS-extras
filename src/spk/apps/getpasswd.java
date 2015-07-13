@@ -13,7 +13,7 @@ import ilex.util.UserAuthFile;
 import java.io.IOException;
 
 /**
- *
+ * Shows the username and password on YOUR system.
  * @author Michael Neilson <michael.a.neilson@usace.army.mil>
  */
 public class getpasswd {

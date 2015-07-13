@@ -21,7 +21,17 @@ import spk.algo.AWAggTemplate;
 
 
 /**
- *
+ * Implements the various condition checks
+ * greater than
+ * less than
+ * is equal
+ * within range
+ * rate of charge
+ * 
+ * all check can have an arbitrary duration, e.g. for greater than 
+ * the condition could be true only if the current value and value from the previous 
+ * hour is greater than some number
+ * 
  * @author L2EDDMAN
  */
 public class AlarmCondition {

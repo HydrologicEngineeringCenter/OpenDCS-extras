@@ -14,6 +14,8 @@ import decodes.tsdb.algo.AWAlgoType;
 // Place an import statements you need here.
 import decodes.db.Constants;
 import decodes.cwms.CwmsFlags;
+import decodes.db.EngineeringUnit;
+import decodes.db.UnitConverter;
 import decodes.tsdb.*;
 import java.io.*;
 import ilex.util.EnvExpander;
@@ -89,6 +91,7 @@ public class DataCheck
 //AW:INIT_END
 
 //AW:USERINIT
+                 /*
 		// Code here will be run once, after the algorithm object is created.
 		// now we must file the correct limit file and extract the limits for our parameter
 		String site_name = getSiteName( "input", "cwms" );
@@ -128,6 +131,7 @@ public class DataCheck
 			throw new DbCompException( "Failed to open and process limit file: " + filename);
 		}
 		debug3( "Limits are in lr lq rq rh order: " + low_reject + " " + low_question + " " + high_question + " " + high_reject );
+                */
 //AW:USERINIT_END
 	}
 	
@@ -142,6 +146,20 @@ public class DataCheck
 		// For TimeSlice algorithms this is done once before all slices.
 		// For Aggregating algorithms, this is done before each aggregate
 		// period.
+                decodes.db.EngineeringUnit eu = EngineeringUnit.getEngineeringUnit("mm");
+                UnitConverter  uc = null;
+                for( int i = 0; i < 100000; i++){
+
+                    uc = decodes.db.CompositeConverter.build(eu, eu);
+                    
+                    if( uc != null){
+                        debug3("Attempt " + i + " result: " + uc.toString() );
+                    } else{
+                            debug3("Attempt " + i + " result: failed" );
+                    }
+                  
+                }
+                debug3("Done Looping through unit converter creation");
 //AW:BEFORE_TIMESLICES_END
 	}
 

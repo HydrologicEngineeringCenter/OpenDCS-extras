@@ -22,7 +22,9 @@ import java.util.HashMap;
 import java.util.Set;
 
 /**
- *
+ * Maintains a list of alarms that whatever system that loaded
+ * the list will check against (for example, the AlarmComp doesn't need to check
+ * missing values as missing value won't trigger a computation.
  * @author L2EDDMAN
  */
 public class AlarmList {

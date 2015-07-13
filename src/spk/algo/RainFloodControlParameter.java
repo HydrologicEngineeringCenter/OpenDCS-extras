@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 Implements the equation: FCP[t] = BasinPrecip[t] + Decay*FCP[t-1]
 FCP = flood control parameter
 Decay = Constant provided by water control diagram.
-t = time ( daily timestep )
+t = time ( daily time step )
 the FCP value may reset on a specific date
 
 

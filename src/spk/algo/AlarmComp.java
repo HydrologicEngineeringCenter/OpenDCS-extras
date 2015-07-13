@@ -30,10 +30,8 @@ import spk.apps.support.Alarms.AlarmResponse;
 
 //AW:JAVADOC
 /**
-Computes the Basin Precip with up to 6 stations and the Station Normal Annual Precipitations and Basin Normal Annual Precipitation. To have an input value ignored, set the nap value to 0 and select any timeseries; A time series must be present in the list or the CCP will not run the comp.
-If 1 or more stations are missing, that time slice will be marked questionable.
-All input timeseries should have missing values ignored, the algorithm take care of those cases.
-
+* Process data and compare it to various alarm thresholds to see if a message
+* should be sent on for further processing.
  */
 //AW:JAVADOC_END
 public class AlarmComp

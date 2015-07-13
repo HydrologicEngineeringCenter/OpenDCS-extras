@@ -26,18 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 //AW:JAVADOC
 /**
-    Calculates reservoir input with the equation
- *  inflow = /\Storage + Evap + Outflow
- *  
- *  Outflow should be provided in cfs
- * Storage and Evap should be provided in ac-ft and will be converted to cfs based on the
- * interval of data.
- * ( this comp will need to be created 3 times for each project, 15minutes, 1hour, and 1day )
- * there may be a way to group things
- *
- * NOTE: there are ac-ft to cfs conversions build into this comp, do NOT use metric input, the comp
- *       will provide bogus results.
- *
+   converters a volume to a flow for a given interval.
  * @author L2EDDMAN
  *
  */

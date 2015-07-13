@@ -16,14 +16,12 @@ import decodes.cwms.CwmsFlags;
 //AW:IMPORTS_END
 
 //AW:JAVADOC
-/**<pre>
- *
- *
- * Calculates total reservoir outflow for Terminus dam.
- * total out = {
- *          TRMQ + Lemon Cove ( LCV) + Hawkeye if TRMQ > 0cfs
- *          Foothill( FTH ) + Lemon Cove ( LCV) + Hawkeye otherwise
- * }
+/**
+  <pre>
+ 
+  Calculates total reservoir outflow for Success dam.
+  total out = Q + PNR + Spill;
+           
  *
  * </pre>
  * @author L2EDDMAN

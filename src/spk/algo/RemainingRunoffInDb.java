@@ -48,13 +48,14 @@ import spk.algo.support.Dates;
 //AW:JAVADOC
 /**
  * Takes the runoff from the CDEC B120 report ( or some other estimate of runoff ) and an Inflow time series and calculates the remaining runoff.
- * The algorithm will query data back to the last snowmelt forcast point, and as such will likely be "slow"; since it's only daily data shouldn't
- * be that big of a deal.
+ * The algorithm will query data back to the last snowmelt forecast point for any give day to calculate the remaining runoff.
+ * The algorithm will also check if a forecast has been updated and gather and compute values as needed.
  * 
- * Expect ac-ft or cfs.
+ * Expects ac-ft or cfs.
  * 
  * if cfs sum gets converted to Ac-ft, otherwise it gets used as is
  * 
+ * This version pulls data from database instead of a text file.
  */
 //AW:JAVADOC_END
 public class RemainingRunoffInDb

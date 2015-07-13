@@ -18,7 +18,7 @@ import java.util.Collections;
 //AW:JAVADOC
 /**
  * Implenents a median filter.
- * select a window of values, and choose the median value.
+ * selects a window of values, and choose the median value.
  *
  * @author L2EDDMAN
  */

@@ -51,10 +51,7 @@ public class Success
         WaterControlDiagram graph = null;       
         IrrigationDemands irrigation;
         Dates dates;
-        SimpleDateFormat df;
-        // These are used for upstream storage( see section 3b1 of WC Diagram )
-        //Date sep = null;
-        //Date feb = null;
+        SimpleDateFormat df;        
 //AW:LOCALVARS_END
 
 //AW:OUTPUTS
@@ -101,11 +98,7 @@ public class Success
                 try{
                     debug3( "loading graph");
                     graph = new WaterControlDiagram( graph_file );                
-                    irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);
-                    /*
-                     * Maybe a timeout for reload? E.g we load once and check once an hour or something...
-                     * Or not, this doesn't actually take that many resources.
-                     */
+                    irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);                    
                 }
                 catch( Exception e)
                 {
@@ -169,8 +162,7 @@ public class Success
                     adjustment = calculate_irrigation();
                     //adjustment = graph.normal_irrigation(_timeSliceBaseTime);
                     
-                    if( wy_day >= dates.March31 && wy_day <= dates.July31){
-                            allowed_storage_unbounded = tcs_snow + adjustment;
+                    if( wy_day >= dates.March31 && wy_day <= dates.July31){                            
                             space_required = Math.max( 0.0, tcs_snow - adjustment  );
                             // This is allowed to go below zero, it will be bounded below
                             allowed_storage_unbounded =  graph.get_max_snowspace() - space_required;

@@ -17,7 +17,14 @@ import ilex.var.TimedVariable;
 import java.util.Date;
 
 /**
- *
+ * This class holds the components of an Alarm
+ *  The timeseries for which it is for.
+ *  The units of the data.
+ *  The background color that will be displayed (if displayed on a dashboard of some sort.)
+ *  The priority of this condition, higher number is a higher priority.
+ *  site/project arbitrary shorter string a display system can use, can also be used for grouping
+ *  condition that actual test that will be compared against.
+ *  action email,text,no nothing, things like that.
  * @author L2EDDMAN
  */
 public class Alarm {

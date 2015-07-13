@@ -38,10 +38,7 @@ public class TopConRainOnly
 
 //AW:LOCALVARS
 	// Enter any local class variables needed by the algorithm.
-        WaterControlDiagram graph = null;
-        // These are used for upstream storage( see section 3b1 of WC Diagram )
-        //Date sep = null;
-        //Date feb = null;
+        WaterControlDiagram graph = null;        
 //AW:LOCALVARS_END
 
 //AW:OUTPUTS	
@@ -71,8 +68,7 @@ public class TopConRainOnly
                 try{
                     debug3( "loading graph");
                     graph = new WaterControlDiagram( graph_file );
-                    debug3( "setting bouding dates for upstream storage");
-                    // these dates bound: sep,oct,nov,dec,jan,feb so we must bump
+                    debug3( "setting bouding dates for upstream storage");                   
 
                 }
                 catch( Exception e)

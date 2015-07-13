@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 //AW:JAVADOC
 /**
- * Over the desired interval, get all of the peak points
+ * Over the desired interval, get all of the peak points.
  * 
  *
  * @author L2EDDMAN

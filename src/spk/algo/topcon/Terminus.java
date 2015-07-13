@@ -39,7 +39,7 @@ import spk.algo.support.IrrigationDemands;
 public class Terminus
 	extends decodes.tsdb.algo.AW_AlgorithmBase
 {
-        // that should say RainFloodControlParamter....however there is a 24 character limit in that field.
+        
 //AW:INPUTS
 	public double RemainingRunoff;	//AW:TYPECODE=i
         public double RainFCP;    //AW:TYPECODE=i
@@ -51,10 +51,7 @@ public class Terminus
         WaterControlDiagram graph = null;
         IrrigationDemands irrigation;
         Dates dates;
-        SimpleDateFormat df;
-        // These are used for upstream storage( see section 3b1 of WC Diagram )
-        //Date sep = null;
-        //Date feb = null;
+        SimpleDateFormat df;      
 //AW:LOCALVARS_END
 
 //AW:OUTPUTS
@@ -101,10 +98,7 @@ public class Terminus
                 try{
                     debug3( "loading graph");
                     graph = new WaterControlDiagram( graph_file );                
-                    irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);
-                    /*
-                     * Maybe a timeout for reload? E.g we load once and check once an hour or something...
-                     */
+                    irrigation = WaterControlDiagram.get_irrigation_data(irrigation_demand_file);                    
                 }
                 catch( Exception e)
                 {
@@ -174,7 +168,7 @@ public class Terminus
                     
                     debug3( " unbounded storage is " + allowed_storage_unbounded );
                     debug3 ( "Applying bounds to storage" );
-                   
+                    
                     
                     allowed_storage = graph.bound(wy_day-1, allowed_storage_unbounded );
                     debug3( " bounded storage is " + allowed_storage );

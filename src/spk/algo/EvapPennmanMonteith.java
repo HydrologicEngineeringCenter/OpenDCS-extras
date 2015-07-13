@@ -194,6 +194,7 @@ public class EvapPennmanMonteith
                     C_n = 37;
                 }
                 
+                
 //AW:INIT_END
 
 //AW:USERINIT
@@ -228,8 +229,10 @@ public class EvapPennmanMonteith
                 avg_pressure = 0.0;
                 avg_pressure_counts = 0;
                 //setOutputUnitsAbbr("Evap", "mm");
-                decodes.db.EngineeringUnit eu = EngineeringUnit.getEngineeringUnit(getParmRef("Evap").timeSeries.getUnitsAbbr());
-                uc = decodes.db.CompositeConverter.build(EngineeringUnit.getEngineeringUnit("mm"), eu);
+                decodes.db.EngineeringUnit eu = EngineeringUnit.getEngineeringUnit(getParmUnitsAbbr("Evap"));
+                if( uc == null ){
+                    uc = decodes.db.CompositeConverter.build(EngineeringUnit.getEngineeringUnit("mm"), eu);
+                }
 //AW:BEFORE_TIMESLICES_END
 	}
 

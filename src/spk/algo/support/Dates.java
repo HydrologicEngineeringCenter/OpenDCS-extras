@@ -394,7 +394,7 @@ public class Dates {
     public int February26 = 149;
     public int February27 = 150;
     public int February28 = 151;
-    public int February29 = 151; // This lets will just have 1 added to it if it is leap year
+    public int February29 = 151; // This lets us just have 1 added to it and the rest if it is leap year
     public int March01 = 152;
     public int March02 = 153;
     public int March03 = 154;

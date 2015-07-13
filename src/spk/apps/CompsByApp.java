@@ -19,7 +19,7 @@ import lrgs.gui.DecodesInterface;
 
 
 /**
- *
+ * Runs a simple query to show the status of the system
  * @author L2EDDMAN
  */
 public class CompsByApp extends TsdbAppTemplate {

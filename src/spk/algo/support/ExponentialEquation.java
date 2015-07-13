@@ -51,9 +51,9 @@ public class ExponentialEquation {
      * Minimum number of days to assume before filling at the end of the season when
      * the if condition in the main summary is met.
      *
-     * Note: this is used in a supplimental release calculation not being used at this
-     * time. it is added for consistency and because it may be used in the
-     * future.
+     * Note: this is used in a supplimental release calculation not being used 
+     * in the automated data processing system at this time. it is added for 
+     * consistency and because it may be used in the future.
      */
     private double min_days_to_assume;
 
