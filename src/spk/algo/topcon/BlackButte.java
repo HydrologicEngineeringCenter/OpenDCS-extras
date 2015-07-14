@@ -168,7 +168,7 @@ public class BlackButte
                     else
                     {// section 3b2 is in effect
                         stony = Math.max( 0, 28400.0 - StonyGorge );
-                        debug3( " sotny gorge available (3b2) is " + stony);
+                        debug3( " stony gorge available (3b2) is " + stony);
                     }
                     debug3( "Calculating allowed storage adjustment");
                     // Section 3c
@@ -182,13 +182,11 @@ public class BlackButte
                     //  credit space in our reservoirs.
 
 
-                    debug3 ( "calculating unbounded storage" );
-                    // we now bound adjust the top con
+                    debug3 ( "calculating unbounded storage" );                    
                     allowed_storage_unbounded = tcs_rain + adjustment;
                     debug3( " unbounded storage is " + allowed_storage_unbounded );
-                    debug3 ( "Applying bounds to storage" );
                    
-                   
+                    debug3 ( "Applying bounds to storage" );                                      
                     allowed_storage = graph.bound(wy_day, allowed_storage_unbounded );
                     debug3( " bounded storage is " + allowed_storage );
                     
