@@ -260,7 +260,7 @@ public class Friant
         
         /*
          * Cacluate the irritation to 15th of June until 31st of May.
-         * After the 31st of May sum the sort of 15days or until the 1st of August
+         * After the 31st of May sum the shorter of 15days or until the 1st of August
          * See "Use of Diagram Section 3" for more information
         */
         public double calculate_irrigation()throws Exception{
@@ -272,7 +272,7 @@ public class Friant
             if( wy_julian_day >= dates.August01 - 15){
                 end_time = dates.August01;
             }
-            else if( wy_julian_day >= dates.May31 ){
+            else if( wy_julian_day > dates.May31 ){
                 end_time = wy_julian_day+15; // next 15 days
             }
             else{
