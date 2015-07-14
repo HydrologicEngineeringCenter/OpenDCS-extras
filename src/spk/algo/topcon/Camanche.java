@@ -170,7 +170,10 @@ public class Camanche
                     // the math in the diagram is based on these being space required, the difl file has everything listed
                     // Actual Top of Conservation
                     double gross_reservation = Math.max( graph.get_upper_bound(wy_day-1) - tcs_rain, graph.get_upper_bound(wy_day-1)-tcs_snow ); 
-                            
+                    if( gross_reservation > 200000){
+                        gross_reservation = 200000;
+                    }
+                    
                     //section 2
                     double transferable_space      = gross_reservation - (graph.gross_pool()-non_transferable_space);
                     
