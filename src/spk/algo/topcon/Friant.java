@@ -259,8 +259,8 @@ public class Friant
 	}
         
         /*
-         * Cacluate the irritation to 10th of June until 26th of May.
-         * After the 26th of May sum the sort of 15days or until the 31st of July
+         * Cacluate the irritation to 15th of June until 31st of May.
+         * After the 31st of May sum the sort of 15days or until the 1st of August
          * See "Use of Diagram Section 3" for more information
         */
         public double calculate_irrigation()throws Exception{
@@ -269,14 +269,14 @@ public class Friant
             double demands[] = irrigation.getDemands(_timeSliceBaseTime);
             double demand = 0.0;
             int end_time = -1;
-            if( wy_julian_day >= dates.July31 - 15){
-                end_time = dates.July31;
+            if( wy_julian_day >= dates.August01 - 15){
+                end_time = dates.August01;
             }
-            else if( wy_julian_day >= dates.May26 ){
+            else if( wy_julian_day >= dates.May31 ){
                 end_time = wy_julian_day+15; // next 15 days
             }
             else{
-                end_time = dates.June10;
+                end_time = dates.June15;
             }
                 
             for( int i = wy_julian_day; i <= end_time; i++){
