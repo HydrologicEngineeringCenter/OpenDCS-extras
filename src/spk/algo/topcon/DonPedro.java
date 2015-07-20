@@ -151,7 +151,7 @@ public class DonPedro
                     double total_space_available = .8 * (space_in_cherry_valley + space_in_hetch_hetchy );
                     
                     upstream = Math.min( .8*space_in_hetch_hetchy , hetchhetchy_percent_allowed*total_space_available ) + Math.min( .8*space_in_cherry_valley, cherryvalley_percent_allowed * total_space_available);
-                    if( upstream < 50000 ){
+                    if( total_space_available < 50000 ){
                         // Section 4 of the Water Control Diagram says no reduction will be permitted below 50,000.
                         upstream = 0.0;
                     }
