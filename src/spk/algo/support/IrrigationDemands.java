@@ -73,10 +73,18 @@ public class IrrigationDemands {
                         // we don't actually need the 2nd flow
                         double flow2 = Double.parseDouble( parts[1] ); 
                         // using the julian data this should take care of leap year
-                        for( int k=t1; k < t2; k++ ){
-                            _demands.add(k, flow1);
+                        if( t1 < t2 ){
+                            for( int k=t1; k <= t2; k++ ){
+                                _demands.set(k, flow1);
+
+                            }
+                        } else{
+                            int tmp = t2+365;
+                            for( int k=t1; k <= tmp; k++){
+                                _demands.set(k%365, flow1);
+                            }
                         }
-                        _demands.add(t2, flow2 );
+                        //_demands.set(t2, flow2 );
                         
                     }
                     else{
@@ -87,7 +95,7 @@ public class IrrigationDemands {
                         int t1 = DateTime.to_wy_julian( df.parse(time) );
                         double flow1 = Double.parseDouble( parts[1] );
                         for( int k=t1; k < t1+31; k++ ){ // just arbitrary go through the next month in case we only have 31July
-                            _demands.add(k, flow1);
+                            _demands.set(k%365, flow1);
                         }
                     }
                                                    
