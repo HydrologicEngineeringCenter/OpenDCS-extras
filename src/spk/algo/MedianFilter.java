@@ -17,7 +17,7 @@ import java.util.Collections;
 
 //AW:JAVADOC
 /**
- * Implenents a median filter.
+ * Implements a median filter.
  * selects a window of values, and choose the median value.
  *
  * @author L2EDDMAN
@@ -78,6 +78,7 @@ public class MedianFilter
 		// This will allow the first value to be initially selected		
                 list.clear();
 		numSamples = 0;
+                debug3("agg per Begin" + _aggregatePeriodBegin);
 //AW:BEFORE_TIMESLICES_END
 	}
 
@@ -98,7 +99,7 @@ public class MedianFilter
 		if( !isMissing(input))
                 {
                     list.add(input);
-                    debug3("" +  input + " added to list");
+                    debug3("" + _timeSliceBaseTime + "/" +  input + " added to list");
                 }
 //AW:TIMESLICE_END
 	}
@@ -110,7 +111,7 @@ public class MedianFilter
 		throws DbCompException
 	{
 //AW:AFTER_TIMESLICES
-		
+		debug3("agg per End" + _aggregatePeriodEnd);
 		if( list.size() > 1 ){
                     Collections.sort(list);
                     
