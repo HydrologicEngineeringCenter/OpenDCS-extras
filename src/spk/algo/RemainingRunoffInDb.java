@@ -182,40 +182,28 @@ public class RemainingRunoffInDb
                  boolean TriggeredByRunoff = false;
                  PreparedStatement stmt = null;
                  ResultSet rs = null;
-                 try {
-                    
-                    stmt = this.tsdb.getConnection().prepareStatement("select site_datatype_id from ccp.cp_comp_tasklist where record_num = ?");
-                    //stmt = this.tsdb.getConnection().prepareStatement("select record_num from ccp.cp_comp_tasklist");
-                    debug3("Statement Prepared");
-                    //debug3( "Connection valid:" + this.tsdb.getConnection().isValid(30) );
+                 try {                    
+                    stmt = this.tsdb.getConnection().prepareStatement("select site_datatype_id from ccp.cp_comp_tasklist where record_num = ?");                    
+                    debug3("Statement Prepared");                    
                     if( recs.size() > 0 )
                     {
-                         // Was triggered
-                        
-                         //ResultSet rs = this.tsdb.doQuery( );                         
+                         // Was triggered, now figure what triggered the comp                                               
                          stmt.setLong(1, recs.iterator().next().longValue() );
                          debug3("Executing tasklist query");
-                         rs = stmt.executeQuery();
-                         
-                         debug3("Looping Through tasklist");
-                         if( rs.next() ){
-                             
+                         rs = stmt.executeQuery();                                                  
+                         if( rs.next() ){                             
                              debug3("Getting Record Num");
-                             long sdi = rs.getLong(1);
-                             
-                             //String ts = this.tsdb.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();
+                             long sdi = rs.getLong(1);                                                          
                              String ts ="TDAI creation/get failed";
                              TimeSeriesDAI tdai = null;
                              try{
                                 tdai = tsdb.makeTimeSeriesDAO();
-                                ts = tdai.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();
-                             
+                                ts = tdai.getTimeSeriesIdentifier(DbKey.createDbKey(sdi)).getUniqueString();                             
                              }finally{
                                  if( tdai != null ){
                                     tdai.close();
                                  }
-                             }
-                             
+                             }                             
                              debug3( "Time Series name = " + ts );                             
                              if( ts.equalsIgnoreCase( getParmRef("forecasted_runoff").timeSeries.getTimeSeriesIdentifier().getUniqueString() ) ){
                                  // Was Triggered by a runoff entry
