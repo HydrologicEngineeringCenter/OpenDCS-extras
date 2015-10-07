@@ -28,16 +28,21 @@ import decodes.db.ConfigSensor;
 import decodes.db.DataType;
 
 import decodes.db.Database;
+import decodes.sql.DbKey;
 import decodes.tsdb.BadConnectException;
 import decodes.tsdb.BadTimeSeriesException;
 import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.DbIoException;
 import decodes.tsdb.NoSuchObjectException;
+import decodes.tsdb.TimeSeriesIdentifier;
+import decodes.tsdb.VarFlags;
 import ilex.util.AuthException;
 import ilex.util.UserAuthFile;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Enumeration;
+import opendcs.dai.TimeSeriesDAI;
 /**
  *
  * @author L2EDDMAN
@@ -46,7 +51,7 @@ public class CwmsConsumer2 extends DataConsumer{
     private CwmsTimeSeriesDb db = null;
     private CwmsTsJdbc db2 = null;
     public  String version = null;
-    
+    public boolean savePower = false;
     @Override
     public void open(String string, Properties prprts) throws DataConsumerException {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -71,18 +76,14 @@ public class CwmsConsumer2 extends DataConsumer{
         p.setProperty("password", af.getPassword());
         try {
             db.connect("decodes", p);            
-            db2 = new CwmsTsJdbc( db.getConnection() );
+            //db2 = new CwmsTsJdbc( db.getConnection() );
         } catch (BadConnectException ex) {
-            Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, ex);
-            Logging.debug3( ex.getMessage() );
-            return;
-        } catch (SQLException ex) {
             Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, ex);
             Logging.debug3( ex.getMessage() );
             return;
         }
         
-        
+        savePower = Boolean.parseBoolean( prprts.getProperty("savePower", "false") );
         version = prprts.getProperty("cwmsVersion");
         //CwmsDbConfig conf = CwmsDbConfig.instance();
         Logging.debug3( "**** office is:   " + db.getDbOfficeId() );
@@ -103,6 +104,64 @@ public class CwmsConsumer2 extends DataConsumer{
         Platform p = dm.getPlatform();
         Logging.debug3("Processing Platform: " + p.getSiteName(false));
         
+        
+        CTimeSeries cts = null;
+        TimeSeriesDAI tdao = null;
+        String tsid = null;
+        
+        // GOES EIRP is ALWAYS associated with the main logger name
+        // So we'll just pull the platform name and use it.
+        if( savePower ){
+             tsid = String.format("%s.%s.Inst.%s.0.%s", p.getSiteName(false), "Power-GOES XMIT","1Hour",this.version);
+            //long test = db.createTimeSeriesInDb(id);
+            
+            try{
+                tdao = db.makeTimeSeriesDAO();  
+                //TimeSeriesIdentifier _tsid= tdao.getTimeSeriesIdentifier(tsid);                
+                try{
+                    cts = db.makeTimeSeries(tsid);
+                }
+                catch(NoSuchObjectException e){
+                    Logging.debug3(e.getMessage());
+                    Logging.debug3("attempting to create a new time series");
+                    //int tscode = db2.createTsCode(db.getDbOfficeId(), tsid, 0, 0, 0,false, true);
+                    //long tscode = db2.createTsCodeBigInteger(tsid, tsid, 0, 0, 0, false,true);
+                    CwmsTsId _tsid = new CwmsTsId();
+                    _tsid.setUniqueString(tsid);
+                    DbKey key =null;
+                    try {
+                        key = tdao.createTimeSeries(_tsid);
+                    } catch (BadTimeSeriesException ex) {
+                        Logging.debug3( ex.getMessage() );
+                    }
+                    if( key != null ){
+                        cts = db.makeTimeSeries(tsid);
+                    }
+                }
+                
+                cts.setDisplayName(tsid);        
+                cts.setUnitsAbbr("W");
+                double sig_strength = dm.getRawMessage().getPM("SignalStrength").getDoubleValue();
+                TimedVariable _tv = new TimedVariable();              
+                _tv.setTime( dm.getMessageTime() );
+                _tv.setValue( sig_strength);
+                VarFlags.setToWrite(_tv);
+                cts.addSample(_tv);
+                
+                tdao.saveTimeSeries(cts);
+            }
+            catch(NoSuchObjectException e){
+                Logging.debug3(e.getMessage());
+
+            } catch (DbIoException ex) {
+                Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex){
+                Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, ex);
+            } finally{
+                tdao.close();
+            }
+        }
+        
         while( it.hasNext()){
             TimeSeries ts = it.next();    
             if( ts.size() > 0 ){
@@ -116,8 +175,9 @@ public class CwmsConsumer2 extends DataConsumer{
                     name = p.getSiteName(false);
                 }
                 Logging.debug3("Processing: " + name);
-                CTimeSeries cts = null;
+                cts = null;
                 try {
+                    tdao = db.makeTimeSeriesDAO();
                     // build time series name
                     
                     String sensor = s.getName();                
@@ -139,7 +199,7 @@ public class CwmsConsumer2 extends DataConsumer{
                     //ConfigSensor config = p.getConfig().getSensor(s.getNumber());
                     //config.g
                     // For now, everything is inst.
-                    String tsid = String.format("%s.%s.Inst.%s.0.%s", name, sensor,interval_s,this.version);
+                    tsid = String.format("%s.%s.Inst.%s.0.%s", name, sensor,interval_s,this.version);
 
                     Logging.debug3("Storing: " + tsid);
 
@@ -157,8 +217,17 @@ public class CwmsConsumer2 extends DataConsumer{
                     catch(NoSuchObjectException e){
                         Logging.debug3(e.getMessage());
                         Logging.debug3("attempting to create a new time series");
-                        int tscode = db2.createTsCode(db.getDbOfficeId(), tsid, 0, 0, 0,false, true);
-                        if( tscode != 0 ){
+                        //int tscode = db2.createTsCode(db.getDbOfficeId(), tsid, 0, 0, 0,false, true);
+                        //long tscode = db2.createTsCodeBigInteger(tsid, tsid, 0, 0, 0, false,true);
+                        CwmsTsId _tsid = new CwmsTsId();
+                        _tsid.setUniqueString(tsid);
+			DbKey key =null;
+                        try {
+                            key = tdao.createTimeSeries(_tsid);
+                        } catch (BadTimeSeriesException ex) {
+                            Logging.debug3( ex.getMessage() );
+                        }
+                        if( key != null ){
                             cts = db.makeTimeSeries(tsid);
                         }
                     }
@@ -173,21 +242,40 @@ public class CwmsConsumer2 extends DataConsumer{
                     int quals[] = new int[ts.size()];
 
                     for( int i = 0; i < ts.size(); i++){                
-                        TimedVariable tv = ts.sampleAt(i);  
-                        //tv.setFlags(decodes.tsdb.VarFlags.TO_WRITE);
-                        times[i] = tv.getTime().getTime();
-                        values[i] = tv.getDoubleValue();
-                        quals[i] = CwmsFlags.flag2CwmsQualityCode(tv.getFlags());
+                        try{
+                            TimedVariable tv = ts.sampleAt(i);  
+                            
+                            tv.setFlags(decodes.tsdb.VarFlags.TO_WRITE);
+                            Logging.debug3( "TV value = " + tv.getStringValue() );
 
-                        cts.addSample(tv);                    
-                        Logging.debug3("Date -> Data: " + tv.getTime().toString() + " -> " + tv.getDoubleValue() + " Quality: " + quals[i]);                   
+                            times[i] = tv.getTime().getTime();
+                            try{
+                                values[i] = tv.getDoubleValue();                                
+                                quals[i] = CwmsFlags.flag2CwmsQualityCode(tv.getFlags());
+                            } catch( Exception err ){
+                                values[i] = Double.NEGATIVE_INFINITY;
+                                quals[i] = CwmsFlags.VALIDITY_MISSING;
+                            }
+
+                            cts.addSample(tv);                    
+                            Logging.debug3("Date -> Data: " + tv.getTime().toString() + " -> " + tv.getDoubleValue() + " Quality: " + quals[i]);                   
+                        } catch( Exception err ){
+                            Logging.debug3(err.getMessage());
+                            Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, err);
+                        }
                     }
 
                     Logging.debug3("There are " + cts.size() + " values to store" );
 
-                    db2.store(db.getDbOfficeId(), tsid, units, times, values, quals, ts.size(), "REPLACE ALL", true, null);
-
-
+                    cts.sort(); // lack of this caused a really annoying issue.
+                    //db2.store(db.getDbOfficeId(), tsid, units, times, values, quals, ts.size(), "REPLACE WITH NON MISSING", true, null);
+                    
+                    try{
+                        tdao.saveTimeSeries(cts);
+                    } catch( Exception err ){
+                        Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, err);
+                    }
+                    
                     //db.fillTimeSeriesMetadata(cts);
                     //.
                     //I have no idea why this doesn't work.
@@ -201,16 +289,10 @@ public class CwmsConsumer2 extends DataConsumer{
                 } catch (NoSuchObjectException ex) {
                     Logging.debug3(ex.getMessage());
                     Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, ex);
-                }/* catch (BadTimeSeriesException ex) {
-                    Logging.debug3(ex.getMessage());
-                    Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, ex);
-                }*/ catch (NoConversionException ex) {
-                    Logging.debug3(ex.getMessage());
-                    Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SQLException ex) {
-                    Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, ex);
                 } 
-            
+                finally{
+                        tdao.close();
+                }
             
             }
             
