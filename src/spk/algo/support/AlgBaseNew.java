@@ -9,6 +9,7 @@ import java.util.TreeSet;
 import decodes.hdb.HdbFlags;
 import decodes.sql.DbKey;
 import decodes.tsdb.BadTimeSeriesException;
+import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.DbAlgorithmExecutive;
 import decodes.tsdb.DbCompException;
 import decodes.tsdb.DbIoException;
@@ -30,6 +31,7 @@ import decodes.tsdb.algo.AggregatePeriod;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import opendcs.dai.TimeSeriesDAI;
 
 
 /**
@@ -905,66 +907,76 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
         debug3( "Getting output parameter reference");        
         ParmRef pr = getParmRef(parmRefName);
         String interval = pr.timeSeries.getInterval();
-        int seconds_back = -1*(decodes.tsdb.IntervalCodes.getIntervalSeconds(interval));
-        debug3( "interval = " + seconds_back + " seconds");
-        cal.add( Calendar.SECOND, seconds_back); // get the previous day
+        //int seconds_back = -1*(decodes.tsdb.IntervalCodes.getIntervalSeconds(interval));
+        int interval_constant = IntervalCodes.getInterval(interval).getCalConstant();
+        //debug3( "interval = " + seconds_back + " seconds");
+        cal.add( interval_constant, -1); // get the previous interval
         previous_fcp_date = cal.getTime();
         debug3("intial date" + tsbasetime);
         debug3("calculated date" + previous_fcp_date);
-        decodes.tsdb.CTimeSeries ts = new decodes.tsdb.CTimeSeries(pr.compParm);
-
+        CTimeSeries ts = this.getParmRef(parmRefName).timeSeries;
+        TimeSeriesDAI tdao = null;
         try{
-                ts.setUnitsAbbr(pr.timeSeries.getUnitsAbbr());
-                debug3("Querying database");
-                    // tsdb is the generic interface to the database backend of the CCP
-                    // having the start date and end date the time gets us one value
+
+            debug3("Querying database");
+                // tsdb is the generic interface to the database backend of the CCP
+                // having the start date and end date the time gets us one value
 
 
-                    if( tsdb.fillTimeSeries( ts, previous_fcp_date, tsbasetime) == 0 )
-                    {
-                        warning( "Could not access output timeseries, assuming it doesn't exist and we are starting at 0");                        
-                    }
-                    
-                    // this gets us an individual value from within the retreived time series
-                    TimedVariable tv = tsdb.getPreviousValue(ts, tsbasetime);
-                    //TimedVariable tv = ts.findWithin(previous_fcp_date, roundSec);
-                    
-                    
-                    try{
-                        if( tv != null )
-                        {
-                            value = tv.getDoubleValue();                            
-                        }
-                        else
-                        {
-                            warning( "no existing data, starting at 0.0" );                            
-                        }
-                    }
-                    catch( NoConversionException e)
-                    {
-                        warning( "could not convert data from provided  time series");
-                    
-                    }
-                }
-                catch( DbIoException e)
+            debug3("filling ts for this time");
+            tdao = this.tsdb.makeTimeSeriesDAO();                        
+            tdao.fillTimeSeries(ts, previous_fcp_date, tsbasetime);
+
+
+            debug3( "Search for data from time: " + previous_fcp_date.toString() );
+
+            // this gets us an individual value from within the retreived time series
+            TimedVariable tv = ts.findWithin(previous_fcp_date, 1000);
+            //TimedVariable tv = ts.findWithin(previous_fcp_date, roundSec);
+
+
+            try{
+                if( tv != null )
                 {
-                    warning( "Could not access timeseries, returning missing val");
-                    
+                    value = tv.getDoubleValue();                            
                 }
-                catch( BadTimeSeriesException e )
+                else
                 {
-                    warning( "Could not access timeseries, returning missing val");
-                    
+                    warning( "no existing data, starting at 0.0" );                            
                 }
+            }
+            catch( NoConversionException e)
+            {
+                warning( "could not convert data from provided  time series");
 
+            }
+        }
+        catch( DbIoException e)
+        {
+            warning( "Could not access timeseries, returning missing val");
+
+        }
+        catch( BadTimeSeriesException e )
+        {
+            warning( "Could not access timeseries, returning missing val");
+
+        } finally{
+            if( tdao != null ){
+                tdao.close();
+            }
+            
+        }
 
                 
-                return value;
+        return value;
     }
     /**
      * Get all of the values previous to this one up to a certain base time
      * @param parmRefName the value for which we want the data
      *
+     * 
+     * TODO: update to use DAO interface, for now it works correctly
+     * 
      * @param start the current time ( we have this value )
      * @param end the time from which ( inclusive ) to get data
      * @return array of the previous values. this version doesn't care about the dates
