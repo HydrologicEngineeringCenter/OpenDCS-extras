@@ -148,8 +148,7 @@ public class BlackButte
                     }
                     if( isMissing( StonyGorge ) ){
                         StonyGorge = this.getPrevValue("StonyGorge", _timeSliceBaseTime);
-                    }
-                    
+                    }                     
                     // upstream storage, see Black Butte WC Diagram: USE OF DIAGRAM: section 3
                     debug3( "Calculating East Park Allowed Storage" );
                     // Section 3a
