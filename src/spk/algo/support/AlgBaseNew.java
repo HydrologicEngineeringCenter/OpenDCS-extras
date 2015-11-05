@@ -903,7 +903,8 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
         double val2 = Double.NEGATIVE_INFINITY;
         Date previous_fcp_date = tsbasetime;
         GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(previous_fcp_date);        
+        cal.setTime(previous_fcp_date);  
+        cal.setTimeZone(aggTZ);
         debug3( "Getting output parameter reference");        
         ParmRef pr = getParmRef(parmRefName);
         String interval = pr.timeSeries.getInterval();
