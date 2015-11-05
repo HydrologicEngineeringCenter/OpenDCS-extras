@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lrgs.gui.DecodesInterface;
 import opendcs.dai.TimeSeriesDAI;
 import spk.apps.support.Alarms.AlarmCondition;
 import spk.apps.support.Alarms.AlarmList;
@@ -149,6 +150,15 @@ public class AlarmComp
 		// For Aggregating algorithms, this is done after each aggregate
 		// period.
                 ts.sort();
+                
+                if( !DecodesInterface.isGUI() ){
+                    debug3("Not GUI, will ignore data that isn't new.");
+                    // something to ignore data after figuring out if said data is old.
+                    /*
+                    Perhaps search for data in the database that exists after and then assume this
+                    data has already been processed. If equal, assume processing for first time, or data was corrected
+                    */
+                }
                 
                 AlarmResponse res = alarms.check_timeseries(ts);
                 if( res != null){
