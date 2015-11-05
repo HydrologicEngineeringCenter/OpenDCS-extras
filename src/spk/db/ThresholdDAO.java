@@ -10,7 +10,11 @@ package spk.db;
 
 import decodes.sql.DbKey;
 import decodes.tsdb.CTimeSeries;
+import decodes.tsdb.DbIoException;
+import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import opendcs.dao.DaoBase;
 import opendcs.dao.DatabaseConnectionOwner;
 import opendcs.dao.DbObjectCache;
@@ -39,25 +43,36 @@ public class ThresholdDAO
        ArrayList<Threshold> thresholds = new ArrayList<Threshold>();
         
         String q = "select from ccp.alarm_thresholds where sitedatatypeid = " + SDI.toString();
-        // and check in checks
+        try {
+            // and check in checks
+            ResultSet rs = this.doQuery(q);
+            
+            return thresholds;
+        } catch (DbIoException ex) {
+            Logger.getLogger(ThresholdDAO.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
         
         /*
             do the sql, build the thresholds
         
         */
         
-        return thresholds;
+        
         
     }
 
     @Override
     public ArrayList<Threshold> getThresholds(CTimeSeries cts, ArrayList<String> checks) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.getThresholds(cts.getSDI() , checks);        
     }
 
     @Override
     public void saveThreashold(Threshold threshold) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // check for existing threshold id
+        // check for existing check of same parameters ( SDI, check, a,b,duration )
+        
+        
     }
 
     

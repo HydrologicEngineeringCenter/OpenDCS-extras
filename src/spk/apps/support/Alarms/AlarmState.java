@@ -11,7 +11,7 @@ package spk.apps.support.Alarms;
 import java.util.Date;
 
 /**
- *
+ * 
  * @author Michael Neilson <michael.a.neilson@usace.army.mil>
  */
 public class AlarmState {

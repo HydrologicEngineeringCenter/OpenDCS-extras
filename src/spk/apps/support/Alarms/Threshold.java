@@ -37,9 +37,9 @@ import spk.algo.AWAggTemplate;
  * within range
  * rate of charge
  * 
- * all check can have an arbitrary duration, e.g. for greater than 
+ * all checks can have an arbitrary duration, e.g. for greater than 
  * the condition could be true only if the current value and value from the previous 
- * hour is greater than some number
+ * hour is greater than some number, or the previous 3 hours, etc.
  * 
  * @author L2EDDMAN
  */
