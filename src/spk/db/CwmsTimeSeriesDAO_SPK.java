@@ -34,6 +34,7 @@ import java.util.Iterator;
 import cwmsdb.CwmsTsJdbc;
 import decodes.cwms.CwmsConstants;
 import decodes.cwms.CwmsFlags;
+import decodes.cwms.CwmsTimeSeriesDAO;
 import decodes.cwms.CwmsTsId;
 import decodes.cwms.HecConstants;
 
@@ -562,16 +563,20 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 			unitsAbbr = ts.getUnitsAbbr();
 		}
 		
+		// noUnitConv is used for testing by TsImport only
+		if (!noUnitConv)
+		{
 		// Convert to the required 'storage units'.
 		debug3("Time Series '" + tsId.getUniqueString() + "' have units '"
 			+ unitsAbbr + "' require units '" + tsId.getStorageUnits() + "'");
-		if (unitsAbbr == null)
-			unitsAbbr = tsId.getStorageUnits(); // Assume they're already correct
-		else if (!unitsAbbr.equalsIgnoreCase(tsId.getStorageUnits()))
+			if (!unitsAbbr.equalsIgnoreCase(tsId.getStorageUnits()))
 		{
 			TimeSeriesHelper.convertUnits(ts, tsId.getStorageUnits());
 			unitsAbbr = tsId.getStorageUnits();
 		}
+		}
+		else
+			debug3("Will write time series " + tsId.getUniqueString() + " with unit " + unitsAbbr);
 		
 		// We do not yet support versioned data
 		java.sql.Timestamp versionDate = null;
@@ -604,7 +609,8 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 					
 					debug3("sample[" + idx + "] time=" + 
 						db.getLogDateFormat().format(new Date(times[idx]))
-						+ ", value=" + values[idx] + ", qual=" + qualities[idx]);
+						+ ", value=" + values[idx] 
+						+ ", qual=0x" + Integer.toHexString(qualities[idx]));
 				}
 				// The "Replace All" store-rule means: 
 				//  -- Values at same time stamp I provide will replace existing values
@@ -612,8 +618,8 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 				//  -- Existing values at different time stamps will be left alone.
 				debug1(" Calling store for ts_id="
 					+ path + ", office='" + dbOfficeId 
-					+ "' with " + num2write + " values, units=" + unitsAbbr);
-				cwmsTsJdbc.store(dbOfficeId, path, unitsAbbr, times, values,
+					+ "' with " + num2write + " values, units=" + ts.getUnitsAbbr());
+				cwmsTsJdbc.store(dbOfficeId, path, ts.getUnitsAbbr(), times, values,
 					qualities, num2write, CwmsConstants.REPLACE_ALL, 
 					overrideProtection, versionDate);
 			}
@@ -639,9 +645,9 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 				// The "REPLACE_MISSING_VALUES_ONLY" store-rule means: 
 				//  -- Do not overwrite if a value exists at that time-slice.
 				debug1(" Calling store (no overwrite) for ts_id="
-						+ path + " with " + num2write + " values, units=" + unitsAbbr);
+						+ path + " with " + num2write + " values, units=" + ts.getUnitsAbbr());
 
-				cwmsTsJdbc.store(dbOfficeId, path, unitsAbbr, times, values,
+				cwmsTsJdbc.store(dbOfficeId, path, ts.getUnitsAbbr(), times, values,
 					qualities, num2write, CwmsConstants.REPLACE_MISSING_VALUES_ONLY,
 					overrideProtection, versionDate);
 			}
@@ -874,7 +880,7 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 			+ "FROM CWMS_V_TS_ID a, CWMS_V_LOC c "
 			+ " WHERE a.LOCATION_CODE = c.LOCATION_CODE "
 			+ " AND c.UNIT_SYSTEM = 'SI' ";
-		if (db.getTsdbVersion() >= TsdbDatabaseVersion.VERSION_8)
+//		if (db.getTsdbVersion() >= TsdbDatabaseVersion.VERSION_8)
 			q = q + "and upper(a.DB_OFFICE_ID) = " + sqlString(dbOfficeId.toUpperCase());
 
 		try
@@ -932,6 +938,7 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 			}
 			else // CWMS 2.2 or later
 			{
+Logger.instance().debug3("createTsCodeBigInteger(" + path + ")");
 				BigInteger tsCode = cwmsTsJdbc.createTsCodeBigInteger(dbOfficeId,
 					path,   // 6-part path name 
 					utcOffset, // utcOfficeMinutes 
@@ -940,6 +947,7 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 					false,  // versionFlag
 					true);  // active
 				tsKey = DbKey.createDbKey(tsCode.longValue());
+Logger.instance().debug3("createTsCodeBigInteger returned code=" + tsKey);
 			}
 			tsid.setKey(tsKey);
 			
@@ -949,6 +957,31 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 		}
 		catch(SQLException ex)
 		{
+			// CWMS-5773 If the create error is due to some kind of user-level constraint,
+			// then throw NoSuchObject, meaning that the tsid is bad but the connection is still
+			// Ok. Prasad says ORA numbers > 20000 mean user-defined. Probably some kind of 
+			// constraint violation.
+			String exs = ex.toString();
+			int oraidx = exs.indexOf("ORA-");
+			if (oraidx >= 0)
+			{
+				exs = exs.substring(oraidx+4);
+				int intlen = 0;
+				for(; intlen < exs.length() && Character.isDigit(exs.charAt(intlen)); intlen++);
+				if (intlen > 0)
+				{
+					try
+					{
+						int oraerr = Integer.parseInt(exs.substring(0, intlen));
+						if (oraerr >= 20000)
+							throw new NoSuchObjectException(
+								"Error creating time series for '" + path + "' with officeId '"
+								+ dbOfficeId + "': " + ex);
+					}
+					catch(NumberFormatException ex2) { /* fall through & throw DbIoException */ }
+				}
+			}
+			// This must be more serious. Assume db connection is now hosed.
 			throw new DbIoException(
 				"Error creating time series for '" + path + "' with officeId '"
 				+ dbOfficeId + "': " + ex);
@@ -968,6 +1001,11 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 			warning("Error in cwms_util.refresh_mv_cwms_ts_id: " + ex);
 			ex.printStackTrace(Logger.instance().getLogOutput());
 		}
+	}
+
+	public static void setNoUnitConv(boolean noUnitConv)
+	{
+		CwmsTimeSeriesDAO.noUnitConv = noUnitConv;
 	}
 
 

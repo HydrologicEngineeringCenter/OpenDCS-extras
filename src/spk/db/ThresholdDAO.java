@@ -8,10 +8,14 @@
  */
 package spk.db;
 
+import decodes.db.DatabaseException;
 import decodes.sql.DbKey;
 import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.DbIoException;
+import java.sql.Array;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,12 +34,19 @@ public class ThresholdDAO
 	implements ThresholdDAI{
 
     protected static DbObjectCache<Threshold> cache = new DbObjectCache<Threshold>(15 * 60 * 1000L, false);
-    
+    PreparedStatement stmtGetThresholds_no_checks;
+    PreparedStatement stmtGetThresholds;
     
     public ThresholdDAO(DatabaseConnectionOwner db){
         super(db, "ThresholdDAO");
         
-        // get properaties and such
+        try {
+            stmtGetThresholds_no_checks = db.getConnection().prepareStatement("select * from ccp.alarm_thresholds where sitedatatypeid = ?" );
+            stmtGetThresholds = db.getConnection().prepareStatement("select * from ccp.alarm_thresholds where sitetypetypeid = ? and check_type in ?");
+            // get properaties and such
+        } catch (SQLException ex) {
+            Logger.getLogger(ThresholdDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
@@ -43,20 +54,42 @@ public class ThresholdDAO
        ArrayList<Threshold> thresholds = new ArrayList<Threshold>();
         
         String q = "select from ccp.alarm_thresholds where sitedatatypeid = " + SDI.toString();
+        
         try {
+            ResultSet rs;
+            stmtGetThresholds_no_checks.setLong(1, SDI.getValue());
+            stmtGetThresholds.setLong(1, SDI.getValue());
             // and check in checks
-            ResultSet rs = this.doQuery(q);
+            if( checks.size() > 0 ){
+                stmtGetThresholds.setArray(2, (Array) checks);                
+                rs = stmtGetThresholds.executeQuery();
+            } else{
+                rs = stmtGetThresholds_no_checks.executeQuery();
+            }
+            
+            while( rs.next() ){
+                try {
+                    thresholds.add( new Threshold(rs) );
+                } catch (DatabaseException ex) {
+                    Logger.getLogger(ThresholdDAO.class.getName()).log(Level.SEVERE, null, ex);
+                    warning( "Failed to process a threshold");
+                }
+            }
+            
+            
+            
+            
             
             return thresholds;
-        } catch (DbIoException ex) {
+        } catch (SQLException ex) {
             Logger.getLogger(ThresholdDAO.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
         }
         
         /*
             do the sql, build the thresholds
         
         */
+        return null;
         
         
         

@@ -21,6 +21,8 @@ import decodes.tsdb.TimeSeriesIdentifier;
 import ilex.util.HasProperties;
 import ilex.var.NoConversionException;
 import ilex.var.TimedVariable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -62,6 +64,18 @@ public class Threshold
     private int duration; // duration in seconds
     public Threshold(){
         
+    }
+    
+    public Threshold( ResultSet rs ) throws SQLException, DatabaseException{        
+        this.site = DbKey.createDbKey(rs, 2);        
+        this.setId(DbKey.createDbKey(rs,1));
+        this.check = rs.getString(3);
+        this.a = rs.getDouble(4);
+        this.b = rs.getDouble(5);
+        this.duration = rs.getInt(5);
+        this.priority = rs.getInt(6);
+        this.color = rs.getString(7);
+        this.units = rs.getString(8);
     }
     
     public Threshold( String condition ){
