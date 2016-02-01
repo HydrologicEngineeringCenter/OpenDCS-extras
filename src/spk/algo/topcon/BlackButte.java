@@ -159,7 +159,9 @@ public class BlackButte
                     // Section 3b
                     //
                     debug3( "Calculating Stony Gorge Allowed Storage" );
-                    if( wy_day > dates.September01 || wy_day < dates.February01 )
+                    // per discussion with Christy Jones (20160201) this should be 
+                    // inclusive of the end dates
+                    if( wy_day >= dates.September01 || wy_day <= dates.February01 )
                     {// section 3b1 is in effect
                         stony = 28400.0 - StonyGorge;
                         debug3( " stony gorge available (3b1) is " + stony );
