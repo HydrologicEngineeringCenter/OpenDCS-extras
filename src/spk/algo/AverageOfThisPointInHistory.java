@@ -30,7 +30,7 @@ import opendcs.opentsdb.Interval;
 //AW:JAVADOC
 /**
  * Intended primary for daily data, given a fixed day, go back in time to average that day over a period of time.
- * Algorithm was created to operate on generic intervals but will has not been tested for them.
+ * Algorithm was created to operate on generic intervals but has not been tested for them.
  * @author L2EDDMAN
  */
 //AW:JAVADOC_END
