@@ -24,6 +24,7 @@ import decodes.cwms.CwmsDbConfig;
 import decodes.cwms.CwmsDbUtils;
 import decodes.cwms.CwmsFlags;
 import decodes.cwms.CwmsTsId;
+import decodes.datasource.UnknownPlatformException;
 import decodes.db.ConfigSensor;
 import decodes.db.DataType;
 
@@ -102,6 +103,13 @@ public class CwmsConsumer2 extends DataConsumer{
     public void startMessage(DecodedMessage dm) throws DataConsumerException {
         Iterator<TimeSeries> it = dm.getAllTimeSeries();
         Platform p = dm.getPlatform();
+        if( p == null){
+            try {
+                p = dm.getRawMessage().getPlatform();
+            } catch (UnknownPlatformException ex) {
+                Logger.getLogger(CwmsConsumer2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         Logging.debug3("Processing Platform: " + p.getSiteName(false));
         
         
