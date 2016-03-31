@@ -166,38 +166,32 @@ public class BuildCompGraph extends TsdbAppTemplate {
                 
                 if( parm.isOutput()){
                     
-                    target = comp.getId();
+                    target = parm.getSiteDataTypeId();
                     
                     System.out.print("\tOutput: " + parm.getRoleName() +"/");
                     if( !target.isNull()) {
                         TimeSeriesIdentifier ts = tsDAO.getTimeSeriesIdentifier(parm.getSiteDataTypeId());
                         System.out.println( ts.getUniqueString() );
-                        graph.addNode(new GraphNode(parm.getSiteDataTypeId(), ts.getUniqueString() , "TS"));
-
-                        graph.addNode( new GraphNode( target, comp.getName(), "COMP"));
-                        
-                        
-                        Iterator<DbCompParm> parms2 = comp.getParms();
-                        // we need an edge for each output and comps can have multiple outputs
-                        while( parms2 != null && parms2.hasNext() ){
-                            DbCompParm parm2 = parms2.next();
-
-                            if( parm2.isInput()){
-                                System.out.print("\tInput: " + parm2.getRoleName() + "/");
-                                DbKey source = parm2.getSiteDataTypeId();
-                                if( source.getValue() != DbKey.NullKey.getValue() ){
-                                    TimeSeriesIdentifier tsin = tsDAO.getTimeSeriesIdentifier(source);
-                                    System.out.println(tsin.getUniqueString() );
-                                    graph.addNode( new GraphNode( source,tsin.getUniqueString(),"TS"));
-                                    graph.addEdge( new GraphEdge( source,target, "TS", "COMP" ) );
-                                } else{
-                                    System.out.println(" ");
-                                }
-                            }
-                        }
-                    } else{
-                        System.out.println("undef output");
+                        graph.addNode(new GraphNode(target, ts.getUniqueString() , "TS"));
+                        graph.addNode( new GraphNode( comp.getId(), comp.getName(), "COMP"));                        
+                        graph.addEdge( new GraphEdge( comp.getId(),target, "COMP", "TS" ) );
                     }
+                }else {
+
+                    System.out.print("\tInput: " + parm.getRoleName() + "/");
+                    DbKey source = parm.getSiteDataTypeId();
+                    if( source.getValue() != DbKey.NullKey.getValue() ){
+                        TimeSeriesIdentifier tsin = tsDAO.getTimeSeriesIdentifier(source);
+                        System.out.println(tsin.getUniqueString() );
+                        graph.addNode( new GraphNode( comp.getId(), comp.getName(), "COMP"));
+                        graph.addNode( new GraphNode( source,tsin.getUniqueString(),"TS"));
+                        graph.addEdge( new GraphEdge( source,comp.getId(), "TS", "COMP" ) );
+                    } else{
+                        System.out.println(" ");
+                    }
+
+     
+     
                 }
             }
 
