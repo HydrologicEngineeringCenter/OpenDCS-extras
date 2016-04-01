@@ -39,6 +39,8 @@ import decodes.cwms.HecConstants;
 
 import decodes.db.Constants;
 import decodes.db.DataType;
+import decodes.db.Database;
+import decodes.db.DatabaseIO;
 import decodes.db.Site;
 import decodes.db.SiteName;
 import decodes.db.UnitConverter;
@@ -156,6 +158,9 @@ public class CwmsTimeSeriesDAO_SPK
 		site.setDescription(publicSiteName);
 		ret.setSite(site);
 	
+                Database adb = decodes.db.Database.getDb();
+                DatabaseIO dbio = adb.getDbIo();
+                String type = dbio.getDatabaseType();
 		if (decodes.db.Database.getDb().getDbIo().getDatabaseType().equalsIgnoreCase("XML"))
 			return ret;
 		
