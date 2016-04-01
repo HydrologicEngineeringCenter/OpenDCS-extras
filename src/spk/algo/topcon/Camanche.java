@@ -209,14 +209,14 @@ public class Camanche
                     
                     // section 6
                     
-                    double ebmud = gross_reservation - credit; // we add the credit here
+                    double ebmud = gross_reservation - credit; // we subtract the credit here
                     
                     // section 7
                     double pardee_space_available = pardee_gross_pool - pardee;
                     double camanche_unbound = graph.gross_pool() - (ebmud - pardee_space_available);
                     
-                    double camanche = Math.min( graph.gross_pool(), camanche_unbound);
-                    
+                    //double camanche = Math.min( graph.gross_pool(), camanche_unbound);
+                    double camanche = graph.bound(wy_day-1, camanche_unbound);
                     
                     setOutput(AllowedStorage, camanche);
                     
