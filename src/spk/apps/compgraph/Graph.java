@@ -9,6 +9,7 @@
 package spk.apps.compgraph;
 
 import java.util.ArrayList;
+import org.apache.commons.lang.xwork.StringUtils;
 
 /**
  *
@@ -29,7 +30,7 @@ public class Graph {
         for( int i=0; i < nodes.size(); i++){
             GraphNode tmp = nodes.get(i);
             
-            if( tmp.tsid.getValue() == node.tsid.getValue() ){                                
+            if( tmp.id.equalsIgnoreCase( node.id ) ){                                
                 return false; // already have
             }
         }
@@ -40,8 +41,8 @@ public class Graph {
     
     public boolean addEdge( GraphEdge edge ){
         for (GraphEdge tmp : edges) {
-            if( tmp.source.getValue() == edge.source.getValue()
-                    &&tmp.target.getValue() == edge.target.getValue() 
+            if( tmp.source.equalsIgnoreCase(edge.source)
+                    && tmp.target.equalsIgnoreCase( edge.target )
                     ){
                 return false; //we have this edge already
             }                
@@ -52,13 +53,30 @@ public class Graph {
     
         
     void printgraph() {
-        System.out.println("[");
+        
+        System.out.println("{ \"data\": [");
+        
+        System.out.print( StringUtils.join(nodes.toArray(), ",\r\n") );
+        System.out.println(",");
+        System.out.print( StringUtils.join(edges.toArray(), ",\r\n") );
+        /*
         for( GraphNode node:  nodes){
             System.out.println(node);
         }
         for( GraphEdge edge: edges){
             System.out.println(edge);
         }
+        */
         System.out.println("]");
+        ArrayList<String> datatypes = new ArrayList<String>();
+        for( GraphNode node: nodes){
+            if( !datatypes.contains("\""+node.datatype+"\"") ){
+                datatypes.add("\""+node.datatype +"\"");
+            }
+        }
+        System.out.println(", \"categories\": [");
+        System.out.print( StringUtils.join(datatypes,",\r\n"));
+        System.out.println("]");
+        System.out.println("}");
     }
 }

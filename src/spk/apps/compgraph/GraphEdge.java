@@ -14,20 +14,17 @@ import decodes.sql.DbKey;
  *
  * @author Michael Neilson <michael.a.neilson@usace.army.mil>
  */
-public class GraphEdge {
-    DbKey source;
-    DbKey target;
-    String source_type;
-    String target_type;
+public class GraphEdge {    
+    String source;
+    String target;
     
-    public GraphEdge( DbKey source, DbKey target, String source_type, String target_type){
+    public GraphEdge( String source, String target){
         this.source = source;
         this.target = target;
-        this.source_type = source_type;
-        this.target_type = target_type;
+        
     }
     
     public String toString(){
-        return String.format( "{\r\n data: { id:'%s%s_%s%s', source: '%s%s', target:'%s%s'}\r\n},\r\n", source_type,source,target_type,target,source_type,source,target_type,target);
+        return String.format( "{\r\n \"data\": { \"id\":\"%s_%s\", \"source\": \"%s\", \"target\":\"%s\"}\r\n}", this.source,this.target,this.source,this.target);
     }
 }

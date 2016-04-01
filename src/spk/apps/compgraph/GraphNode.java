@@ -17,20 +17,27 @@ import decodes.tsdb.DbComputation;
  * @author Michael Neilson <michael.a.neilson@usace.army.mil>
  */
 public class GraphNode {
-    public DbKey tsid;
+    public String id;
     public String name;    
     public String type;
+    public String datatype;
     
     
-    GraphNode(DbKey key, String name,  String type ) {
-        this.tsid = key;
+    GraphNode(String key, String name,  String type, String datatype ) {
+        this.id = key;
         this.name = name;
         
         this.type = type;
+        
+        
+        
+        this.datatype = datatype.toLowerCase().split("-")[0]; // we only care about the base parameter
     }
     
     public String toString(){
-        return String.format("{\r\ndata:{ id: '%s%s', name: '%s', type: '%s' }\r\n},\r\n", this.type, this.tsid, this.name,this.type);
+        return String.format("{\r\n\"data\":{ \"id\": \"%s\", \"name\": \"%s\", \"type\": \"%s\", \"datatype\": \"%s\" }\r\n}", this.id, this.name,this.type,this.datatype);
+        
+        
     }
     
     

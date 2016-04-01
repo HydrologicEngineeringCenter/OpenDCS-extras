@@ -159,22 +159,31 @@ public class BuildCompGraph extends TsdbAppTemplate {
         for( DbComputation comp: comps ){
             System.out.println(comp.getName() );
             Iterator<DbCompParm> parms = comp.getParms();
-            DbKey target=null;
-            // do this twice, because we need all of the outputs
+            String compid="COMP"+comp.getId();
+            // do this twice, because we need a unique ID for the comps
+            // so combine the inputs
+            while( parms !=null && parms.hasNext()){
+                DbCompParm parm = parms.next();
+                if( parm.isInput() && !parm.getSiteDataTypeId().isNull() ){
+                    compid = compid + "_" + parm.getSiteDataTypeId();
+                }
+            }
+            parms = comp.getParms();
             while( parms !=null && parms.hasNext()){
                 DbCompParm parm =parms.next();
                 
                 if( parm.isOutput()){
                     
-                    target = parm.getSiteDataTypeId();
+                    DbKey target = parm.getSiteDataTypeId();
                     
                     System.out.print("\tOutput: " + parm.getRoleName() +"/");
                     if( !target.isNull()) {
-                        TimeSeriesIdentifier ts = tsDAO.getTimeSeriesIdentifier(parm.getSiteDataTypeId());
+                        String target_id = "TS"+target;
+                        TimeSeriesIdentifier ts = tsDAO.getTimeSeriesIdentifier(target);
                         System.out.println( ts.getUniqueString() );
-                        graph.addNode(new GraphNode(target, ts.getUniqueString() , "TS"));
-                        graph.addNode( new GraphNode( comp.getId(), comp.getName(), "COMP"));                        
-                        graph.addEdge( new GraphEdge( comp.getId(),target, "COMP", "TS" ) );
+                        graph.addNode(new GraphNode(target_id, ts.getUniqueString(),"TS", ts.getPart("param")));
+                        graph.addNode( new GraphNode( compid, comp.getName(), "COMP","comp"));                        
+                        graph.addEdge( new GraphEdge( compid,target_id ) );
                     }
                 }else {
 
@@ -182,10 +191,12 @@ public class BuildCompGraph extends TsdbAppTemplate {
                     DbKey source = parm.getSiteDataTypeId();
                     if( source.getValue() != DbKey.NullKey.getValue() ){
                         TimeSeriesIdentifier tsin = tsDAO.getTimeSeriesIdentifier(source);
+                        
+                        String source_id = "TS"+source;
                         System.out.println(tsin.getUniqueString() );
-                        graph.addNode( new GraphNode( comp.getId(), comp.getName(), "COMP"));
-                        graph.addNode( new GraphNode( source,tsin.getUniqueString(),"TS"));
-                        graph.addEdge( new GraphEdge( source,comp.getId(), "TS", "COMP" ) );
+                        graph.addNode( new GraphNode( compid, comp.getName(), "COMP", "comp"));
+                        graph.addNode( new GraphNode( source_id,tsin.getUniqueString(),"TS", tsin.getPart("param")));
+                        graph.addEdge( new GraphEdge( source_id,compid  ) );
                     } else{
                         System.out.println(" ");
                     }
@@ -198,7 +209,7 @@ public class BuildCompGraph extends TsdbAppTemplate {
                         
         }
         
-        System.out.println("[");
+        //System.out.println("[");
         graph.printgraph();
         
         compDAO.close();
