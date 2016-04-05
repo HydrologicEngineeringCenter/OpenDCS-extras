@@ -17,14 +17,15 @@ import decodes.sql.DbKey;
 public class GraphEdge {    
     String source;
     String target;
+    String extra;
     
-    public GraphEdge( String source, String target){
+    public GraphEdge( String source, String target, String extra){
         this.source = source;
         this.target = target;
-        
+        this.extra = extra;
     }
     
     public String toString(){
-        return String.format( "{\r\n \"data\": { \"id\":\"%s_%s\", \"source\": \"%s\", \"target\":\"%s\"}\r\n}", this.source,this.target,this.source,this.target);
+        return String.format( "{\r\n \"data\": { \"id\":\"%s_%s\", \"source\": \"%s\", \"target\":\"%s\", %s}\r\n}", this.source,this.target,this.source,this.target,this.extra);
     }
 }

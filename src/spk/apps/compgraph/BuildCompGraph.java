@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lrgs.gui.DecodesInterface;
@@ -34,6 +35,7 @@ import opendcs.dai.ComputationDAI;
 import opendcs.dai.LoadingAppDAI;
 import opendcs.dai.TimeSeriesDAI;
 import opendcs.dai.TsGroupDAI;
+import org.apache.commons.lang.xwork.StringUtils;
 
 
 
@@ -181,9 +183,14 @@ public class BuildCompGraph extends TsdbAppTemplate {
                         String target_id = "TS"+target;
                         TimeSeriesIdentifier ts = tsDAO.getTimeSeriesIdentifier(target);
                         System.out.println( ts.getUniqueString() );
-                        graph.addNode(new GraphNode(target_id, ts.getUniqueString(),"TS", ts.getPart("param")));
-                        graph.addNode( new GraphNode( compid, comp.getName(), "COMP","comp"));                        
-                        graph.addEdge( new GraphEdge( compid,target_id ) );
+                        graph.addNode(new GraphNode(target_id, ts.getUniqueString(),"TS", ts.getPart("param"),null));
+                        graph.addNode( new GraphNode( compid, comp.getName(), "COMP","comp", comp ));                        
+                        /*
+                        TODO: may need to figure out a way to deal with input vs output properties 
+                        on edges.
+                        
+                        */
+                        graph.addEdge( new GraphEdge( compid,target_id, "\"extra\": {}" ) ); 
                     }
                 }else {
 
@@ -194,9 +201,28 @@ public class BuildCompGraph extends TsdbAppTemplate {
                         
                         String source_id = "TS"+source;
                         System.out.println(tsin.getUniqueString() );
-                        graph.addNode( new GraphNode( compid, comp.getName(), "COMP", "comp"));
-                        graph.addNode( new GraphNode( source_id,tsin.getUniqueString(),"TS", tsin.getPart("param")));
-                        graph.addEdge( new GraphEdge( source_id,compid  ) );
+                        graph.addNode( new GraphNode( compid, comp.getName(), "COMP", "comp",comp));
+                        graph.addNode( new GraphNode( source_id,tsin.getUniqueString(),"TS", tsin.getPart("param"),null));
+                        
+                        // find this edges properties.
+                        String rolename = parm.getRoleName();
+                        ArrayList<String> proplist = new ArrayList<String>();
+                        Properties properties = comp.getProperties();
+                        for( Object key: properties.keySet()){
+                                String prop = (String)key;
+                                if( prop.contains(rolename)){
+                                    proplist.add( String.format("\"%s\": \"%s\"",prop,properties.getProperty(prop)) );
+                                }
+                        }
+                        String data = "";
+                        if( proplist.size() > 0 ){
+                            data = "\"extra\": { \"properties\": {" + StringUtils.join(proplist, ",\r\n") + "}\r\n}\r\n";
+                        } else{
+                            data = "\"extra\": {}";                                    
+                        }
+                        // special case for basin precip until names fixed
+                        
+                        graph.addEdge( new GraphEdge( source_id,compid, data  ) );
                     } else{
                         System.out.println(" ");
                     }
