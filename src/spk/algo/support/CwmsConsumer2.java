@@ -120,7 +120,7 @@ public class CwmsConsumer2 extends DataConsumer{
         // GOES EIRP is ALWAYS associated with the main logger name
         // So we'll just pull the platform name and use it.
         if( savePower ){
-             tsid = String.format("%s.%s.Inst.%s.0.%s", p.getSiteName(false), "Power-GOES XMIT","1Hour",this.version);
+             tsid = String.format("%s.%s.Inst.0.0.%s", p.getSiteName(false), "Power-GOES XMIT",this.version);
             //long test = db.createTimeSeriesInDb(id);
             
             try{
