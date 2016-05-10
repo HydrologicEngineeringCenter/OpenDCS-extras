@@ -151,7 +151,8 @@ public class CwmsConsumer2 extends DataConsumer{
                 cts.setUnitsAbbr("W");
                 double sig_strength = dm.getRawMessage().getPM("SignalStrength").getDoubleValue();
                 TimedVariable _tv = new TimedVariable();              
-                _tv.setTime( dm.getMessageTime() );
+                _tv.setTime( dm.getRawMessage().getOrigDcpMsg().getXmitTime() );
+                
                 _tv.setValue( sig_strength);
                 VarFlags.setToWrite(_tv);
                 cts.addSample(_tv);
