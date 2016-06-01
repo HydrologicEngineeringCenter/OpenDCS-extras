@@ -89,7 +89,7 @@ public class AlarmList {
         Assume calling program has gotten all data
         */
         try{
-            
+            String tsid = ts.getTimeSeriesIdentifier().getUniqueName();
             ArrayList<Alarm> myalarms = alarms.get(ts.getTimeSeriesIdentifier().getUniqueName() );
             ArrayList<AlarmResponse> responses = new ArrayList<AlarmResponse>();
             for( Alarm a: myalarms){
