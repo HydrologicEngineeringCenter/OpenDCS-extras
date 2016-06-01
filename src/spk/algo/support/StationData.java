@@ -92,6 +92,10 @@ public class StationData {
                     {
                         d.primary_feed = 2;
                     }
+                    else if( feed.equalsIgnoreCase("off"))
+                    {
+                        d.primary_feed = 3;
+                    }
                     else
                     {
                         d.primary_feed = 0;// default to goes if unknown
