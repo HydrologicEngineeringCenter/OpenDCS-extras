@@ -2,6 +2,7 @@ package spk.algo;
 
 
 
+import decodes.db.DbEnum;
 import decodes.tsdb.BadTimeSeriesException;
 import decodes.tsdb.CTimeSeries;
 import java.util.Date;
@@ -20,6 +21,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lrgs.gui.DecodesInterface;
+import opendcs.dai.EnumDAI;
 import opendcs.dai.TimeSeriesDAI;
 import spk.apps.support.Alarms.AlarmCondition;
 import spk.apps.support.Alarms.AlarmList;
