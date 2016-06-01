@@ -59,6 +59,7 @@ public class CombineStream_Adv
         public static final int GOES = 0;
         public static final int IP = 1;
         public static final int LOS = 2;
+        public static final int OFF = 3;
 //AW:LOCALVARS_END
 
 //AW:OUTPUTS
@@ -233,6 +234,9 @@ public class CombineStream_Adv
                                 have_an_output = false;
                                 debug1("Sensor has no value for this time slice.");
                             }
+                            break;
+                    case OFF:                            
+                            have_an_output = false; // this period will just be missing
                             break;
                     default:
                         have_an_output = false;
