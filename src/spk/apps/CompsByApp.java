@@ -11,6 +11,8 @@ import ilex.cmdline.StringToken;
 import ilex.cmdline.TokenOptions;
 import java.io.PrintStream;
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lrgs.gui.DecodesInterface;
@@ -49,21 +51,30 @@ public class CompsByApp extends TsdbAppTemplate {
     protected void runApp() throws Exception {
         //System.out.println( this.compname.getValue() );                             
         System.out.println( "Query Database");
-        ResultSet rs = theDb.doQuery( "select a.loading_application_id, "
-                + "(select b.loading_application_name from ccp.hdb_loading_application b where a.loading_application_id=b.loading_application_id) AS App,"
-                + "count(site_datatype_id) as num_comps "
-                + "from ccp.cp_comp_tasklist a group by a.loading_application_id order by num_comps desc");
-        System.out.printf("%10s %-20s %10s\n", "AppID", "App Name","Num Comps");
+        Map<String,Integer> data = new HashMap<String, Integer>();
+        
+        ResultSet rs = theDb.doQuery( "select a.loading_application_id," +
+                            "a.loading_application_name as App," +
+                            "(select count(b.site_datatype_id) from ccp.cp_comp_tasklist b where a.loading_application_id = b.loading_application_id) as num_comps " +
+                            "from ccp.hdb_loading_application a order by num_comps desc" );
+                                    
+        
+        
         while( rs.next() )
         {
             int id = rs.getInt(1);
             String name = rs.getString(2);
+            String comp_name = String.format( "%10d %-20s", id, name );
             int count = rs.getInt(3);
-            System.out.printf("%10d %-20s %10d\n", id,name,count);
             
+            data.put(comp_name, count);
             
         }
         
+        System.out.printf("%10s %-20s %10s\n", "AppID", "App Name","Num Comps");
+        for( Map.Entry<String,Integer> pair: data.entrySet()){
+               System.out.printf("%s %10d\n", pair.getKey(),pair.getValue());        
+        }
         
     }
     
