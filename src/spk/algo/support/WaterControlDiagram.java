@@ -531,6 +531,7 @@ public class WaterControlDiagram
 
         /*
          * TODO: rebuild for new full water year array format
+         * @deprecated
          */
         public double normal_irrigation( Date basetime)
         {
@@ -553,6 +554,36 @@ public class WaterControlDiagram
 
             return demand;
         }
+        
+        /*
+        *   Replaces above function, to be slightly more generic.
+        *   
+        *
+        */
+        
+        public double normal_irrigation( Date basetime, int to_month)
+        {
+            GregorianCalendar cal = new GregorianCalendar();
+            cal.setTime(basetime);
+            int month = cal.get( Calendar.MONTH);
+            int cur_day = cal.get(Calendar.DAY_OF_MONTH);
+            double demand = 0.0;
+            if( month < Calendar.FEBRUARY || month > Calendar.JULY )
+                return 0.0; // we don't worry about irrigation at this time
+                                   
+            int day_remaining = cal.getActualMaximum(cal.DAY_OF_MONTH) - cur_day + 1; // include current day
+            demand = day_remaining*irrigation.get(month)*1.9835;
+            // TODO: check that this is valid for everything
+            for( int i=month+1; i <= to_month; i++ ) // go to 30 june                
+            {
+                cal.set( cal.MONTH, i);
+                demand += irrigation.get( cal.get(Calendar.MONTH))*cal.getActualMaximum(Calendar.DAY_OF_MONTH)*1.9835;
+            }
+
+            return demand;
+        }
+        
+        
         
         public static IrrigationDemands get_irrigation_data( String filename ) throws DbCompException, FileNotFoundException, IOException, ParseException{
             try {
