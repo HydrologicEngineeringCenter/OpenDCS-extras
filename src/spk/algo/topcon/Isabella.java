@@ -169,7 +169,7 @@ public class Isabella
                     debug3( "Calculating Irrigation Demand Adjustment" );
                     
                     // we now adjust the top con
-                    normal_irrigation_today = calculate_irrigation( normal_irrigation );
+                    normal_irrigation_today = graph.normal_irrigation( _timeSliceBaseTime, Calendar.JUNE );                                     
                     actual_irrigation_today = calculate_irrigation(  );
                     adjustment = actual_irrigation_today - normal_irrigation_today;
                     debug3( "***Irrigation ****");
