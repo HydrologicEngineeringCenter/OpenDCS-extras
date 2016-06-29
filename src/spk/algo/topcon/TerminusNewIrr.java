@@ -260,7 +260,7 @@ public class TerminusNewIrr
             double demands[] = actual_irrigation.getDemands(_timeSliceBaseTime);
             double demand = 0.0;
             if( wy_julian_day <= dates.July31 ){
-                for( int i = wy_julian_day; i <= dates.June30; i++){
+                for( int i = wy_julian_day; i <= dates.July31; i++){
                     demand += demands[i];
                 }
             }
