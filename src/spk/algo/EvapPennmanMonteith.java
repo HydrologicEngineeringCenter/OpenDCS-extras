@@ -57,7 +57,7 @@ The equation expects the following units:
  */
 //AW:JAVADOC_END
 public class EvapPennmanMonteith
-	extends spk.algo.support.AlgBaseNew
+	extends decodes.tsdb.algo.AW_AlgorithmBase
 {
 //AW:INPUTS
         // input values, declare a variable, and add the string of the variable name to the _inputNames array
@@ -185,7 +185,7 @@ public class EvapPennmanMonteith
                 // create an output variable and give it's name here
                 // this variable will determine the output interval
 		_aggPeriodVarRoleName = "Evap";
-                
+                /*
                 radian_latitude = (Math.PI/180.0)*latitude;
                 radian_latitude_center_tz = (Math.PI/180.0)*latitude_center_tz;
                 String interval = getInterval("Evap");
@@ -193,7 +193,7 @@ public class EvapPennmanMonteith
                 if(isHourly){
                     C_n = 37;
                 }
-                
+                */
                 
 //AW:INIT_END
 
@@ -233,6 +233,15 @@ public class EvapPennmanMonteith
                 if( uc == null ){
                     uc = decodes.db.CompositeConverter.build(EngineeringUnit.getEngineeringUnit("mm"), eu);
                 }
+                
+                radian_latitude = (Math.PI/180.0)*latitude;
+                radian_latitude_center_tz = (Math.PI/180.0)*latitude_center_tz;
+                String interval = getInterval("Evap");
+                isHourly = interval.equalsIgnoreCase("1hour");
+                if(isHourly){
+                    C_n = 37;
+                }
+                
 //AW:BEFORE_TIMESLICES_END
 	}
 
