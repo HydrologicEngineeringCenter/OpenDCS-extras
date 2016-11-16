@@ -529,6 +529,7 @@ import decodes.cwms.CwmsIntervalDAO;
 import decodes.cwms.CwmsSequenceKeyGenerator;
 import decodes.cwms.CwmsSiteDAO;
 import decodes.cwms.CwmsTimeSeriesDAO;
+import decodes.cwms.CwmsTimeSeriesDb;
 import decodes.cwms.CwmsTsId;
 
 import oracle.jdbc.OraclePreparedStatement;
@@ -763,7 +764,7 @@ public class CwmsTimeSeriesDb_SPK
 
 		postConnectInit(appName);
 		
-		keyGenerator = new CwmsSequenceKeyGenerator(cwmsSchemaVersion);
+		keyGenerator = new CwmsSequenceKeyGenerator(CwmsTimeSeriesDb.CWMS_V_3_0,cwmsSchemaVersion);
 
 		if (dbOfficeId != null && dbOfficeId.length() > 0)
 		{
@@ -953,7 +954,7 @@ public class CwmsTimeSeriesDb_SPK
 	 * the passed object.
 	 * @param siteDatatype the association between sdi, names, & datatypes
 	 */
-	public void expandSDI(DbCompParm parm)
+	public TimeSeriesIdentifier expandSDI(DbCompParm parm)
 		throws DbIoException, NoSuchObjectException
 	{
 		TimeSeriesDAI timeSeriesDAO = makeTimeSeriesDAO();
@@ -963,6 +964,7 @@ public class CwmsTimeSeriesDb_SPK
 				parm.getSiteDataTypeId());
 			parm.setSite(tsid.getSite());
 			parm.setDataType(tsid.getDataType());
+                        return tsid;
 		}
 		finally
 		{

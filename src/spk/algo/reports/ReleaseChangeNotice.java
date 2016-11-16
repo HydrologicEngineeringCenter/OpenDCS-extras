@@ -126,14 +126,7 @@ public class ReleaseChangeNotice
 //               } catch (SQLException ex) {
 //                    Logger.getLogger(ReleaseChangeNotice.class.getName()).log(Level.SEVERE, null, ex);
 //                }
-            Properties properties = System.getProperties();
-            properties.setProperty("mail.smtp.host", smtp_host);
-            properties.setProperty("mail.smtp.port", smtp_port);
-            message_date_format = new SimpleDateFormat( "MM/dd/yyyy HH:mm" );
-            session = Session.getDefaultInstance( properties );
             
-            String site_name = getSiteName( "from", "cwms" );
-            project_name = site_name.split("\\s+")[0];
 //AW:USERINIT_END
             
 	}
@@ -149,6 +142,14 @@ public class ReleaseChangeNotice
 		// For TimeSlice algorithms this is done once before all slices.
 		// For Aggregating algorithms, this is done before each aggregate
 		// period.
+            Properties properties = System.getProperties();
+            properties.setProperty("mail.smtp.host", smtp_host);
+            properties.setProperty("mail.smtp.port", smtp_port);
+            message_date_format = new SimpleDateFormat( "MM/dd/yyyy HH:mm" );
+            session = Session.getDefaultInstance( properties );
+            
+            String site_name = getSiteName( "from", "cwms" );
+            project_name = site_name.split("\\s+")[0];
 //AW:BEFORE_TIMESLICES_END
 	}
 
@@ -275,8 +276,8 @@ public class ReleaseChangeNotice
                  
                  if( send_message == true )
                  {
-                     String email_from = "l2ccp@spk-cwms1.spk.usace.army.mil";
-                     String host = "localhost";
+                     String email_from = from_address;
+                     String host = smtp_host;
                      
                      
                      try {
@@ -284,7 +285,7 @@ public class ReleaseChangeNotice
                          message.setFrom( new InternetAddress(email_from ) );
                          
                          message.addRecipients(Message.RecipientType.TO, send_to_list);
-                         String link = "https://spk-wmlocal1.spk.usace.army.mil/auth_required/release/?project=" + project_name + "&amp;datetime=" + message_date_format.format(_timeSliceBaseTime);
+                         String link = "https://spk-wmlocal2.spk.usace.army.mil/auth_required/release/?project=" + project_name + "&amp;datetime=" + message_date_format.format(_timeSliceBaseTime);
                          message.setSubject("New Release from " + project_name);
                          
                          String msg = "New Release information is availabled from " +project_name + " + please click <a href=\"" + link + "\">Here</a> To check and approve the message";
