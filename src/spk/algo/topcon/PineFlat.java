@@ -166,8 +166,8 @@ public class PineFlat
                     // we now adjust the top con
                     //adjustment = calculate_irrigation();
                     adjustment = this.calculate_irrigation(); //0.0;//graph.normal_irrigation(_timeSliceBaseTime);
-
-                    if( wy_day >= dates.February01 && wy_day <= dates.July31){
+                    
+                    if( wy_day > dates.February01 && wy_day <= dates.July31){
                         
                         space_required = Math.max( 0.0, tcs_snow - adjustment - upstream );
                         // This is allowed to go below zero, it will be bounded below
