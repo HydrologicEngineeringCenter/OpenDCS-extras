@@ -169,7 +169,7 @@ public class AlarmComp
                             
                     Socket s;
                     try {
-                        s = new Socket("spk-wmlocal1.spk.usace.army.mil",(int)51900);
+                        s = new Socket(address,(int)port);
                         s.getOutputStream().write(res.toString().getBytes() );
                         s.close();
                     } catch (IOException ex) {
