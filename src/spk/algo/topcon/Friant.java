@@ -150,7 +150,7 @@ public class Friant
                 // and section 3 of the water control manaul.
                 debug3( "Calculating available upstream storage");
                 if( wy_day >= dates.February01 && wy_day < dates.July31){
-                    upstream = total_gross_pool - (TotalUpstream - max_credit*(1-Math.exp( credit_decay*(decay_offset - (double)wy_day))));
+                    upstream = total_gross_pool - (TotalUpstream + max_credit*(1-Math.exp( credit_decay*(decay_offset - (double)wy_day))));
                 }
                 
                 else{
