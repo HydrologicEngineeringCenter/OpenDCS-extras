@@ -1177,7 +1177,9 @@ public class CwmsTimeSeriesDb_SPK
                                 }
 				q = q + failTimeClause;
 		
-				q = q + " ORDER BY a.RECORD_NUM";
+				//q = q + " ORDER BY a.RECORD_NUM";
+                                // CWMS saves can be slow, group by timeseries for better performance results.
+                                q = q + " ORDER BY a.site_datatype_id, a.start_date_time";
 			
 				ResultSet rs = doQuery(q);
 				while (rs.next())
