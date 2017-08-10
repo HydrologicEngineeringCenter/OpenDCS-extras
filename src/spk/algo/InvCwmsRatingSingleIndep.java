@@ -165,7 +165,12 @@ public class InvCwmsRatingSingleIndep
 			+ depParmRef.compParm.getDataType().getCode() + ";"
 			+ indepTsid.getDataType().getCode() + "."
 			+ templateVersion + "." + specVersion;
-			
+		
+//                specId = specLocation + "." 
+//			+ depParmRef.compParm.getDataType().getCode().replace("-Top Con", "") + ";"
+//			+ indepTsid.getDataType().getCode().replace("-Top Con", "") + "."
+//			+ templateVersion + "." + specVersion;
+//		
 		// Retrieve the RatingSet object
 		try
 		{
