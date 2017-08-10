@@ -1,5 +1,6 @@
 package spk.algo;
 
+import decodes.tsdb.CTimeSeries;
 import java.util.Date;
 
 import ilex.var.NamedVariableList;
@@ -7,9 +8,11 @@ import ilex.var.NamedVariable;
 import decodes.tsdb.DbAlgorithmExecutive;
 import decodes.tsdb.DbCompException;
 import decodes.tsdb.DbIoException;
+import decodes.tsdb.ParmRef;
 import decodes.tsdb.TimeSeriesIdentifier;
 import decodes.tsdb.VarFlags;
 import decodes.tsdb.algo.AWAlgoType;
+import ilex.var.TimedVariable;
 
 
 //AW:IMPORTS
@@ -18,6 +21,8 @@ import java.util.TreeMap;
 import spk.algo.support.StationData;
 import java.util.Map;
 import java.util.Map.Entry;
+import opendcs.dai.TimeSeriesDAI;
+import spk.algo.reports.ReleaseChangeNotice;
 //AW:IMPORTS_END
 
 //AW:JAVADOC
@@ -52,7 +57,7 @@ public class CombineStream_Adv
          */
         public TreeMap< Date, StationData> map;
         // array that holds the primary source transitions
-
+        private TimeSeriesDAI timeSeriesDAO;
         /**
          *  variables for the source to use
          */
@@ -242,8 +247,28 @@ public class CombineStream_Adv
                         have_an_output = false;
                        debug3("you should never see this");
                 }
-
-                if( have_an_output )
+                
+                ParmRef outputParmRef = getParmRef("output");
+                CTimeSeries outputTS = new CTimeSeries(outputParmRef.compParm);
+                
+                double currentout = Double.NEGATIVE_INFINITY;
+                try
+                {
+                        timeSeriesDAO = tsdb.makeTimeSeriesDAO();
+                        //TimedVariable currentoutput = 
+                        timeSeriesDAO.fillTimeSeries(outputTS, _timeSliceBaseTime,_timeSliceBaseTime );
+                        TimedVariable currentoutput = outputTS.findWithin(_timeSliceBaseTime, 0);
+                        currentout = currentoutput.getDoubleValue();
+                        
+                }
+                catch (Exception e)
+                {
+                        // any error means the data doesn't exist yet so we have to right it out
+                } finally{
+                    timeSeriesDAO.close();
+                }
+                debug3( "existing output= " + currentout);
+                if( have_an_output && !ReleaseChangeNotice.fequals(currentout,output,0.0001) )
                 {
                     debug3( "output= " + output );
                     setOutput( this.output, output );
