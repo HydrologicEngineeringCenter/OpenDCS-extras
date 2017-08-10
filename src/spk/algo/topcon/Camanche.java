@@ -81,7 +81,8 @@ public class Camanche
         public double max_snow_lower_bear = 52000;
         public double percent_lower_bear = .25;
         public double snow_percent = .8;
-        public double pardee_gross_pool = 197950;
+        public double pardee_gross_pool = 203800;
+        
 	String _propertyNames[] = { "graph_file", "StorAll", "irrigation_demand_file", "max_rain_salt_springs", "max_snow_salt_springs", "percent_salt_springs","max_rain_lower_bear", "max_snow_lower_bear", "percent_lower_bear", "snow_percent", "pardee_gross_pool"};
 //AW:PROPERTIES_END
         // total_gross_pool should probably be 622530, if you add all of the reservoirs on the daily reports. 
@@ -169,14 +170,17 @@ public class Camanche
                     
                     // the math in the diagram is based on these being space required, the difl file has everything listed
                     // Actual Top of Conservation
-                    double gross_reservation = Math.max( graph.get_upper_bound(wy_day-1) - tcs_rain, graph.get_upper_bound(wy_day-1)-tcs_snow ); 
+                    //double gross_reservation = Math.max( graph.get_upper_bound(wy_day-1) - tcs_rain, graph.get_upper_bound(wy_day-1)-tcs_snow ); 
+                    double gross_reservation = Math.max( graph.gross_pool() - tcs_rain, graph.gross_pool()-tcs_snow ); 
                     if( gross_reservation > 200000){
                         gross_reservation = 200000;
                     }
                     
+                    
+                    
                     //section 2
                     double transferable_space      = gross_reservation - (graph.gross_pool()-non_transferable_space);
-                    
+                    //transferable_space = Math.max( transferable_space, 0 );
                     // rain credits
                     //section 3 a
                     double salt_springs_space_available = Math.max(0, max_rain_salt_springs-salt_springs);
