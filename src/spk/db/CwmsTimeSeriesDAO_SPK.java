@@ -391,13 +391,14 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 	public int fillTimeSeries(CTimeSeries ts, Collection<Date> queryTimes)
 		throws DbIoException, BadTimeSeriesException
 	{
+                fillTimeSeriesMetadata(ts); // may throw BadTimeSeriesException
 		String qbase = "select DATE_TIME, ROUND(VALUE,8), QUALITY_CODE "
 			+ "FROM CWMS_V_TSV_DQU " 
 			+ "where TS_CODE = " + ts.getSDI()
 			+ " AND UNIT_ID = " + sqlString(ts.getUnitsAbbr()) + " "
 			+ " and DATE_TIME IN (";
 
-		fillTimeSeriesMetadata(ts); // may throw BadTimeSeriesException
+		
 		
 		int datesPerQuery = 300;
 		int start = 0;
