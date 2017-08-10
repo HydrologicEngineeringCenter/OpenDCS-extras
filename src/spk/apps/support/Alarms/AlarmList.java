@@ -57,7 +57,7 @@ public class AlarmList {
 
                 String parts[] = line.split(",");        
                 String ts_units = parts[0];
-                String ts = ts_units.split(";")[0];
+                String ts = ts_units.split("\\|")[0];
                 Alarm a = new Alarm(line);
 
                 ArrayList<Alarm> list = alarms.get(ts);

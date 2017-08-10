@@ -39,7 +39,7 @@ public class Alarm {
     
     public Alarm( String alarm_line ){
         String parts[] = alarm_line.split(",");
-        String tsid_units[] = parts[0].split(";");
+        String tsid_units[] = parts[0].split("\\|");
         timeseries_id = tsid_units[0];
         units = tsid_units[1];
         String color_priority[] = parts[3].split(";");
