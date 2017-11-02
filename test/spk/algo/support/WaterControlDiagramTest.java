@@ -52,7 +52,7 @@ public class WaterControlDiagramTest {
     @Test
     public void testLoad_graph() {
         System.out.println("load_graph");
-        String graph_file = "C:\\compsystem_cwms\\sup\\tcs\\diagrams\\blb_diagram.txt";
+        String graph_file = "C:\\shared\\production\\config\\topcon\\blackbutte";
         WaterControlDiagram instance = new WaterControlDiagram();
         try
         {
@@ -64,6 +64,15 @@ public class WaterControlDiagramTest {
             fail( "The function has generated an exception" );
         }
 
+        System.out.println("load_graph fbo");
+        instance = new WaterControlDiagram();
+        graph_file = "C:\\shared\\production\\config\\topcon\\folsomfbo";
+        try{
+            instance.load_graph(graph_file);
+        } catch( java.lang.Exception e){
+            e.printStackTrace();
+            fail("Failed to load FBO data");
+        }
     }
 
     /**
@@ -74,7 +83,7 @@ public class WaterControlDiagramTest {
         System.out.println("get_allowed_storage");
         int day = 0;
         double fcp = 0.0;
-        String graph_file = "C:\\compsystem_cwms\\sup\\tcs\\diagrams\\blb_diagram.txt";
+        String graph_file = "C:\\shared\\production\\config\\topcon\\blackbutte";
         WaterControlDiagram instance = new WaterControlDiagram();
         try
         {
@@ -132,7 +141,7 @@ public class WaterControlDiagramTest {
         System.out.println("interpolate_graph_line");
         int day = 0;
         double fcp = 0.0;
-        String graph_file = "C:\\compsystem_cwms\\sup\\tcs\\diagrams\\blb_diagram.txt";
+        String graph_file = "C:\\shared\\production\\config\\topcon\\blackbutte";
         WaterControlDiagram instance = new WaterControlDiagram();
         try
         {
@@ -173,10 +182,10 @@ public class WaterControlDiagramTest {
         System.out.println("get_allowed_storage");
         int day = 144;
         double fcp = 0.0;
-        double high_bound_test = 60000;
+        double high_bound_test = 49650;
         double low_bound_test = -200;
         double good_value = 36000;
-        String graph_file = "C:\\compsystem_cwms\\sup\\tcs\\diagrams\\blb_diagram.txt";
+        String graph_file = "C:\\shared\\production\\config\\topcon\\blackbutte";
         WaterControlDiagram instance = new WaterControlDiagram();
         try
         {
