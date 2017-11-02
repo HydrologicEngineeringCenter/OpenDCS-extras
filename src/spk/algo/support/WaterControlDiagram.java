@@ -44,7 +44,7 @@ public class WaterControlDiagram
         double          restricted_pool = Double.NEGATIVE_INFINITY;
         double            max_snowspace = 0.0;
         ExponentialEquation           equation = null;
-
+        FBOCurves           fbo_curves = null;
         
         public WaterControlDiagram()
         {
@@ -55,6 +55,7 @@ public class WaterControlDiagram
             upper_bound = new ArrayList< Double >();
             times = new ArrayList<Double>();
             irrigation = new ArrayList<Double>();
+            fbo_curves = new FBOCurves();
         }
 
         public WaterControlDiagram( String graph_file ) throws Exception
@@ -65,6 +66,7 @@ public class WaterControlDiagram
             upper_bound = new ArrayList< Double >();
             times = new ArrayList<Double>();
             irrigation = new ArrayList<Double>();
+               fbo_curves = new FBOCurves();
             this.load_graph( graph_file );
         }
         /**
@@ -171,6 +173,9 @@ public class WaterControlDiagram
                     else if( section.equals("restricted_pool")){
                         this.restricted_pool = Double.parseDouble(parts[1]);
                 
+                    }
+                    else if( section.equalsIgnoreCase("fbo_curve")){
+                        this.fbo_curves.add_curve(parts[1].trim());
                     }
                 }
 
@@ -627,6 +632,10 @@ public class WaterControlDiagram
         
         public double get_max_snowspace(){
             return this.max_snowspace;
+        }
+        
+        public FBOCurves get_fbo_curves(){
+            return this.fbo_curves;
         }
         
 }
