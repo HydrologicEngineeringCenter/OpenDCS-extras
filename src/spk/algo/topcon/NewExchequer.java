@@ -258,7 +258,7 @@ public class NewExchequer
                 end_time = wy_julian_day+20; // next 20 days
             }
             else{
-                end_time = dates.June16;
+                end_time = dates.June15; // Changed per Ticket at request of Kevin Ricardson
             }
                 
             for( int i = wy_julian_day; i <= end_time; i++){
