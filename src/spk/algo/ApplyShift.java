@@ -123,10 +123,14 @@ public class ApplyShift
 //AW:TIMESLICE
 		// Enter code to be executed at each time-slice.
 		double shift = this.getShift(_timeSliceBaseTime);
+                double pzf = this.getPZF(_timeSliceBaseTime);
                 debug3( "The shift for " + _timeSliceBaseTime + " is " + shift);
                 double value = Math.max( shift+input, this.MinimumValue );
-
-                debug3( " " + input + " + " + shift + " = " + value);
+                if( !isMissing( pzf ) ){
+                    value = Math.max( value, pzf );
+                }
+                
+                debug3( String.format( "%.02f + %.02f = %.02f (pzf = %f)", input,shift,value, pzf ) );
                 setFlagBits(output, getInputFlagBits("input"));
                 setOutput( output, value );
                 
@@ -198,6 +202,19 @@ public class ApplyShift
             }
 
             return 0.0;
+        }
+        
+        public double getPZF( Date sliceTime ){
+            if( map == null ) return 0.0; // if there is no config, we assume no shift
+            Map.Entry<Date,StationData> d = map.floorEntry(sliceTime);
+            if( d != null )
+            {
+                StationData v = d.getValue();
+                debug3( "pulled " + v.point_zero_flow + " entered by " + v.who );
+                return v.point_zero_flow;
+            }
+
+            return Double.NEGATIVE_INFINITY;
         }
 
 }

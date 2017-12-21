@@ -42,6 +42,13 @@ public class StationData {
      * person who last edited things
      */
     public String who;
+    /**
+     * Point of Zero flow, used in the 
+     * shift calculation to make sure the 
+     * value never goes below the rating table
+     */
+    public Double point_zero_flow;
+    
 
     /**
      * Read in the parameter file data
@@ -59,7 +66,8 @@ public class StationData {
             Date date;
             SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
-            String date_str, shift, feed,entered,who,line = null;
+            String date_str, shift, feed,entered,who,line,pzf = null;
+            
             String parts[] = null;
             while( (line = reader.readLine()) != null )
             {
@@ -70,12 +78,21 @@ public class StationData {
                     feed = parts[2];
                     entered = parts[3];
                     who = parts[4];
+                    if( parts.length > 5){
+                        pzf = parts[5];
+                    }
+                    
                     // convert date
                     // convert shift
                     StationData d = new StationData();
                     date = df.parse(date_str);
                     d.shift = Double.parseDouble(shift);
                     d.who = who;
+                    if( pzf != null && !pzf.isEmpty() ){
+                        d.point_zero_flow = Double.parseDouble(pzf);
+                    } else{
+                        d.point_zero_flow = Double.NEGATIVE_INFINITY;
+                    }
                     d.date_entered = df.parse(entered);
                     feed = feed.trim();
                     Logging.debug3(" processing for " + date_str + " shift=" +d.shift + " and primary feed of '" + feed + "' " + "entered by " + d.who);
