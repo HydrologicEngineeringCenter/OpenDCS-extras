@@ -908,10 +908,10 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
         debug3( "Getting output parameter reference");        
         ParmRef pr = getParmRef(parmRefName);
         String interval = pr.timeSeries.getInterval();
-        //int seconds_back = -1*(decodes.tsdb.IntervalCodes.getIntervalSeconds(interval));
-        int interval_constant = IntervalCodes.getInterval(interval).getCalConstant();
-        //debug3( "interval = " + seconds_back + " seconds");
-        cal.add( interval_constant, -1); // get the previous interval
+        int seconds_back = -1*(decodes.tsdb.IntervalCodes.getIntervalSeconds(interval));
+        int interval_constant = IntervalCodes.getInterval(interval).getCalConstant();         
+        debug3( "interval = " + seconds_back + " seconds");
+        cal.add( Calendar.SECOND, -1*IntervalCodes.getIntervalSeconds(interval) ); // get the previous interval
         previous_fcp_date = cal.getTime();
         debug3("intial date" + tsbasetime);
         debug3("calculated date" + previous_fcp_date);
