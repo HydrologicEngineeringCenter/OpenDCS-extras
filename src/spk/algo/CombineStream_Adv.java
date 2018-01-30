@@ -74,7 +74,8 @@ public class CombineStream_Adv
 
 //AW:PROPERTIES        
         public String StationsDir = "/shared/stations/";
-	String _propertyNames[] = { "StationsDir" };
+        public boolean checkPZF = false;
+	String _propertyNames[] = { "StationsDir", "checkPZF" };
 //AW:PROPERTIES_END
 
 	// Allow javac to generate a no-args constructor.
@@ -248,6 +249,9 @@ public class CombineStream_Adv
                        debug3("you should never see this");
                 }
                 
+                if( checkPZF && have_an_output ){
+                    output = Math.max(output, getPZF(_timeSliceBaseTime));
+                }                
                 ParmRef outputParmRef = getParmRef("output");
                 CTimeSeries outputTS = new CTimeSeries(outputParmRef.compParm);
                 
@@ -347,6 +351,16 @@ public class CombineStream_Adv
                 debug3( "no entry found for this sensor/date" );
             }
             return GOES;
+        }
+        
+        public double getPZF( Date sliceTime ){
+            if( map != null ){                            
+                Map.Entry<Date,StationData> d = map.floorEntry(sliceTime);
+                if( d!=null){
+                    return d.getValue().point_zero_flow;
+                }
+            }
+            return Double.NEGATIVE_INFINITY;
         }
 
 }

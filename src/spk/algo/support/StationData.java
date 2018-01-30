@@ -63,7 +63,7 @@ public class StationData {
         try{
             File f = new File( file );
             BufferedReader reader = new BufferedReader( new FileReader(f)  );
-            Date date;
+            Date date,date_entered;
             SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
             String date_str, shift, feed,entered,who,line,pzf = null;
@@ -85,7 +85,7 @@ public class StationData {
                     // convert date
                     // convert shift
                     StationData d = new StationData();
-                    date = df.parse(date_str);
+                    date = df.parse(date_str);                    
                     d.shift = Double.parseDouble(shift);
                     d.who = who;
                     if( pzf != null && !pzf.isEmpty() ){
@@ -118,7 +118,14 @@ public class StationData {
                         d.primary_feed = 0;// default to goes if unknown
                     }
 
-                    map.put(date, d);
+                    StationData tmp = map.get(date);
+                    if( tmp == null ){
+                        map.put(date, d);
+                    } else {
+                        if( d.date_entered.getTime() > tmp.date_entered.getTime() ){
+                            map.put(date, d); // if there is a newer entry, overwrite it 
+                        }
+                    }
 
             
             }
