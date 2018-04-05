@@ -73,7 +73,7 @@ public class TopConRainOnly
                 }
                 catch( Exception e)
                 {
-                    debug3( "Failed to initialize comp: \n" + e.getMessage() );
+                    debug3( "Failed to initialize comp: \n" + e.toString());
                     debug3( "Aborting computation");
                     throw new DbCompException("Fail to initialize comp");
                 }
