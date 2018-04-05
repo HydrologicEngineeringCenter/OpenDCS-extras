@@ -144,7 +144,7 @@ public class FolsomFBOParameter
                 
                 CTimeSeries ts = this.tsdb.makeTimeSeries(this.getParmTsId("forecast") );
                 ts.setUnitsAbbr(this.getParmUnitsAbbr("forecast"));
-                this.tsdb.fillTimeSeries(ts, _timeSliceBaseTime, future);
+                this.tsdb.fillTimeSeries(ts, _timeSliceBaseTime, future,true,true,true);
                 
                 double accumulation = 0.0;
                 double oneday = 0.0;
@@ -157,7 +157,7 @@ public class FolsomFBOParameter
                     conversion = 3600; // 1 cms * 3600 s => 3600.
                 }
                 
-                if( ts.size() >= (hours_future+1) ){
+                if( ts.size() >= (hours_future-1) ){
                     for(int i = 0; i < 5*24; i++ ){
                         accumulation += ts.sampleAt(i).getDoubleValue()*conversion;
                         switch(i){
