@@ -246,21 +246,22 @@ public class PineFlat
         /*
          * Cacluate the irritation to 10th of June until 26th of May.
          * After the 26th of May sum the sort of 15days or until the 31st of July
-         */
+         * Proper dates provided by Kevin with ticket #3003.
+        */
         public double calculate_irrigation()throws Exception{
             
             int wy_julian_day = DateTime.to_wy_julian(_timeSliceBaseTime);
             double demands[] = irrigation.getDemands(_timeSliceBaseTime);
             double demand = 0.0;
             int end_time = -1;
-            if( wy_julian_day >= dates.July31 - 20){
+            if( wy_julian_day >= dates.July31 - 15 /*20*/){
                 end_time = dates.July31;
             }
-            else if( wy_julian_day >= dates.June16 ){
-                end_time = wy_julian_day+20; // next 15 days
+            else if( wy_julian_day >= dates.May26 /*June16*/ ){
+                end_time = wy_julian_day+15 /*20*/; // next 15 days
             }
             else{
-                end_time = dates.June16;
+                end_time = dates.June10 /*16*/;
             }
                 
             for( int i = wy_julian_day; i <= end_time; i++){
