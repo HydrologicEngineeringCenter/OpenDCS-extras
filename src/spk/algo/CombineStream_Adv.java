@@ -1,5 +1,7 @@
 package spk.algo;
 
+import decodes.db.CompositeConverter;
+import decodes.db.EngineeringUnit;
 import decodes.tsdb.CTimeSeries;
 import java.util.Date;
 
@@ -13,7 +15,7 @@ import decodes.tsdb.TimeSeriesIdentifier;
 import decodes.tsdb.VarFlags;
 import decodes.tsdb.algo.AWAlgoType;
 import ilex.var.TimedVariable;
-
+import decodes.db.UnitConverter;
 
 //AW:IMPORTS
 // Place an import statements you need here.
@@ -65,6 +67,7 @@ public class CombineStream_Adv
         public static final int IP = 1;
         public static final int LOS = 2;
         public static final int OFF = 3;
+        //UnitConverter uc = null;
 //AW:LOCALVARS_END
 
 //AW:OUTPUTS
@@ -144,7 +147,11 @@ public class CombineStream_Adv
                 units_o = getParmRef( "output").timeSeries.getUnitsAbbr();
                 //units_i1 = ref1.timeSeries.getUnitsAbbr();
                 //units_i2 = ref2.timeSeries.getUnitsAbbr();
-
+                //EngineeringUnit us = EngineeringUnit.getEngineeringUnit("ft");
+                //EngineeringUnit si = EngineeringUnit.getEngineeringUnit(units_o);
+                //UnitConverter uc = CompositeConverter.build(us, si);
+                
+                
                 debug3( "time series units are:" );
                 debug3( "    goes: " + units_goes );
                 debug3( "      ip: " + units_ip );
@@ -249,9 +256,10 @@ public class CombineStream_Adv
                        debug3("you should never see this");
                 }
                 
+                /*
                 if( checkPZF && have_an_output ){
-                    output = Math.max(output, getPZF(_timeSliceBaseTime));
-                }                
+                    output = Math.max(output, getPZF(_timeSliceBaseTime,getInputUnitsAbbr("goes")));
+                } */               
                 ParmRef outputParmRef = getParmRef("output");
                 CTimeSeries outputTS = new CTimeSeries(outputParmRef.compParm);
                 
@@ -353,11 +361,19 @@ public class CombineStream_Adv
             return GOES;
         }
         
-        public double getPZF( Date sliceTime ){
+        public double getPZF( Date sliceTime, String to_units ){
             if( map != null ){                            
                 Map.Entry<Date,StationData> d = map.floorEntry(sliceTime);
                 if( d!=null){
-                    return d.getValue().point_zero_flow;
+                    double _d = d.getValue().point_zero_flow; // assume us units for now
+                    try{
+                        EngineeringUnit to = EngineeringUnit.getEngineeringUnit(to_units);
+                        EngineeringUnit from = EngineeringUnit.getEngineeringUnit(d.getValue().point_zero_flow_units );
+                        UnitConverter uc = CompositeConverter.build(from,to);
+                        return  uc.convert(_d);
+                    } catch(Exception err) {
+                        return _d;
+                    }
                 }
             }
             return Double.NEGATIVE_INFINITY;
