@@ -1153,6 +1153,13 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
     public Date getEndDate(){
         return (Date)this.baseTimes.last();
     }
+    /**
+     * Simple method that unit tests can use to loop through data
+     * @param dt date for this time slice 
+     */
+    public void setTimeSliceBaseTime( Date dt ){
+        this._timeSliceBaseTime = dt;
+    }
     
     
     
