@@ -48,7 +48,11 @@ public class StationData {
      * value never goes below the rating table
      */
     public Double point_zero_flow;
-    
+    /**
+     * Point of Zero flow Units, used in the shift or combined calculation
+     * to adjust value for minimum values
+     */
+    public String point_zero_flow_units;
 
     /**
      * Read in the parameter file data
@@ -89,6 +93,13 @@ public class StationData {
                     d.shift = Double.parseDouble(shift);
                     d.who = who;
                     if( pzf != null && !pzf.isEmpty() ){
+                        String p2[] = pzf.split("\\s+");
+                        d.point_zero_flow = Double.parseDouble(p2[0]);
+                        if( p2.length > 1 ){
+                            d.point_zero_flow_units = p2[1];
+                        } else {
+                            d.point_zero_flow_units = "na";
+                        }
                         d.point_zero_flow = Double.parseDouble(pzf);
                     } else{
                         d.point_zero_flow = Double.NEGATIVE_INFINITY;
@@ -146,5 +157,6 @@ public class StationData {
             
         return null;
     }
+    
 
 }
