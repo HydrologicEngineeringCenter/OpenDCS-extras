@@ -7,6 +7,7 @@
 
 package spk.algo.support;
 
+import java.io.BufferedInputStream;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.TreeMap;
@@ -15,6 +16,8 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,8 +68,9 @@ public class StationData {
     {
         TreeMap<Date, StationData> map = new TreeMap<Date, StationData>();
         try{
-            File f = new File( file );
-            BufferedReader reader = new BufferedReader( new FileReader(f)  );
+            
+            
+            BufferedReader reader = new BufferedReader( new InputStreamReader(Resource.fromURI(URI.create(file)))  );
             Date date,date_entered;
             SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
@@ -153,6 +157,8 @@ public class StationData {
         catch( java.text.ParseException pe )
         {
             Logging.info( pe.getMessage() );
+        } catch (Exception ex) {
+            Logger.getLogger(StationData.class.getName()).log(Level.SEVERE, null, ex);
         }
             
         return null;

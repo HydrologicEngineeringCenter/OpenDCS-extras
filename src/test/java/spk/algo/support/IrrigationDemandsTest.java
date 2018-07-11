@@ -19,65 +19,88 @@ import static org.junit.Assert.*;
  * @author L2EDDMAN
  */
 public class IrrigationDemandsTest {
-        private SimpleDateFormat df;
-    public IrrigationDemandsTest() {
+
+    private SimpleDateFormat df;
+    double delta = 0.0001;
+    Date Feb4_2017 = null;
+    Date Jan1_2010 = null;
+    Date Feb1_2016 = null;
+            
+    public IrrigationDemandsTest() throws ParseException {
         df = new SimpleDateFormat("MM/dd/yyyy");
+        Feb4_2017 = df.parse("02/04/2017");
+        Jan1_2010 = df.parse("01/01/2010");
+        Feb1_2016 = df.parse("02/01/2016");
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
-        
+
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
 
     @Test
-    public void testSomeMethod() throws ParseException {
-        // TODO review the generated test code and remove the default call to fail.
-        //fail("The test case is a prototype.");
-        System.out.println("reading file");
-        try{
-         IrrigationDemands d = new IrrigationDemands( "C:\\tests\\PNF.irr");
-         
-        }
-        catch( Exception e){
-            e.printStackTrace();
-            fail("exception thrown");
-        }
+    public void testLoadFile() throws Exception {
+        IrrigationDemands d = new IrrigationDemands("classpath:/data/irrigation_demands/DNP.irr");
     }
 
+    @Test
+    public void testGetDemandsSimple() throws Exception {
+        IrrigationDemands d = new IrrigationDemands("classpath:/data/irrigation_demands/DNP.irr");
+        Date t1 = df.parse("02/04/2017");
+        Dates dates = new Dates(t1);
+        double list[] = d.getDemands(t1);
+        assertEquals("List value doesn't match required value",180.0,list[dates.February04],.0001);
+    }
+    
+    /**
+     * Test that January is 0 (provided files should not have a january flow defined)
+     */
+    @Test
+    public void testJanuaryIs0() throws Exception {
+        IrrigationDemands d = new IrrigationDemands("classpath:/data/irrigation_demands/DNP.irr");
+        Dates datesT1 = new Dates(Feb4_2017);
+        double list[] = d.getDemands(Feb4_2017);
+        assertEquals("first value not 0", list[datesT1.January01], 0.0, delta);
+    }
+    
     /**
      * Test of getDemands method, of class IrrigationDemands.
      */
     @Test
-    public void testGetDemands() throws Exception {
-        double delta = 0.0001;
-        System.out.println("getDemands");
-        IrrigationDemands d = new IrrigationDemands( "C:\\tests\\PNF.irr");
-        Date t1 = df.parse("01/01/2010");
-        Date t2 = df.parse("01/01/2012");
-        double list[] = d.getDemands(t1);
-        assertEquals( "first value not 0", list[0], 0.0, delta );
-        assertEquals( "July 31st not 5250.0" ,list[304], 5250.0, delta );
-         
-        d = new IrrigationDemands( "C:\\tests\\TRM.irr");
-        list = d.getDemands(t2);
-         
-        assertEquals( "first value not 0", list[0], 0.0, delta);
-        assertEquals( "Feb 29 is the february value", list[152], 30.0, delta );
-        assertEquals( "Mar 01 is the march value ",   list[153], 200.0, delta );
-         
-        // TODO review the generated test code and remove the default call to fail.
-        
+    public void testGetDemandsComplexFile() throws Exception {
+        IrrigationDemands d = new IrrigationDemands("classpath:/data/irrigation_demands/PNF.irr");
+        Dates datesT1 = new Dates(Jan1_2010);
+        double[] list = d.getDemands(Jan1_2010);
+        assertEquals("July 31st not 5250.0", list[datesT1.July31], 5250.0, delta);
     }
+    
+    @Test
+    public void testGetDemandsFeb29() throws Exception{
+        IrrigationDemands d = new IrrigationDemands("classpath:/data/irrigation_demands/PNF.irr");        
+        Dates datesT2 = new Dates(Feb1_2016);
+        double[] list = d.getDemands(Feb1_2016);        
+        assertEquals("Feb 29 is the february value", 150, list[datesT2.February29], delta);
+    }
+    
+    @Test
+    public void testGetDemandsMar1() throws Exception{
+        IrrigationDemands d = new IrrigationDemands("classpath:/data/irrigation_demands/PNF.irr");        
+        Dates datesT2 = new Dates(Feb1_2016);
+        double[] list = d.getDemands(Feb1_2016);        
+        assertEquals("Mar 01 is the march value ", 400, list[datesT2.March01], delta);        
+    }
+    
+    
 }

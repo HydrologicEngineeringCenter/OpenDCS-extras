@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,12 +38,13 @@ public class IrrigationDemands {
          */
         private TreeMap< Date, ArrayList<Double> > demands;
     
-        public IrrigationDemands( String filename ) throws DbCompException, FileNotFoundException, IOException, ParseException, java.text.ParseException{
+        public IrrigationDemands( String filename ) throws DbCompException, FileNotFoundException, IOException, ParseException, java.text.ParseException, Exception{
             SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-            File f = new File(filename);
-            if(!f.exists())
+            InputStream is = Resource.fromURI(URI.create(filename));
+            
+            if(is == null)
                 throw new DbCompException("No irrigation demand file, this project requires one");
-            BufferedReader reader = new BufferedReader( new FileReader(f) );
+            BufferedReader reader = new BufferedReader( new InputStreamReader(is) );
             JSONParser parser = new JSONParser();
             demands = new TreeMap< Date, ArrayList<Double> >();
             

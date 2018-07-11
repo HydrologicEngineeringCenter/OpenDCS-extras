@@ -19,6 +19,8 @@ import decodes.tsdb.TsGroup;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import opendcs.dai.IntervalDAI;
 import opendcs.dai.ScheduleEntryDAI;
 import opendcs.dai.TimeSeriesDAI;
@@ -29,7 +31,7 @@ import opendcs.dai.TimeSeriesDAI;
  */
 public class TestDatabase extends TimeSeriesDb{
 
-    
+    TimeSeriesDAI tsdai = null;
     
     
     @Override
@@ -90,16 +92,28 @@ public class TestDatabase extends TimeSeriesDb{
 
     @Override
     public TimeSeriesDAI makeTimeSeriesDAO() {
-        return new TestDbTimeSeriesDAO();
+        try {
+            if( tsdai == null ){
+                tsdai = new TestDbTimeSeriesDAO();
+            }
+            return tsdai;
+        } catch (Exception ex) {
+            Logger.getLogger(TestDatabase.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
     @Override
     public TimeSeriesIdentifier expandSDI(DbCompParm parm) throws DbIoException, NoSuchObjectException {
         TimeSeriesDAI tsdai = this.makeTimeSeriesDAO();
         TimeSeriesIdentifier tsi = tsdai.getTimeSeriesIdentifier(parm.getSiteDataTypeId());
-        parm.setSite(tsi.getSite());
-        parm.setDataType(tsi.getDataType());
+        if( tsi != null ){
+            parm.setSite(tsi.getSite());
+            parm.setDataType(tsi.getDataType());
+        } 
+        
         return tsi;
+        
     }
 
     @Override

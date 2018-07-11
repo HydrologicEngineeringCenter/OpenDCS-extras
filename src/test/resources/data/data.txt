@@ -1,0 +1,5 @@
+0,TEST.Stage.Inst.15Minutes.0.GOES-raw,ft
+#1,TEST.Stage.Inst.15Minutes.0.LOS-raw,ft
+#2,TEST.Stage.Inst.15Minutes.0.IP-raw,ft
+3,TEST.Stage.Inst.15Minutes.0.Combined-raw,ft
+4,TEST.Stage.Inst.15Minutes.0.Combined-raw_missing,ft

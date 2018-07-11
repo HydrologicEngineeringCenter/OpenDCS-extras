@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -40,6 +41,7 @@ public class HADATest {
      * Test of subup method, of class HADA.
      */
     @Test
+    @Ignore
     public void testSubup() {
         System.out.println("subup");
         int day = 0;

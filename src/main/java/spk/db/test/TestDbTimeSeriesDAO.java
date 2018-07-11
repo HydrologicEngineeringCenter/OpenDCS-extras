@@ -33,36 +33,21 @@ public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
     public static final DbKey DATA_STAGE_GOES = DbKey.createDbKey(0);
     public static final DbKey DATA_STAGE_LOS = DbKey.createDbKey(1);
     public static final DbKey DATA_STAGE_IP = DbKey.createDbKey(2);
+    public static final DbKey DATA_STAGE_COMB = DbKey.createDbKey(3);
+    public static final DbKey DATA_STAGE_COMB_missing= DbKey.createDbKey(4);
     
-    public static final DbKey DATA_FLOW = DbKey.createDbKey(3);
+    public static final DbKey DATA_FLOW = DbKey.createDbKey(5);
     
     private HashMap<DbKey,CTimeSeries> timeseries;
     
     
-    public TestDbTimeSeriesDAO() {
-        try {
-            fixtures = Fixtures.getFixtures();
+    public TestDbTimeSeriesDAO() throws Exception {
+        
+        fixtures = Fixtures.getFixtures(this);
+
+        //timeseries = new HashMap<>();
+
             
-            timeseries = new HashMap<>();
-            
-            TimeSeriesIdentifier tsid = new CwmsTsId();
-            tsid.setUniqueString("TEST.Stage.Inst.15Minutes.0.GOES-raw");
-            tsid.setKey( DbKey.createDbKey(0));
-            tsid.setSiteName("TEST");
-            tsid.setDataType(new DataType("cwms", "Stage"));
-            CTimeSeries cts = this.makeTimeSeries(tsid);
-            cts.setTimeSeriesIdentifier(tsid);
-            timeseries.put(DbKey.createDbKey(0), cts);
-            // add data to a file
-            
-            
-        } catch (DbIoException ex) {
-            Logger.getLogger(TestDbTimeSeriesDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchObjectException ex) {
-            Logger.getLogger(TestDbTimeSeriesDAO.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (BadTimeSeriesException ex) {
-            Logger.getLogger(TestDbTimeSeriesDAO.class.getName()).log(Level.SEVERE, null, ex);
-        }
         
     }
 
@@ -73,7 +58,12 @@ public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
 
     @Override
     public TimeSeriesIdentifier getTimeSeriesIdentifier(DbKey key) throws DbIoException, NoSuchObjectException {
-        return this.timeseries.get(key).getTimeSeriesIdentifier();
+        CTimeSeries cts = fixtures.getDC().getTimeSeriesByUniqueSdi(key);
+        if( cts != null ){
+            return cts.getTimeSeriesIdentifier();
+        } else {
+            throw new NoSuchObjectException("No time series for DbKey: " + key.toString() );
+        }
     }
 
     @Override
@@ -83,7 +73,13 @@ public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
 
     @Override
     public int fillTimeSeries(CTimeSeries ts, Date from, Date until) throws DbIoException, BadTimeSeriesException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        CTimeSeries from_dc = fixtures.getDC().getTimeSeriesByUniqueSdi(ts.getSDI());
+        if( from_dc == null ) return 0;
+        ts.setTimeSeriesIdentifier(from_dc.getTimeSeriesIdentifier());
+        for( int i = 0; i < from_dc.size(); i++ ){
+            ts.addSample(from_dc.sampleAt(i));
+        }
+        return from_dc.size();
     }
 
     @Override
@@ -149,7 +145,7 @@ public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
 
     @Override
     public void close() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
     
 }

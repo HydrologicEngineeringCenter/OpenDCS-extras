@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package spk.algo.support;
 
 import java.util.TreeMap;
@@ -20,6 +19,8 @@ import static org.junit.Assert.*;
  * @author L2EDDMAN
  */
 public class StationDataTest {
+
+    String uri = "classpath:/shared/stations/TEST.Stage.station";
 
     public StationDataTest() {
     }
@@ -45,20 +46,25 @@ public class StationDataTest {
      */
     @Test
     public void testLoadData() {
-        System.out.println("loadData");
-        String file = "C:\\ccptestdata\\ALS.station";
-        TreeMap expResult = null;
-        TreeMap<Date, StationData> result = StationData.loadData(file);
+        TreeMap<Date, StationData> result = StationData.loadData(uri);
         assertNotNull(result);
-        System.out.println( result.keySet() );        
-        StationData d = result.floorEntry(new Date() ).getValue();
-        assertNotNull(d);
-        System.out.println("Shift is " + d.shift + " created by " + d.who);
-        assertEquals(0.2, d.shift, 0.05);
-        //assertEquals( "l2eddman", d.who);
-        
+    }
 
-        
+    @Test
+    public void testGetRow() {
+        TreeMap<Date, StationData> result = StationData.loadData(uri);
+
+        StationData d = result.floorEntry(new Date()).getValue();
+        assertNotNull(d);
+    }
+
+    @Test
+    public void testGetShift() {
+        TreeMap<Date, StationData> result = StationData.loadData(uri);
+        StationData d = result.floorEntry(new Date()).getValue();
+        assertEquals(0.0, d.shift, 0.0001);
+        //assertEquals( "l2eddman", d.who);
+
     }
 
 }

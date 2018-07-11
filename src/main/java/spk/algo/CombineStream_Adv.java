@@ -144,7 +144,7 @@ public class CombineStream_Adv
                 units_goes = getInputUnitsAbbr( "goes" );
                 units_ip = getInputUnitsAbbr( "ip" );
                 units_los = getInputUnitsAbbr( "los" );
-                units_o = getParmRef( "output").timeSeries.getUnitsAbbr();
+                //units_o = getParmRef( "output").timeSeries.getUnitsAbbr();
                 //units_i1 = ref1.timeSeries.getUnitsAbbr();
                 //units_i2 = ref2.timeSeries.getUnitsAbbr();
                 //EngineeringUnit us = EngineeringUnit.getEngineeringUnit("ft");
