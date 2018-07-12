@@ -21,6 +21,7 @@ import decodes.tsdb.DuplicateTimeSeriesException;
 import decodes.tsdb.ParmRef;
 import decodes.tsdb.TimeSeriesDb;
 import ilex.var.TimedVariable;
+import java.lang.reflect.Field;
 import java.util.Date;
 import opendcs.dai.TimeSeriesDAI;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import spk.db.test.TestDatabase;
 import spk.db.test.TestDbTimeSeriesDAO;
+import spk.db.test.UnitHelpers;
 
 /**
  *
@@ -62,7 +64,6 @@ public class ApplyShiftTest {
         DbCompAlgorithm dbca = new DbCompAlgorithm("ApplyShift");
         dbca.setExecClass("spk.algo.ApplyShift");
         DataCollection dc = new DataCollection();
-
         DbComputation comp = new DbComputation(DbKey.NullKey, "ApplyShiftTest");
 
         DbCompParm parm = new DbCompParm("input", TestDbTimeSeriesDAO.DATA_STAGE_GOES, "15Minute", "Stage.0.GOES-raw", 0);
@@ -83,8 +84,8 @@ public class ApplyShiftTest {
 
         instance = (ApplyShift) comp.getExecutive();
         instance.ShiftsDir = "classpath:/shared/stations/";
-        instance.prepForApply(dc);
-
+        //instance.prepForApply(dc);
+        UnitHelpers.prepForApply(instance, dc);
     }
 
     /**
@@ -115,7 +116,17 @@ public class ApplyShiftTest {
         CTimeSeries ts_out = dc.getTimeSeriesAt(1);
 
         TimedVariable tv = ts.findWithin(t1, 500);
-        instance.setTimeSliceBaseTime(tv.getTime());
+        
+        /*Class<?> clz = instance.getClass().getSuperclass();
+        Field fields[] = clz.getDeclaredFields();
+        Field tsbt = clz.getDeclaredField("_timeSliceBaseTime");
+        tsbt.setAccessible(true);
+        tsbt.set(instance, tv.getTime() );
+        */
+        UnitHelpers.setBaseTime(instance, tv.getTime());
+        
+        
+        //instance.setTimeSliceBaseTime(tv.getTime());
         instance.input = tv.getDoubleValue();
         instance.doAWTimeSlice();
 

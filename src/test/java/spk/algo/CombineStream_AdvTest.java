@@ -25,6 +25,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import spk.db.test.TestDatabase;
 import spk.db.test.TestDbTimeSeriesDAO;
+import spk.db.test.UnitHelpers;
 /**
  *
  * @author L2EDDMAN
@@ -88,7 +89,8 @@ public class CombineStream_AdvTest {
         
         instance = (CombineStream_Adv) comp.getExecutive();
         instance.StationsDir="classpath:/shared/stations/";
-        instance.prepForApply(dc);
+        //instance.prepForApply(dc);
+        UnitHelpers.prepForApply(instance, dc);
         ParmRef parmRef = instance.getParmRef("output");
       
         
