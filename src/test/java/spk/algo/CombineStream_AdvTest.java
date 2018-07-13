@@ -79,20 +79,18 @@ public class CombineStream_AdvTest {
         comp.setAlgorithmName("CombStream");
         comp.setAlgorithm(dbca);
         comp.prepareForExec(db);
-        
+                
         for(DbCompParm p: comp.getParmList()){
             CTimeSeries cts = new CTimeSeries(p);
             tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2014,10,1));
             dc.addTimeSeries(cts);
         }
-        
-        
+                
         instance = (CombineStream_Adv) comp.getExecutive();
         instance.StationsDir="classpath:/shared/stations/";
         //instance.prepForApply(dc);
         UnitHelpers.prepForApply(instance, dc);
-        ParmRef parmRef = instance.getParmRef("output");
-      
+        
         
         
     }
@@ -133,9 +131,7 @@ public class CombineStream_AdvTest {
         instance.los = Double.NEGATIVE_INFINITY;
         instance.doAWTimeSlice();
 
-        assertEquals( "output does not match the GOES value", instance.goes, instance.output.getDoubleValue(), .0001 );
-        
-        
+        assertEquals( "output does not match the GOES value", instance.goes, instance.output.getDoubleValue(), .0001 );        
     }
 
     /**

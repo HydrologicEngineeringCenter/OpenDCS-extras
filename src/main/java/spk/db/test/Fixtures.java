@@ -45,6 +45,13 @@ public class Fixtures {
 
     }
 
+    /**
+     * Will initialize data if needed.
+     * Needs a TimeSeriesDAI implementation to prepare data
+     * @param tsdai
+     * @return
+     * @throws Exception 
+     */
     public static Fixtures getFixtures(TimeSeriesDAI tsdai) throws Exception {
         if (fixtures == null) {
             fixtures = new Fixtures();
@@ -52,7 +59,10 @@ public class Fixtures {
         }
         return fixtures;
     }
-
+    /**
+     * Get the Data Colleciton
+     * @return 
+     */
     public DataCollection getDC() {
         return dc;
     }
@@ -97,6 +107,12 @@ public class Fixtures {
 
     }
 
+    /**
+     * used by loadData. Handles retrieving data from the classpath for the unit tests
+     * @param cts
+     * @param uri
+     * @throws Exception 
+     */
     public void fillDataFromStream(CTimeSeries cts, URI uri) throws Exception {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));

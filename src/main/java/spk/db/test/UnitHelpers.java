@@ -66,33 +66,7 @@ public class UnitHelpers {
         
         
     }
-        /**
-	 * Sets the internal 'dc' data collection variable and calls 
-	 * allows unit tests to setup comps. 
-	 * @param dc the data collection to act on.
-	 * @throws DbCompException on computation error.
-	 * @throws DbIoException on IO error to database.
-	 
-	public void prepForApply( DataCollection dc )
-		throws DbCompException, DbIoException
-	{
-		this.dc = dc;
-debug3("DbAlgorithmExec.apply()");
-
-		evaluateEffectiveRange();
-		determineModelRunId(dc);
-
-		// Add the time series to the parm-references for inputs.
-		// If any are modeled, use the modelRunId we determined above.
-		for(String role : getInputNames())
-			addTsToParmRef(role, false);
-		for(String role : getOutputNames())
-			addTsToParmRef(role, true);
-
-		//applyAlgorithm();
-	}
-        */
-    
+        
     
     
 }

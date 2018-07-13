@@ -24,7 +24,7 @@ import opendcs.dai.TimeSeriesDAI;
 import opendcs.dao.DbObjectCache;
 
 /**
- *
+ * TimeSeriesDAO for use in unit tests. 
  * @author L2EDDMAN
  */
 public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
@@ -143,6 +143,9 @@ public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * this one stays open
+     */
     @Override
     public void close() {
         
