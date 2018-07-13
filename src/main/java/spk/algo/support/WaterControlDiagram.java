@@ -590,7 +590,7 @@ public class WaterControlDiagram
         
         
         
-        public static IrrigationDemands get_irrigation_data( String filename ) throws DbCompException, FileNotFoundException, IOException, ParseException{
+        public static IrrigationDemands get_irrigation_data( String filename ) throws DbCompException, FileNotFoundException, IOException, ParseException, Exception{
             try {
                 return new IrrigationDemands( filename );
             } catch (org.json.simple.parser.ParseException ex) {
