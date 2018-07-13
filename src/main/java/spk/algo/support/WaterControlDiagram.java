@@ -3,6 +3,7 @@ package spk.algo.support;
 import decodes.tsdb.DbCompException;
 import spk.algo.support.exceptions.InterpolationException;
 import java.io.*;
+import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -66,14 +67,11 @@ public class WaterControlDiagram {
      * @param graph_file full path to the file to load
      * @throws java.lang.Exception
      */
-    public void load_graph(String graph_file) throws java.lang.Exception {
+    public void load_graph(String graph_file) throws Exception {
 
-        File f = new File(graph_file);
-        if (!f.exists()) {
-            throw new java.lang.Exception("The requested graph file doesn't exist ");
-        }
+        InputStream is = Resource.fromURI(URI.create(graph_file));
 
-        BufferedReader reader = new BufferedReader(new FileReader(f));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         try {
             String line = null;
             String[] parts = null;
