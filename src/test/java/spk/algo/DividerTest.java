@@ -22,31 +22,31 @@ import static org.junit.Assert.*;
  * @author L2EDDMAN
  */
 public class DividerTest {
-    
+
     Divider instance = null;
-    
+
     public DividerTest() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() throws DbCompException {
         DbCompAlgorithm dbca = new DbCompAlgorithm("Divider");
-        dbca.setExecClass("spk.algo.Divider");        
+        dbca.setExecClass("spk.algo.Divider");
         instance = new Divider();
-        DbComputation comp = new DbComputation(DbKey.NullKey,"DividerTest");
+        DbComputation comp = new DbComputation(DbKey.NullKey, "DividerTest");
         comp.setAlgorithmName("spk.algo.Divider");
         comp.setAlgorithm(dbca);
-        instance.init(comp , null);
+        instance.init(comp, null);
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -54,8 +54,6 @@ public class DividerTest {
     /**
      * Test of initAWAlgorithm method, of class Divider.
      */
-  
-
     /**
      * Test of doAWTimeSlice method, of class Divider.
      */
@@ -63,27 +61,25 @@ public class DividerTest {
     public void testTenDivide5() throws Exception {
         instance.a = 10;
         instance.b = 5;
-        
+
         instance.beforeTimeSlices();
         instance.doAWTimeSlice();
         instance.afterTimeSlices();
-        
+
         assertEquals("Failed to divided 10 by 5", 2, instance.y.getDoubleValue(), 0.0001);
     }
-    
+
     @Test
-    public void testDivideByZero() throws Exception{     
+    public void testDivideByZero() throws Exception {
         instance.a = 10;
         instance.b = 0;
-       
+
         instance.beforeTimeSlices();
         instance.doAWTimeSlice();
         instance.afterTimeSlices();
-        
-        assertEquals("Code actually tried to divide by zero", 0, instance.y.getDoubleValue(),0.0001);    
-        
+
+        assertEquals("Code actually tried to divide by zero", 0, instance.y.getDoubleValue(), 0.0001);
+
     }
 
-    
-    
 }
