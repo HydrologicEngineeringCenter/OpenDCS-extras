@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,8 +33,11 @@ import spk.algo.support.Resource;
 public class Fixtures {
 
     private static Fixtures fixtures = null;
+    public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     private DataCollection dc = null;
 
+    private HashMap<String, DbKey> keys_by_tsname = null;
+    
     private Date start = null;
     private Date end = null;
 
@@ -42,7 +46,7 @@ public class Fixtures {
      */
     private Fixtures() {
         dc = new DataCollection();
-
+        keys_by_tsname = new HashMap<>();
     }
 
     /**
@@ -60,7 +64,7 @@ public class Fixtures {
         return fixtures;
     }
     /**
-     * Get the Data Colleciton
+     * Get the Data Collection
      * @return 
      */
     public DataCollection getDC() {
@@ -90,7 +94,7 @@ public class Fixtures {
                 tsid.setUniqueString(tsname);
                 tsid.setKey(key);
                 tsid.setSiteName(tsname_parts[0]);
-                tsid.setDataType(new DataType("cwms", tsname_parts[2]));
+                tsid.setDataType(new DataType("cwms", tsname_parts[1]));
 
                 CTimeSeries cts = tsdai.makeTimeSeries(tsid);
                 cts.setTimeSeriesIdentifier(tsid);
@@ -99,8 +103,9 @@ public class Fixtures {
                 this.fillDataFromStream(cts, uri);
 
                 dc.addTimeSeries(cts);
-                // add data to a file
-
+                
+                keys_by_tsname.put(tsname, key);
+                
             }
 
         }
@@ -114,7 +119,7 @@ public class Fixtures {
      * @throws Exception 
      */
     public void fillDataFromStream(CTimeSeries cts, URI uri) throws Exception {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
             BufferedReader reader = new BufferedReader( new InputStreamReader(Resource.fromURI(uri)));
             String line = null;
@@ -127,4 +132,10 @@ public class Fixtures {
                 cts.addSample(tv);
             }
     }
+
+    public DbKey getTimeSeriesKey(String unique_name) {
+        return keys_by_tsname.get(unique_name);
+    }
+
+    
 }

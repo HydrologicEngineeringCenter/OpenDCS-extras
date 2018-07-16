@@ -3,3 +3,5 @@
 #2,TEST.Stage.Inst.15Minutes.0.IP-raw,ft
 3,TEST.Stage.Inst.15Minutes.0.Combined-raw,ft
 4,TEST.Stage.Inst.15Minutes.0.Combined-raw_missing,ft
+5,TEST.Flow.Inst.15Minutes.0.raw,cfs
+6,TEST.Flow.Ave.1Hour.1Hour.calc,cfs

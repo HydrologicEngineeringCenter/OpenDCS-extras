@@ -34,6 +34,10 @@ public class TestDatabase extends TimeSeriesDb{
     TimeSeriesDAI tsdai = null;
     
     
+    public TestDatabase(){
+        TestDatabase.sdiIsUnique = true;
+    }
+    
     @Override
     public DbKey connect(String appName, Properties credentials) throws BadConnectException {
         // not needed 
