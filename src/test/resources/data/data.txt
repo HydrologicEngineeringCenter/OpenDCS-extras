@@ -12,3 +12,4 @@
 11,TEST.Stor.Inst.~1Day.0.PST8PDT,acft
 12,TEST.Flow.Ave.1Day.1Day.calc,cfs
 13,TEST.Flow.Ave.~1Day.1Day.PST8PDT,cfs
+14,TEST-2.Stage.Inst.15Minutes.0.raw,m

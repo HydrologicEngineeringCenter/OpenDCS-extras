@@ -8,6 +8,8 @@
  */
 package spk.algo;
 
+import decodes.db.Database;
+import decodes.db.TestDatabaseIO;
 import decodes.sql.DbKey;
 import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.DataCollection;
@@ -27,6 +29,7 @@ import opendcs.dai.TimeSeriesDAI;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
+import spk.db.test.Fixtures;
 import spk.db.test.TestDatabase;
 import spk.db.test.TestDbTimeSeriesDAO;
 import spk.db.test.UnitHelpers;
@@ -40,7 +43,7 @@ public class ApplyShiftTest {
     ApplyShift instance = null;
     TimeSeriesDb db = null;
     TimeSeriesDAI tsdai = null;
-
+    Fixtures fixtures = null;
     /**
      * Dates of Interest 02/04/2016 17:00:00, 0.12, goes, 02/04/2016 16:37:38,
      * user1 01/28/2016 18:00:00, 0.07, goes, 01/28/2016 17:35:32, user1
@@ -50,13 +53,19 @@ public class ApplyShiftTest {
     Date t2 = null;
     Date t3 = null;
 
-    public ApplyShiftTest() {
+    public ApplyShiftTest() throws Exception {
         db = new TestDatabase();
         tsdai = db.makeTimeSeriesDAO();
-
+        fixtures = Fixtures.getFixtures(tsdai);
         t1 = new Date(2013 - 1900, 6, 1, 19, 0, 0);
         t2 = new Date(2016 - 1900, 0, 28, 18, 0, 0);
         t3 = new Date(2016 - 1900, 1, 4, 17, 0, 0);
+         Database _db = new Database();
+        _db.setDbIo(new TestDatabaseIO("classpath:/decodes/xml"));
+        _db.read();
+        _db.unitConverterSet.prepareForExec();
+        //_db.prepareForExec();
+        
     }
 
     @Before
@@ -116,16 +125,15 @@ public class ApplyShiftTest {
         CTimeSeries ts_out = dc.getTimeSeriesAt(1);
 
         TimedVariable tv = ts.findWithin(t1, 500);
-        
+
         /*Class<?> clz = instance.getClass().getSuperclass();
-        Field fields[] = clz.getDeclaredFields();
-        Field tsbt = clz.getDeclaredField("_timeSliceBaseTime");
-        tsbt.setAccessible(true);
-        tsbt.set(instance, tv.getTime() );
-        */
+         Field fields[] = clz.getDeclaredFields();
+         Field tsbt = clz.getDeclaredField("_timeSliceBaseTime");
+         tsbt.setAccessible(true);
+         tsbt.set(instance, tv.getTime() );
+         */
         UnitHelpers.setBaseTime(instance, tv.getTime());
-        
-        
+
         //instance.setTimeSliceBaseTime(tv.getTime());
         instance.input = tv.getDoubleValue();
         instance.doAWTimeSlice();
@@ -140,13 +148,6 @@ public class ApplyShiftTest {
         assertEquals("input and output don't match correctly", in.getDoubleValue(), out.getDoubleValue(), .0001);
 
     }
-    
-    
-    @Test
-    public void testExistingOutputIsSame() throws Exception{
-        
-    }
-    
 
     @Test
     public void testMinimumValue() throws Exception {
@@ -158,7 +159,8 @@ public class ApplyShiftTest {
         CTimeSeries ts_out = dc.getTimeSeriesAt(1);
 
         TimedVariable tv = ts.findWithin(t1, 500);
-        instance.setTimeSliceBaseTime(tv.getTime());
+        UnitHelpers.setBaseTime(instance, tv.getTime());
+
         instance.input = tv.getDoubleValue();
         instance.doAWTimeSlice();
 
@@ -173,5 +175,88 @@ public class ApplyShiftTest {
 
     }
 
+    @Test
+    public void testGetPZF_units_not_set() throws Exception {
+        DbCompAlgorithm dbca = new DbCompAlgorithm("ApplyShift");
+        dbca.setExecClass("spk.algo.ApplyShift");
+        DataCollection dc = new DataCollection();
+        DbComputation comp = new DbComputation(DbKey.NullKey, "ApplyShiftTest");
+
+        DbCompParm parm = new DbCompParm("input", fixtures.getTimeSeriesKey("TEST-2.Stage.Inst.15Minutes.0.raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        parm = new DbCompParm("output", fixtures.getTimeSeriesKey("TEST.Stage.Inst.15Minutes.0.calc"), "15Minutes", null, 0);
+        comp.addParm(parm);
+        //comp.setProperty("input_EU", "m");
+        comp.setAlgorithmName("ApplyShift");
+        comp.setAlgorithm(dbca);
+        comp.prepareForExec(db);
+
+        for (DbCompParm p : comp.getParmList()) {
+            CTimeSeries cts = new CTimeSeries(p);
+            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2014, 10, 1));
+            dc.addTimeSeries(cts);
+        }
+
+        instance = (ApplyShift) comp.getExecutive();
+        instance.ShiftsDir = "classpath:/shared/stations/";
+        //instance.prepForApply(dc);
+        UnitHelpers.prepForApply(instance, dc);
+
+        //Date dt = df.parse("06/26/2018 23:00:00+0000");
+        Date dt = Fixtures.sdf.parse("2018-06-26T23:00:00+0000");
+        UnitHelpers.setBaseTime(instance, dt);
+        instance.input = 1;
+        instance.beforeTimeSlices();
+        instance.doAWTimeSlice();
+        assertEquals("PZF value was not used", 1.81, instance.output.getDoubleValue(), .0001);
+        instance.input = 2;
+        instance.doAWTimeSlice();
+
+        // 2ft in meters = 0.6096
+        assertEquals("PZZ value was used", 2, instance.output.getDoubleValue(), .0001);
+    }
+
+    @Test
+    public void testGetPZF_with_units() throws Exception{
+
+        DbCompAlgorithm dbca = new DbCompAlgorithm("ApplyShift");
+        dbca.setExecClass("spk.algo.ApplyShift");
+        DataCollection dc = new DataCollection();
+        DbComputation comp = new DbComputation(DbKey.NullKey, "ApplyShiftTest");
+
+        DbCompParm parm = new DbCompParm("input", fixtures.getTimeSeriesKey("TEST-2.Stage.Inst.15Minutes.0.raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        parm = new DbCompParm("output", fixtures.getTimeSeriesKey("TEST.Stage.Inst.15Minutes.0.calc"), "15Minutes", null, 0);
+        comp.addParm(parm);
+        comp.setProperty("input_EU", "m");
+        comp.setProperty("output_EU", "m");
+        comp.setAlgorithmName("ApplyShift");
+        comp.setAlgorithm(dbca);
+        comp.prepareForExec(db);
+
+        for (DbCompParm p : comp.getParmList()) {
+            CTimeSeries cts = new CTimeSeries(p);
+            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2014, 10, 1));
+            dc.addTimeSeries(cts);
+        }
+
+        instance = (ApplyShift) comp.getExecutive();
+        instance.ShiftsDir = "classpath:/shared/stations/";
+        //instance.prepForApply(dc);
+        UnitHelpers.prepForApply(instance, dc);
+
+        //Date dt = df.parse("06/26/2018 23:00:00+0000");
+        Date dt = Fixtures.sdf.parse("2018-07-17T00:00:00+0000");
+        UnitHelpers.setBaseTime(instance, dt);
+        instance.input = .5;
+        instance.beforeTimeSlices();
+        instance.doAWTimeSlice();
+
+        // 2ft in meters = 0.6096
+        assertEquals("PZF value was not used", .6096, instance.output.getDoubleValue(), .0001);
+
+    }
 
 }

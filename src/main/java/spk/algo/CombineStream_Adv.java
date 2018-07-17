@@ -136,7 +136,11 @@ public class CombineStream_Adv
                 debug3("getting full location name");
                 location = tsid.getSiteName() + "." + tsid.getDataType().getCode(); //+"." + tsid.getPart("paramtype")+"."+tsid.getInterval();
                 debug3("getting station information for: " + location);
+                try{
                 map = StationData.loadData( StationsDir + "/"+ location+".station");
+                } catch( Exception ex ){
+                    throw new DbCompException(ex.getLocalizedMessage());
+                }
                 // make sure the units are set correctly
                 debug3(" have map for station: " + (map != null) );
                 String units_goes,units_ip,units_los = null;
