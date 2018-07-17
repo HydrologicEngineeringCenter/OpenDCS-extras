@@ -1,0 +1,4 @@
+<?xml version="1.0" standalone="yes"?>
+<DataSource Name="ILEX-LRGS" Type="LRGS">
+  <DataSourceArg>hostname=www.ilexengineering.com,username=guest</DataSourceArg>
+</DataSource>

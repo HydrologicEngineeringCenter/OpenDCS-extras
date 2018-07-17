@@ -100,6 +100,14 @@ public class UnitHelpers {
         }
         return dc;
     }
+
+    
+    public static void setCompProperty(DbAlgorithmExecutive instance, String prop, String val) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        Class<?> clz = instance.getClass().getSuperclass().getSuperclass();
+        Field fldDC = clz.getDeclaredField(prop);
+        fldDC.setAccessible(true);
+        fldDC.set(instance, val);
+    }
         
     
     

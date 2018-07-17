@@ -66,10 +66,10 @@ public class ApplyShiftTest {
         DataCollection dc = new DataCollection();
         DbComputation comp = new DbComputation(DbKey.NullKey, "ApplyShiftTest");
 
-        DbCompParm parm = new DbCompParm("input", TestDbTimeSeriesDAO.DATA_STAGE_GOES, "15Minute", "Stage.0.GOES-raw", 0);
+        DbCompParm parm = new DbCompParm("input", TestDbTimeSeriesDAO.DATA_STAGE_GOES, "15Minutes", "Stage.0.GOES-raw", 0);
         comp.addParm(parm);
 
-        parm = new DbCompParm("output", TestDbTimeSeriesDAO.DATA_STAGE_COMB, "15Minute", "Stage.0.Combined-raw", 0);
+        parm = new DbCompParm("output", TestDbTimeSeriesDAO.DATA_STAGE_COMB, "15Minutes", "Stage.0.Combined-raw", 0);
         comp.addParm(parm);
 
         comp.setAlgorithmName("ApplyShift");
@@ -140,6 +140,13 @@ public class ApplyShiftTest {
         assertEquals("input and output don't match correctly", in.getDoubleValue(), out.getDoubleValue(), .0001);
 
     }
+    
+    
+    @Test
+    public void testExistingOutputIsSame() throws Exception{
+        
+    }
+    
 
     @Test
     public void testMinimumValue() throws Exception {

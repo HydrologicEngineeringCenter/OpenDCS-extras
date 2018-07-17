@@ -5,3 +5,10 @@
 4,TEST.Stage.Inst.15Minutes.0.Combined-raw_missing,ft
 5,TEST.Flow.Inst.15Minutes.0.raw,cfs
 6,TEST.Flow.Ave.1Hour.1Hour.calc,cfs
+7,TEST.Stor.Inst.15Minutes.0.raw,acft
+8,TEST.Flow.Inst.15Minutes.0.calc,cfs
+9,TEST.Stor.Inst.1Hour.0.raw,acft
+10,TEST.Stor.Inst.1Day.0.raw,acft
+11,TEST.Stor.Inst.~1Day.0.PST8PDT,acft
+12,TEST.Flow.Ave.1Day.1Day.calc,cfs
+13,TEST.Flow.Ave.~1Day.1Day.PST8PDT,cfs

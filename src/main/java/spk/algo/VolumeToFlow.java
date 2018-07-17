@@ -137,7 +137,7 @@ public class VolumeToFlow
                     t1.setTime(_timeSliceBaseTime);
                     t2.setTime(_timeSliceBaseTime);
                     // this might need to be -1 and on T1, investigate monday with PH1 and PH2 of englebright
-                    t2.add(Calendar.DAY_OF_MONTH, 1);
+                    t1.add(Calendar.DATE, -1);
                     
                     // since these are the UTC values we'll get the right time difference
                     long time_difference = ( t2.getTimeInMillis() - t1.getTimeInMillis() )/ (1000*60*60);

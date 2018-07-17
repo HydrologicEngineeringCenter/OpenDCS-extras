@@ -361,22 +361,6 @@ public class CombineStream_Adv
             return GOES;
         }
         
-        public double getPZF( Date sliceTime, String to_units ){
-            if( map != null ){                            
-                Map.Entry<Date,StationData> d = map.floorEntry(sliceTime);
-                if( d!=null){
-                    double _d = d.getValue().point_zero_flow; // assume us units for now
-                    try{
-                        EngineeringUnit to = EngineeringUnit.getEngineeringUnit(to_units);
-                        EngineeringUnit from = EngineeringUnit.getEngineeringUnit(d.getValue().point_zero_flow_units );
-                        UnitConverter uc = CompositeConverter.build(from,to);
-                        return  uc.convert(_d);
-                    } catch(Exception err) {
-                        return _d;
-                    }
-                }
-            }
-            return Double.NEGATIVE_INFINITY;
-        }
+        
 
 }

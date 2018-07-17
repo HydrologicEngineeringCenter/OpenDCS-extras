@@ -114,7 +114,7 @@ public class AcreFtToCFS
                  }
                  else if( diff == 23 ){
                      debug3("short day");
-                     conversion = 0.052609;
+                     conversion = 0.52609;
                  }
                  else if( diff == 25){
                      debug3("long day");

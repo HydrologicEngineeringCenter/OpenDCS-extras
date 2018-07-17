@@ -1,0 +1,4 @@
+<?xml version="1.0" standalone="yes"?>
+<DataSource Name="drot.wcda.noaa.gov" Type="LRGS">
+  <DataSourceArg>port=16003,username=your_DDS_user_name</DataSourceArg>
+</DataSource>
