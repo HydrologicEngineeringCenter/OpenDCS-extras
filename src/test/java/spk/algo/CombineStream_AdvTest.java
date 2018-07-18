@@ -137,6 +137,41 @@ public class CombineStream_AdvTest {
 
         assertEquals("output does not match the GOES value", instance.goes, instance.output.getDoubleValue(), .0001);
     }
+    
+    @Test
+    public void testOnlyIPPresent() throws Exception {
+        DataCollection dc = instance.getDataCollection();
+
+        CTimeSeries ts = dc.getTimeSeriesAt(0);
+        CTimeSeries ts_out = dc.getTimeSeriesAt(1);
+
+        TimedVariable tv = ts.findWithin(t1, 500);
+        UnitHelpers.setBaseTime(instance, tv.getTime());
+        instance.ip = tv.getDoubleValue();
+        instance.goes = Double.NEGATIVE_INFINITY;
+        instance.los = Double.NEGATIVE_INFINITY;
+        instance.doAWTimeSlice();
+
+        assertEquals("output does not match the GOES value", instance.ip, instance.output.getDoubleValue(), .0001);
+    }
+    @Test
+    public void testOnlyLOSPresent() throws Exception {
+        DataCollection dc = instance.getDataCollection();
+
+        CTimeSeries ts = dc.getTimeSeriesAt(0);
+        CTimeSeries ts_out = dc.getTimeSeriesAt(1);
+
+        TimedVariable tv = ts.findWithin(t1, 500);
+        UnitHelpers.setBaseTime(instance, tv.getTime());
+        instance.los = tv.getDoubleValue();
+        instance.ip = Double.NEGATIVE_INFINITY;
+        instance.goes = Double.NEGATIVE_INFINITY;
+        instance.doAWTimeSlice();
+
+        assertEquals("output does not match the GOES value", instance.los, instance.output.getDoubleValue(), .0001);
+    }
+    
+    
 
     @Test
     public void testExistingOutputIsSame() throws Exception {
@@ -180,6 +215,162 @@ public class CombineStream_AdvTest {
         instance.doAWTimeSlice();
 
         assertFalse("Value was output when it shouldn't have been", instance.output.isChanged());
+    }
+    
+    @Test
+    public void testGOESPrimaryIsUsed() throws Exception {
+        DbCompAlgorithm dbca = new DbCompAlgorithm("CombineStream_Adv");
+        dbca.setExecClass("spk.algo.CombineStream_Adv");
+        DataCollection dc = new DataCollection();
+
+        DbComputation comp = new DbComputation(DbKey.NullKey, "CombineStreamTest");
+
+        DbCompParm parm = new DbCompParm("goes", fixtures.getTimeSeriesKey("TEST-3.Stage.Inst.15Minutes.0.GOES-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        parm = new DbCompParm("los", fixtures.getTimeSeriesKey("TEST-3.Stage.Inst.15Minutes.0.LOS-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+        
+        parm = new DbCompParm("ip", fixtures.getTimeSeriesKey("TEST-3.Stage.Inst.15Minutes.0.IP-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+        
+        parm = new DbCompParm("output", fixtures.getTimeSeriesKey("TEST.Stage.Inst.15Minutes.0.Combined-raw_missing"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        comp.setAlgorithmName("CombStream");
+        comp.setAlgorithm(dbca);
+        comp.prepareForExec(db);
+
+        for (DbCompParm p : comp.getParmList()) {
+            CTimeSeries cts = new CTimeSeries(p);
+            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2018, 10, 1));
+            dc.addTimeSeries(cts);
+        }
+
+        instance = (CombineStream_Adv) comp.getExecutive();
+        instance.StationsDir = "classpath:/shared/stations/";
+
+        UnitHelpers.prepForApply(instance, dc);
+/*
+        dc = instance.getDataCollection();
+
+        CTimeSeries ts = dc.getTimeSeriesAt(0);
+        CTimeSeries ts_out = dc.getTimeSeriesAt(1);
+
+        TimedVariable tv = ts.findWithin(t1, 500);
+        */
+        UnitHelpers.setBaseTime(instance, t1);
+        instance.goes = 10;
+        instance.ip = 20;
+        instance.los = 30;
+        instance.beforeTimeSlices();
+        instance.doAWTimeSlice();
+
+        assertEquals("GOES value wasn't used", 10, instance.output.getDoubleValue(), .0001);
+    }
+    
+    @Test
+    public void testIPPrimaryIsUsed() throws Exception {
+        DbCompAlgorithm dbca = new DbCompAlgorithm("CombineStream_Adv");
+        dbca.setExecClass("spk.algo.CombineStream_Adv");
+        DataCollection dc = new DataCollection();
+
+        DbComputation comp = new DbComputation(DbKey.NullKey, "CombineStreamTest");
+
+        DbCompParm parm = new DbCompParm("goes", fixtures.getTimeSeriesKey("TEST-3.Stage.Inst.15Minutes.0.GOES-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        parm = new DbCompParm("los", fixtures.getTimeSeriesKey("TEST-3.Stage.Inst.15Minutes.0.LOS-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+        
+        parm = new DbCompParm("ip", fixtures.getTimeSeriesKey("TEST-3.Stage.Inst.15Minutes.0.IP-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+        
+        parm = new DbCompParm("output", fixtures.getTimeSeriesKey("TEST.Stage.Inst.15Minutes.0.Combined-raw_missing"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        comp.setAlgorithmName("CombStream");
+        comp.setAlgorithm(dbca);
+        comp.prepareForExec(db);
+
+        for (DbCompParm p : comp.getParmList()) {
+            CTimeSeries cts = new CTimeSeries(p);
+            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2018, 10, 1));
+            dc.addTimeSeries(cts);
+        }
+
+        instance = (CombineStream_Adv) comp.getExecutive();
+        instance.StationsDir = "classpath:/shared/stations/";
+
+        UnitHelpers.prepForApply(instance, dc);
+/*
+        dc = instance.getDataCollection();
+
+        CTimeSeries ts = dc.getTimeSeriesAt(0);
+        CTimeSeries ts_out = dc.getTimeSeriesAt(1);
+
+        TimedVariable tv = ts.findWithin(t1, 500);
+        */
+        UnitHelpers.setBaseTime(instance, t2);
+        instance.goes = 10;
+        instance.ip = 20;
+        instance.los = 30;
+        instance.beforeTimeSlices();
+        instance.doAWTimeSlice();
+
+        assertEquals("GOES value wasn't used", 20, instance.output.getDoubleValue(), .0001);
+    }
+    
+    @Test
+    public void testLOSPrimaryIsUsed() throws Exception {
+        DbCompAlgorithm dbca = new DbCompAlgorithm("CombineStream_Adv");
+        dbca.setExecClass("spk.algo.CombineStream_Adv");
+        DataCollection dc = new DataCollection();
+
+        DbComputation comp = new DbComputation(DbKey.NullKey, "CombineStreamTest");
+
+        DbCompParm parm = new DbCompParm("goes", fixtures.getTimeSeriesKey("TEST-3.Stage.Inst.15Minutes.0.GOES-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        parm = new DbCompParm("los", fixtures.getTimeSeriesKey("TEST-3.Stage.Inst.15Minutes.0.LOS-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+        
+        parm = new DbCompParm("ip", fixtures.getTimeSeriesKey("TEST-3.Stage.Inst.15Minutes.0.IP-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+        
+        parm = new DbCompParm("output", fixtures.getTimeSeriesKey("TEST.Stage.Inst.15Minutes.0.Combined-raw_missing"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        comp.setAlgorithmName("CombStream");
+        comp.setAlgorithm(dbca);
+        comp.prepareForExec(db);
+
+        for (DbCompParm p : comp.getParmList()) {
+            CTimeSeries cts = new CTimeSeries(p);
+            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2018, 10, 1));
+            dc.addTimeSeries(cts);
+        }
+
+        instance = (CombineStream_Adv) comp.getExecutive();
+        instance.StationsDir = "classpath:/shared/stations/";
+
+        UnitHelpers.prepForApply(instance, dc);
+/*
+        dc = instance.getDataCollection();
+
+        CTimeSeries ts = dc.getTimeSeriesAt(0);
+        CTimeSeries ts_out = dc.getTimeSeriesAt(1);
+
+        TimedVariable tv = ts.findWithin(t1, 500);
+        */
+        UnitHelpers.setBaseTime(instance, t3);
+        instance.goes = 10;
+        instance.ip = 20;
+        instance.los = 30;
+        instance.beforeTimeSlices();
+        instance.doAWTimeSlice();
+
+        assertEquals("GOES value wasn't used", 30, instance.output.getDoubleValue(), .0001);
     }
 
 }

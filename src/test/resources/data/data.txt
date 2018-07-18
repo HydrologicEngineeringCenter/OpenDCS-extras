@@ -13,3 +13,6 @@
 12,TEST.Flow.Ave.1Day.1Day.calc,cfs
 13,TEST.Flow.Ave.~1Day.1Day.PST8PDT,cfs
 14,TEST-2.Stage.Inst.15Minutes.0.raw,m
+15,TEST-3.Stage.Inst.15Minutes.0.GOES-raw,ft
+16,TEST-3.Stage.Inst.15Minutes.0.IP-raw,ft
+17,TEST-3.Stage.Inst.15Minutes.0.LOS-raw,ft
