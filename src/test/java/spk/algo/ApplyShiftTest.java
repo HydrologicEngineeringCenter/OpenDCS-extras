@@ -56,7 +56,7 @@ public class ApplyShiftTest {
     public ApplyShiftTest() throws Exception {
         db = new TestDatabase();
         tsdai = db.makeTimeSeriesDAO();
-        fixtures = Fixtures.getFixtures(tsdai);
+        fixtures = Fixtures.getFixtures(db);
         t1 = new Date(2013 - 1900, 6, 1, 19, 0, 0);
         t2 = new Date(2016 - 1900, 0, 28, 18, 0, 0);
         t3 = new Date(2016 - 1900, 1, 4, 17, 0, 0);

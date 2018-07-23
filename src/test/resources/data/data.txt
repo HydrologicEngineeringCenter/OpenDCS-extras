@@ -16,3 +16,5 @@
 15,TEST-3.Stage.Inst.15Minutes.0.GOES-raw,ft
 16,TEST-3.Stage.Inst.15Minutes.0.IP-raw,ft
 17,TEST-3.Stage.Inst.15Minutes.0.LOS-raw,ft
+18,TEST.Precip-Cum.Inst.15Minutes.0.raw,in
+19,TEST.Precip-Cum.Inst.15Minutes.0.calc,in

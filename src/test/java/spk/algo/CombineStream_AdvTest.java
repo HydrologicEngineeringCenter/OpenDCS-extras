@@ -51,7 +51,7 @@ public class CombineStream_AdvTest {
 
         db = new TestDatabase();
         tsdai = db.makeTimeSeriesDAO();
-        fixtures = Fixtures.getFixtures(tsdai);
+        fixtures = Fixtures.getFixtures(db);
         
         t1 = Fixtures.sdf.parse("2013-07-01T19:00:00+0000");
         t2 = Fixtures.sdf.parse("2016-01-28T18:00:00+0000");

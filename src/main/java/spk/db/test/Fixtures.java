@@ -10,6 +10,7 @@ import decodes.db.DataType;
 import decodes.sql.DbKey;
 import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.DataCollection;
+import decodes.tsdb.TimeSeriesDb;
 import decodes.tsdb.TimeSeriesIdentifier;
 import ilex.var.TimedVariable;
 import java.io.BufferedReader;
@@ -37,7 +38,8 @@ public class Fixtures {
     private DataCollection dc = null;
 
     private HashMap<String, DbKey> keys_by_tsname = null;
-    
+    private TimeSeriesDAI tsdai;
+    private TimeSeriesDb db;
     private Date start = null;
     private Date end = null;
 
@@ -56,10 +58,13 @@ public class Fixtures {
      * @return
      * @throws Exception 
      */
-    public static Fixtures getFixtures(TimeSeriesDAI tsdai) throws Exception {
+    public static Fixtures getFixtures(TimeSeriesDb db) throws Exception {
         if (fixtures == null) {
+            
             fixtures = new Fixtures();
-            fixtures.loadData(tsdai);
+            fixtures.db = db;
+            fixtures.tsdai = db.makeTimeSeriesDAO();
+            fixtures.loadData(/*fixtures.tsdai*/);
         }
         return fixtures;
     }
@@ -74,7 +79,7 @@ public class Fixtures {
     /**
      * load our data from files
      */
-    private void loadData(TimeSeriesDAI tsdai) throws Exception {
+    private void loadData(/*TimeSeriesDAI tsdai*/) throws Exception {
         if (dc.size() == 0) {
 
                 // these are unit tests, we don't need to reload a cache
@@ -91,6 +96,7 @@ public class Fixtures {
 
                 String tsname_parts[] = tsname.split("\\.");
                 TimeSeriesIdentifier tsid = new CwmsTsId();
+                tsid.setDisplayName(tsname);
                 tsid.setUniqueString(tsname);
                 tsid.setKey(key);
                 tsid.setSiteName(tsname_parts[0]);

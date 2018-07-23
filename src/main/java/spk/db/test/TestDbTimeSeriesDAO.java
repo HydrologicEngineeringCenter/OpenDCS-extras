@@ -12,6 +12,7 @@ import decodes.tsdb.BadTimeSeriesException;
 import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.DbIoException;
 import decodes.tsdb.NoSuchObjectException;
+import decodes.tsdb.TimeSeriesDb;
 import decodes.tsdb.TimeSeriesIdentifier;
 import ilex.var.TimedVariable;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import opendcs.dao.DbObjectCache;
 public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
 
     Fixtures fixtures = null;
+    TimeSeriesDb db = null;
     public static final DbKey DATA_STAGE_GOES = DbKey.createDbKey(0);
     public static final DbKey DATA_STAGE_LOS = DbKey.createDbKey(1);
     public static final DbKey DATA_STAGE_IP = DbKey.createDbKey(2);
@@ -41,9 +43,9 @@ public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
     private HashMap<DbKey,CTimeSeries> timeseries;
     
     
-    public TestDbTimeSeriesDAO() throws Exception {
-        
-        fixtures = Fixtures.getFixtures(this);
+    public TestDbTimeSeriesDAO(TimeSeriesDb db) throws Exception {
+        this.db = db;
+        fixtures = Fixtures.getFixtures(db);
 
         //timeseries = new HashMap<>();
 

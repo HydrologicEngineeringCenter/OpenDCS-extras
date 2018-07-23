@@ -6,7 +6,7 @@
  
   <groupId>mil.army.usace.spk</groupId>
   <artifactId>algos</artifactId>
-  <version>6.7RC2-SNAPSHOT</version>
+  <version>6.2RC7-SNAPSHOT</version>
   <packaging>jar</packaging>
  
   <name>SPK Computation Algorithms</name>

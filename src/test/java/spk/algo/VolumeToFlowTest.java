@@ -29,14 +29,14 @@ import spk.db.test.UnitHelpers;
  * @author L2EDDMAN
  */
 public class VolumeToFlowTest {
-
+    
     VolumeToFlow instance = null;
     DbComputation comp = null;
     TimeSeriesDb db = new TestDatabase();
     Fixtures fixtures = null;
     
     public VolumeToFlowTest() throws Exception {
-        this.fixtures = Fixtures.getFixtures(db.makeTimeSeriesDAO());
+        this.fixtures = Fixtures.getFixtures(db);
         System.setProperty("user.timezone", "GMT");
         Fixtures.sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
     }

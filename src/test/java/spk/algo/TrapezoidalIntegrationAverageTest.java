@@ -42,7 +42,7 @@ public class TrapezoidalIntegrationAverageTest {
     public TrapezoidalIntegrationAverageTest() throws Exception {
         db = new TestDatabase();
         tsdai = db.makeTimeSeriesDAO();
-        fixtures = Fixtures.getFixtures(tsdai);
+        fixtures = Fixtures.getFixtures(db);
     }
 
     @BeforeClass

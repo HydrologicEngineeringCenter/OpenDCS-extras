@@ -5,6 +5,7 @@
  */
 package spk.db.test;
 
+import decodes.cwms.CwmsIntervalDAO;
 import decodes.sql.DbKey;
 import decodes.tsdb.BadConnectException;
 import decodes.tsdb.BadTimeSeriesException;
@@ -24,18 +25,20 @@ import java.util.logging.Logger;
 import opendcs.dai.IntervalDAI;
 import opendcs.dai.ScheduleEntryDAI;
 import opendcs.dai.TimeSeriesDAI;
+import opendcs.opentsdb.OpenTsdbIntervalDAO;
 
 /**
  * A Simple Database Implementation for use in unit tests (and maybe integration tests)
  * @author Michael Neilson
  */
-public class TestDatabase extends TimeSeriesDb{
+public final class TestDatabase extends TimeSeriesDb{
 
     TimeSeriesDAI tsdai = null;
-    
+    IntervalDAI intDAI = null;
     
     public TestDatabase(){
         TestDatabase.sdiIsUnique = true;
+        IntervalDAI idai = this.makeIntervalDAO();
     }
     
     @Override
@@ -98,7 +101,7 @@ public class TestDatabase extends TimeSeriesDb{
     public TimeSeriesDAI makeTimeSeriesDAO() {
         try {
             if( tsdai == null ){
-                tsdai = new TestDbTimeSeriesDAO();
+                tsdai = new TestDbTimeSeriesDAO(this);
             }
             return tsdai;
         } catch (Exception ex) {
@@ -122,7 +125,16 @@ public class TestDatabase extends TimeSeriesDb{
 
     @Override
     public IntervalDAI makeIntervalDAO() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            if( this.intDAI == null ){
+                this.intDAI = new CwmsIntervalDAO(this,"don't matter");
+                try {
+                    this.intDAI.loadAllIntervals();
+                } catch (DbIoException ex) {
+                    Logger.getLogger(TestDatabase.class.getName()).log(Level.SEVERE, null, ex);
+                    this.intDAI = null;
+                }
+            }
+            return this.intDAI;
     }
 
     @Override

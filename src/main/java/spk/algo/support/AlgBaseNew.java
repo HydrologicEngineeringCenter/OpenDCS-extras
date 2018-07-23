@@ -933,7 +933,7 @@ public abstract class AlgBaseNew extends DbAlgorithmExecutive
             debug3( "Search for data from time: " + previous_fcp_date.toString() );
 
             // this gets us an individual value from within the retreived time series
-            TimedVariable tv = ts.findWithin(previous_fcp_date, 1000);
+            TimedVariable tv = ts.findWithin(previous_fcp_date, 800);
             //TimedVariable tv = ts.findWithin(previous_fcp_date, roundSec);
 
 

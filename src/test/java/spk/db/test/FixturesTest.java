@@ -27,7 +27,7 @@ public class FixturesTest {
     public void testGetFixtures() throws Exception {
         TimeSeriesDb tsdb = new TestDatabase();
         TimeSeriesDAI tsdai = tsdb.makeTimeSeriesDAO();
-        Fixtures fixtures = Fixtures.getFixtures(tsdai);
+        Fixtures fixtures = Fixtures.getFixtures(tsdb);
 
     }
 
