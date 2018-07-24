@@ -97,10 +97,10 @@ public class RainFloodControlParameter
 			if( !ResetDate.equals("") )
 			{
 				resetDate = df.parse( ResetDate );
-                                cal = new GregorianCalendar();
+                                cal = new GregorianCalendar(aggTZ);
                                 cal.setTime(resetDate);
 			}
-                        tmp = new GregorianCalendar();
+                        tmp = new GregorianCalendar(aggTZ);
 		}
 		catch( java.text.ParseException e )
 		{

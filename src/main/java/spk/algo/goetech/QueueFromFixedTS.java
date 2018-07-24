@@ -149,7 +149,8 @@ public class QueueFromFixedTS
                                     DataType dt = parm.getDataType();
                                     TsGroup group = mycomp.getGroup();
                                     //group.addIntervalCode(parm.getInterval());
-                                    group.addVersion( parm.getVersion() );
+                                    //group.addVersion( parm.getVersion() );
+                                    group.addOtherMember("version", parm.getVersion());
                                     group.addDataTypeId(dt.getKey());
                                     group.setTransient();                                    
                                     group.clearExpandedList();

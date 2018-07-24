@@ -51,12 +51,12 @@ public final class TestDatabase extends TimeSeriesDb{
     public void setParmSDI(DbCompParm parm, DbKey siteId, String dtcode) throws DbIoException, NoSuchObjectException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+/*
     @Override
     public DataCollection getNewDataSince(DbKey applicationId, Date sinceTime) throws DbIoException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
+*/
     @Override
     public void validateParm(DbKey siteId, String dtcode, String interval, String tabSel, int modelId) throws ConstraintException, DbIoException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -149,6 +149,16 @@ public final class TestDatabase extends TimeSeriesDb{
 
     @Override
     public TimeSeriesIdentifier transformTsidByCompParm(TimeSeriesIdentifier tsid, DbCompParm parm, boolean createTS, boolean fillInParm, String timeSeriesDisplayName) throws DbIoException, NoSuchObjectException, BadTimeSeriesException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public DataCollection getNewData(DbKey applicationId) throws DbIoException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public DataCollection getNewDataSince(DbKey applicationId, Date sinceTime) throws DbIoException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

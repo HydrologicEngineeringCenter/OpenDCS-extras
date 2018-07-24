@@ -152,5 +152,15 @@ public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
     public void close() {
         
     }
-    
+/*
+    @Override
+    public ArrayList<TimeSeriesIdentifier> listTimeSeries(boolean forceRefresh) throws DbIoException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setRoundSec(int roundSec) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+  */  
 }

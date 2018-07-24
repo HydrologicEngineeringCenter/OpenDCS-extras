@@ -18,3 +18,5 @@
 17,TEST-3.Stage.Inst.15Minutes.0.LOS-raw,ft
 18,TEST.Precip-Cum.Inst.15Minutes.0.raw,in
 19,TEST.Precip-Cum.Inst.15Minutes.0.calc,in
+20,TEST.Precip-Basin.Total.1Day.1Day.raw,in
+21,TEST.Precip-FCP.Inst.1Day.0.calc,in

@@ -273,7 +273,7 @@ public class CombineStream_Adv
                         timeSeriesDAO = tsdb.makeTimeSeriesDAO();
                         //TimedVariable currentoutput = 
                         timeSeriesDAO.fillTimeSeries(outputTS, _timeSliceBaseTime,_timeSliceBaseTime );
-                        TimedVariable currentoutput = outputTS.findWithin(_timeSliceBaseTime, 0);
+                        TimedVariable currentoutput = outputTS.findWithin(_timeSliceBaseTime, 100);
                         currentout = currentoutput.getDoubleValue();
                         
                 }

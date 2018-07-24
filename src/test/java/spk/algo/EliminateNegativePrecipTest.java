@@ -18,6 +18,7 @@ import opendcs.dai.TimeSeriesDAI;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 import spk.db.test.Fixtures;
 import spk.db.test.TestDatabase;
 import spk.db.test.UnitHelpers;
@@ -158,16 +159,16 @@ public class EliminateNegativePrecipTest {
         DataCollection dc = instance.getDataCollection();
         CTimeSeries bad_rain = dc.getTimeSeriesByUniqueSdi(instance.getParmTsId("BadRain").getKey());
         CTimeSeries fixed_rain = dc.getTimeSeriesByUniqueSdi(instance.getParmTsId("FixedRain").getKey());
-        instance.BadRain = bad_rain.findWithin(reset, 100).getDoubleValue();
+        instance.BadRain = bad_rain.findWithin(dip, 100).getDoubleValue();
         UnitHelpers.setBaseTime(instance, dip);
         instance.beforeTimeSlices();
         instance.doAWTimeSlice();
-        double expected = fixed_rain.findWithin(reset, 100).getDoubleValue();
-        assertEquals("Should output should be zero", expected, instance.FixedRain.getDoubleValue(), .0001);
+        double expected = fixed_rain.findWithin(before_dip, 100).getDoubleValue();
+        assertEquals("0utput should be previous value", expected, instance.FixedRain.getDoubleValue(), .0001);
 
     }
     
-    
+    @Ignore // NOTE: need to actually implement, needs rewrite of beforeTimeSlice
     @Test
     public void testResetDate() throws Exception {
         instance.initAWAlgorithm();
@@ -175,11 +176,11 @@ public class EliminateNegativePrecipTest {
         DataCollection dc = instance.getDataCollection();
         CTimeSeries bad_rain = dc.getTimeSeriesByUniqueSdi(instance.getParmTsId("BadRain").getKey());
         CTimeSeries fixed_rain = dc.getTimeSeriesByUniqueSdi(instance.getParmTsId("FixedRain").getKey());
-        instance.BadRain = bad_rain.findWithin(dip, 100).getDoubleValue();
-        UnitHelpers.setBaseTime(instance, dip);
+        instance.BadRain = bad_rain.findWithin(reset, 100).getDoubleValue();
+        UnitHelpers.setBaseTime(instance, reset);
         instance.beforeTimeSlices();
         instance.doAWTimeSlice();
-        double expected = fixed_rain.findWithin(before_dip, 100).getDoubleValue();
+        double expected = fixed_rain.findWithin(reset, 100).getDoubleValue();
         assertEquals("Prevous value should have been used", expected, instance.FixedRain.getDoubleValue(), .0001);
 
     }

@@ -130,6 +130,7 @@ public class Fixtures {
             BufferedReader reader = new BufferedReader( new InputStreamReader(Resource.fromURI(uri)));
             String line = null;
             while( (line = reader.readLine()) != null ){
+                if( line.trim().isEmpty() ) continue;
                 String parts[] = line.split(",");
                 TimedVariable tv = new TimedVariable();
                 tv.setTime(sdf.parse(parts[0]));
