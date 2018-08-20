@@ -50,7 +50,7 @@ import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.DbIoException;
 import decodes.tsdb.IntervalCodes;
 import decodes.tsdb.NoSuchObjectException;
-import decodes.tsdb.TimeSeriesHelper;
+import decodes.util.TSUtil;
 import decodes.tsdb.TimeSeriesIdentifier;
 import decodes.tsdb.TsdbDatabaseVersion;
 import decodes.tsdb.VarFlags;
@@ -575,7 +575,7 @@ debug3("After re-getting tsid dn='" + cts.getDisplayName() + "'");
 			unitsAbbr = tsId.getStorageUnits(); // Assume they're already correct
 		else if (!unitsAbbr.equalsIgnoreCase(tsId.getStorageUnits()))
 		{
-			TimeSeriesHelper.convertUnits(ts, tsId.getStorageUnits());
+			TSUtil.convertUnits(ts, tsId.getStorageUnits());
 			unitsAbbr = tsId.getStorageUnits();
 		}
 		

@@ -12,7 +12,7 @@ import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.TsdbAppTemplate;
 import decodes.tsdb.DbComputation;
 import decodes.tsdb.DbAlgorithmExecutive;
-import decodes.tsdb.TimeSeriesHelper;
+import decodes.util.TSUtil;
 import decodes.util.CmdLineArgs;
 import ilex.cmdline.StringToken;
 import ilex.cmdline.TokenOptions;

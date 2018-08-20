@@ -95,7 +95,7 @@ public class BuildCompGraph extends TsdbAppTemplate {
               
         TsGroup my_group = groupDAO.getTsGroupByName(group.getValue());
         CwmsGroupHelper helper = new CwmsGroupHelper((CwmsTimeSeriesDb) theDb);
-        helper.expandTsGroupDescriptors(my_group);
+        helper.expandTsGroup(my_group);
         //helper.expandTsGroupDescriptors(my_group); // expand the group
         ArrayList<TimeSeriesIdentifier> expandedList = my_group.getExpandedList();
         DataCollection dc = new DataCollection();

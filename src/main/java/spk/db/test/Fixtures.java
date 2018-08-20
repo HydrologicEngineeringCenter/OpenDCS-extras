@@ -12,6 +12,7 @@ import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.DataCollection;
 import decodes.tsdb.TimeSeriesDb;
 import decodes.tsdb.TimeSeriesIdentifier;
+import decodes.tsdb.VarFlags;
 import ilex.var.TimedVariable;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -135,7 +136,7 @@ public class Fixtures {
                 TimedVariable tv = new TimedVariable();
                 tv.setTime(sdf.parse(parts[0]));
                 tv.setValue(Double.parseDouble(parts[1]));
-                
+                tv.setFlags(VarFlags.DB_ADDED);
                 cts.addSample(tv);
             }
     }

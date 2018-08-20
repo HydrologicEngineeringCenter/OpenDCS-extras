@@ -88,14 +88,15 @@ public class CombineStream_AdvTest {
 
         for (DbCompParm p : comp.getParmList()) {
             CTimeSeries cts = new CTimeSeries(p);
-            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2014, 10, 1));
+            tsdai.fillTimeSeries(cts, new Date(2013, 1, 1), new Date(2018, 8, 16));
             dc.addTimeSeries(cts);
         }
-
+        
         instance = (CombineStream_Adv) comp.getExecutive();
         instance.StationsDir = "classpath:/shared/stations/";
 
         UnitHelpers.prepForApply(instance, dc);
+        UnitHelpers.determineBaseTimes(instance);
 
     }
 
@@ -201,6 +202,7 @@ public class CombineStream_AdvTest {
         instance.StationsDir = "classpath:/shared/stations/";
 
         UnitHelpers.prepForApply(instance, dc);
+        UnitHelpers.determineBaseTimes(instance);
 
         dc = instance.getDataCollection();
 
@@ -212,6 +214,7 @@ public class CombineStream_AdvTest {
         instance.goes = tv.getDoubleValue();
         instance.ip = Double.NEGATIVE_INFINITY;
         instance.los = Double.NEGATIVE_INFINITY;
+        instance.beforeTimeSlices();
         instance.doAWTimeSlice();
 
         assertFalse("Value was output when it shouldn't have been", instance.output.isChanged());
@@ -251,6 +254,7 @@ public class CombineStream_AdvTest {
         instance.StationsDir = "classpath:/shared/stations/";
 
         UnitHelpers.prepForApply(instance, dc);
+        UnitHelpers.determineBaseTimes(instance);
 /*
         dc = instance.getDataCollection();
 
@@ -303,6 +307,8 @@ public class CombineStream_AdvTest {
         instance.StationsDir = "classpath:/shared/stations/";
 
         UnitHelpers.prepForApply(instance, dc);
+        
+        UnitHelpers.determineBaseTimes(instance);
 /*
         dc = instance.getDataCollection();
 
@@ -355,6 +361,7 @@ public class CombineStream_AdvTest {
         instance.StationsDir = "classpath:/shared/stations/";
 
         UnitHelpers.prepForApply(instance, dc);
+        UnitHelpers.determineBaseTimes(instance);
 /*
         dc = instance.getDataCollection();
 

@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.TreeSet;
 import opendcs.dai.TimeSeriesDAI;
 import spk.algo.support.AlgBaseNew;
 
@@ -59,6 +60,43 @@ public class UnitHelpers {
         tsbt.set(instance, dt);
     }
     
+    /**
+     * 
+     * @param instance
+     * @param dt
+     * @throws NoSuchFieldException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException 
+     */
+    public static void determineBaseTimes( AW_AlgorithmBase instance ) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException{
+        Class<?> clz = instance.getClass().getSuperclass();
+        Field tsbt = clz.getDeclaredField("baseTimes");
+        Method determineBaseTimes = clz.getSuperclass().getDeclaredMethod("determineInputBaseTimes");
+        tsbt.setAccessible(true);
+        determineBaseTimes.setAccessible(true);
+        TreeSet<Date> baseTimes = (TreeSet<Date>) determineBaseTimes.invoke(instance);
+        tsbt.set(instance, baseTimes);
+    }
+    
+    /**
+     * 
+     * @param instance
+     * @param dt
+     * @throws NoSuchFieldException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException 
+     */
+    public static void determineBaseTimes( AlgBaseNew instance ) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException{
+        Class<?> clz = instance.getClass().getSuperclass();
+        Field tsbt = clz.getDeclaredField("baseTimes");
+        Method determineBaseTimes = clz.getSuperclass().getDeclaredMethod("determineInputBaseTimes");
+        determineBaseTimes.setAccessible(true);
+        tsbt.setAccessible(true);
+        TreeSet<Date> baseTimes = (TreeSet<Date>) determineBaseTimes.invoke(instance);
+        tsbt.set(instance, baseTimes);
+    }
+    
+    
     
     /**
      * 
@@ -69,15 +107,20 @@ public class UnitHelpers {
         
         Class<?> clz = instance.getClass().getSuperclass().getSuperclass();
         Field fldDC = clz.getDeclaredField("dc");
+        //Field fldBaseTimes = clz.getField("baseTimes");
         fldDC.setAccessible(true);
+        //fldBaseTimes.setAccessible(true);
         fldDC.set(instance, dc);
+        
         Method evalRange = clz.getDeclaredMethod("evaluateEffectiveRange");
         Method modelID = clz.getDeclaredMethod("determineModelRunId", DataCollection.class);
         Method addTsToParmRef = clz.getDeclaredMethod("addTsToParmRef", String.class, boolean.class);
+        Method determineInputBaseTimes = clz.getDeclaredMethod("determineInputBaseTimes");
         
         evalRange.setAccessible(true);
         modelID.setAccessible(true);
         addTsToParmRef.setAccessible(true);
+        determineInputBaseTimes.setAccessible(true);
         
         evalRange.invoke(instance);
         modelID.invoke(instance, dc);
@@ -88,6 +131,8 @@ public class UnitHelpers {
 		for(String role : instance.getOutputNames())
 			addTsToParmRef.invoke(instance, role, true);
         
+       //TreeSet<Date> baseTimes = (TreeSet<Date>) determineInputBaseTimes.invoke(instance);
+       //fldBaseTimes.set(instance, baseTimes);
         
     }
 

@@ -16,6 +16,7 @@ import decodes.tsdb.VarFlags;
 import decodes.tsdb.algo.AWAlgoType;
 import ilex.var.TimedVariable;
 import decodes.db.UnitConverter;
+import decodes.tsdb.BadTimeSeriesException;
 
 //AW:IMPORTS
 // Place an import statements you need here.
@@ -23,6 +24,9 @@ import java.util.TreeMap;
 import spk.algo.support.StationData;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import opendcs.dai.TimeSeriesDAI;
 import spk.algo.reports.ReleaseChangeNotice;
 //AW:IMPORTS_END
@@ -60,6 +64,7 @@ public class CombineStream_Adv
         public TreeMap< Date, StationData> map;
         // array that holds the primary source transitions
         private TimeSeriesDAI timeSeriesDAO;
+        private CTimeSeries outputTS = null; // hold the output TS for each iteration through the loop.
         /**
          *  variables for the source to use
          */
@@ -154,7 +159,22 @@ public class CombineStream_Adv
                 //EngineeringUnit us = EngineeringUnit.getEngineeringUnit("ft");
                 //EngineeringUnit si = EngineeringUnit.getEngineeringUnit(units_o);
                 //UnitConverter uc = CompositeConverter.build(us, si);
+                ParmRef outputParmRef = getParmRef("output");
+                outputTS = new CTimeSeries(outputParmRef.compParm);
                 
+                timeSeriesDAO = tsdb.makeTimeSeriesDAO();
+                Date start;
+                try {
+                    //this.baseTimes
+                    TreeSet<Date> allInputData = this.baseTimes;
+                    start = allInputData.first();
+                    start.setDate(start.getDate()-1);
+                    timeSeriesDAO.fillTimeSeries(outputTS, start, allInputData.last() );
+                } catch (DbIoException ex) {
+                    warning(ex.getLocalizedMessage());
+                } catch (BadTimeSeriesException ex) {
+                   warning(ex.getLocalizedMessage());
+                }
                 
                 debug3( "time series units are:" );
                 debug3( "    goes: " + units_goes );
@@ -264,15 +284,17 @@ public class CombineStream_Adv
                 if( checkPZF && have_an_output ){
                     output = Math.max(output, getPZF(_timeSliceBaseTime,getInputUnitsAbbr("goes")));
                 } */               
-                ParmRef outputParmRef = getParmRef("output");
-                CTimeSeries outputTS = new CTimeSeries(outputParmRef.compParm);
+               // ParmRef outputParmRef = getParmRef("output");
+                //CTimeSeries outputTS = new CTimeSeries(outputParmRef.compParm);
                 
                 double currentout = Double.NEGATIVE_INFINITY;
                 try
                 {
+                    /*
                         timeSeriesDAO = tsdb.makeTimeSeriesDAO();
                         //TimedVariable currentoutput = 
                         timeSeriesDAO.fillTimeSeries(outputTS, _timeSliceBaseTime,_timeSliceBaseTime );
+                    */
                         TimedVariable currentoutput = outputTS.findWithin(_timeSliceBaseTime, 100);
                         currentout = currentoutput.getDoubleValue();
                         
@@ -280,9 +302,7 @@ public class CombineStream_Adv
                 catch (Exception e)
                 {
                         // any error means the data doesn't exist yet so we have to right it out
-                } finally{
-                    timeSeriesDAO.close();
-                }
+                } 
                 debug3( "existing output= " + currentout);
                 if( have_an_output && !ReleaseChangeNotice.fequals(currentout,output,0.0001) )
                 {

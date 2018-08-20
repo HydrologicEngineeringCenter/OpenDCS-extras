@@ -556,6 +556,7 @@ Sub classes must override all the abstract methods and provide
 a mechanism to persistently store time series and computational meta
 data.
 */
+@Deprecated
 public class CwmsTimeSeriesDb_SPK
 	extends decodes.cwms.CwmsTimeSeriesDb
 {
@@ -567,10 +568,10 @@ public class CwmsTimeSeriesDb_SPK
 
 //	private SimpleDateFormat rwdf;
 	private OraclePreparedStatement storeTsStmt = null;
-	private TasklistQueueFile tasklistQueueFile = null;
+	//private TasklistQueueFile tasklistQueueFile = null;
 	private int tasklistQueueThresholdHours = 8;
 	private int numTasklistQueueErrors = 0;
-
+        
 
 	private String[] currentlyUsedVersions = { "" };
 	GregorianCalendar saveTsCal = new GregorianCalendar(
@@ -1436,7 +1437,7 @@ for(CTimeSeries ts : allts)
 	{
 		if (cwmsGroupHelper == null)
 			cwmsGroupHelper = new CwmsGroupHelper((decodes.cwms.CwmsTimeSeriesDb)this);
-		cwmsGroupHelper.expandTsGroupDescriptors(tsGroup);
+		cwmsGroupHelper.expandTsGroup(tsGroup);
 		return tsGroup.getExpandedList();
 	}
 
@@ -1747,6 +1748,7 @@ for(CTimeSeries ts : allts)
 	 * Default implementation does nothing. Tasklist queuing must be handled
 	 * by the underlying subclass.
 	 */
+        /*
 	public void useTasklistQueue(TasklistQueueFile tqf, int thresholdHours)
 	{
 //		this.tasklistQueueFile = tqf;
@@ -1759,7 +1761,8 @@ for(CTimeSeries ts : allts)
 			tasklistQueueFile.close();
 		tasklistQueueFile = null;
 	}
-
+        */
+        
 	/**
 	 * Use database-specific flag definitions to determine whether the
 	 * passed variable should be considered 'questionable'.

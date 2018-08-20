@@ -66,7 +66,7 @@ import decodes.db.SiteName;
 import decodes.tsdb.DbAlgorithmExecutive;
 import decodes.tsdb.DbCompException;
 import decodes.tsdb.DbIoException;
-import decodes.tsdb.TimeSeriesHelper;
+//import decodes.tsdb.T;
 import decodes.tsdb.VarFlags;
 import decodes.tsdb.algo.AWAlgoType;
 import decodes.tsdb.CTimeSeries;
@@ -81,6 +81,7 @@ import hec.data.cwmsRating.RatingSet;
 import java.util.ArrayList;
 
 import decodes.tsdb.TimeSeriesIdentifier;
+import decodes.util.TSUtil;
 //AW:IMPORTS_END
 
 //AW:JAVADOC
@@ -196,7 +197,7 @@ public class InvCwmsRatingSingleIndep
 				debug1(module + " Converting indep units for time series " 
 					+ indepParmRef.timeSeries.getTimeSeriesIdentifier().getUniqueString() + " from "
 					+ indepParmRef.timeSeries.getUnitsAbbr() + " to " + punits[0]);
-				TimeSeriesHelper.convertUnits(indepParmRef.timeSeries, punits[0]);
+				TSUtil.convertUnits(indepParmRef.timeSeries, punits[0]);
 			}
 			// Likewise for the dependent param:
 			if (punits.length > 1 && punits[1] != null
@@ -206,7 +207,7 @@ public class InvCwmsRatingSingleIndep
 debug1(module + " depTSID=" + depParmRef.timeSeries.getTimeSeriesIdentifier());
 				debug1(module + " Converting dep units from "
 					+ depParmRef.timeSeries.getUnitsAbbr() + " to " + punits[1]);
-				TimeSeriesHelper.convertUnits(depParmRef.timeSeries, punits[1]);
+				TSUtil.convertUnits(depParmRef.timeSeries, punits[1]);
 			}
 		}
 		catch (RatingException ex)

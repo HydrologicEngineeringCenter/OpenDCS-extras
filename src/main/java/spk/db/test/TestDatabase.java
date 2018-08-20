@@ -62,10 +62,7 @@ public final class TestDatabase extends TimeSeriesDb{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public int findModelId(int modelRunId) throws DbIoException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    
 
     @Override
     public int findMaxModelRunId(int modelId) throws DbIoException {
@@ -157,11 +154,12 @@ public final class TestDatabase extends TimeSeriesDb{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /*
     @Override
     public DataCollection getNewDataSince(DbKey applicationId, Date sinceTime) throws DbIoException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+    */
     
     
 }

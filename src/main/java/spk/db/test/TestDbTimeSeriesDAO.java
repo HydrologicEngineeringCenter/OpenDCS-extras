@@ -163,4 +163,14 @@ public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
   */  
+
+    @Override
+    public ArrayList<TimeSeriesIdentifier> listTimeSeries(boolean forceRefresh) throws DbIoException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setAppModule(String module) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
