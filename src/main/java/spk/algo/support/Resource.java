@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
+import org.lobobrowser.util.OS;
 
 /**
  * Idea pulled from: https://stackoverflow.com/questions/861500/url-to-load-resources-from-the-classpath-in-java
@@ -23,7 +24,7 @@ public class Resource {
         }
         else if( (scheme == null||scheme.equalsIgnoreCase("file")) && uri.getPath() != null ){
             return new FileInputStream(uri.getPath());
-        } 
+        }         
         else {
             throw new Exception("scheme not implemented");
         }
