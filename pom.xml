@@ -96,6 +96,12 @@
       <artifactId>opendcs</artifactId>
       <version>6.5RC02-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>1.4.197</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
