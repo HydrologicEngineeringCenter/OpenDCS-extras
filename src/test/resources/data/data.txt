@@ -20,3 +20,7 @@
 19,TEST.Precip-Cum.Inst.15Minutes.0.calc,in
 20,TEST.Precip-Basin.Total.1Day.1Day.raw,in
 21,TEST.Precip-FCP.Inst.1Day.0.calc,in
+22,TEST.Flow-In.Ave.1Day.1Day.raw,cfs
+23,TEST.Stor-Runoff.Inst.1Day.0.calc,ac-ft
+24,TEST.Stor-Runoff.Inst.0.0.raw,ac-ft
+25,TEST.Stor-In.Ave.1Day.1Day.raw,ac-ft

@@ -299,7 +299,7 @@ public class RemainingRunoffInDb
                      d = dates.get(i);
                      flow = inflows.get(i);
                      
-                     int wy_day = DateTime.to_wy_julian(d);
+                     int wy_day = DateTime.to_wy_julian(d,aggTZ);
                      Dates days = new Dates(d);                     
                      
                      if( wy_day <= days.February01 || wy_day > days.August01){
@@ -320,7 +320,7 @@ public class RemainingRunoffInDb
                             if( ref.timeSeries.getUnitsAbbr().equalsIgnoreCase( "cfs" ) ){
                                sum=sum*1.9835; // otherwise it's already in acre-ft
                             }// otherwise use sum as is
-                            double remaining = runoff-(sum);
+                            double remaining = Math.max(0, runoff-(sum)); // negative remaining runoff is impossible
                             setOutput( runoff_remaining, remaining, d);                                                  
                         }
                         catch( Exception err){

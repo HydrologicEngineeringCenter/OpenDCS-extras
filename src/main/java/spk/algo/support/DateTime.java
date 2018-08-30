@@ -7,6 +7,7 @@ package spk.algo.support;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Calendar;
+import java.util.TimeZone;
 import static spk.algo.support.Logging.*;
 /**
  * SPK Date/Time Helper functions
@@ -16,6 +17,11 @@ public class DateTime {
 
     private static int days_in_month[] = { 31, 28, 31,30,31,30,31,31,30,31,30,31 };
     
+    
+    public static int to_wy_julian( Date t ){
+        return to_wy_julian(t, TimeZone.getDefault());
+    }
+    
     /**
      * This will return the correct Julian date even during a leap year.
      * starts at 1, for the Water Control Diagrams you should subtract 1 when
@@ -23,9 +29,9 @@ public class DateTime {
      * @param t  input date to return
      * @return   water year Julian day
      */
-    public static int to_wy_julian( Date t)
+    public static int to_wy_julian( Date t, TimeZone tz)
     {
-        GregorianCalendar cal = new GregorianCalendar();
+        GregorianCalendar cal = new GregorianCalendar(tz);
         cal.setTime(t);
         
         int cur_day = cal.get(cal.DAY_OF_MONTH);

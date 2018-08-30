@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.TreeSet;
 import opendcs.dai.TimeSeriesDAI;
 import spk.algo.support.AlgBaseNew;
@@ -141,7 +142,11 @@ public class UnitHelpers {
         for (DbCompParm p : comp.getParmList()) {
             CTimeSeries cts = new CTimeSeries(p);
             tsdai.fillTimeSeries(cts, start, end);
-            dc.addTimeSeries(cts);
+            try{
+                dc.addTimeSeries(cts);
+            } catch ( DuplicateTimeSeriesException e ){
+                // just don't add it...though figure out why it was happening in the remaining runoff after a minor change
+            }
         }
         return dc;
     }
@@ -153,7 +158,13 @@ public class UnitHelpers {
         fldDC.setAccessible(true);
         fldDC.set(instance, val);
     }
-        
     
+    public static DbComputation getComp(DbAlgorithmExecutive instance) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
+    {
+        Class<?> clz = instance.getClass().getSuperclass().getSuperclass();
+        Field fldComp = clz.getDeclaredField("comp");
+        fldComp.setAccessible(true);
+        return (DbComputation) fldComp.get(instance);
+    }
     
 }

@@ -23,6 +23,11 @@ public class WaterControlDiagramTest {
     String basic_graph = "classpath:/shared/tables/tcs/basic";
     String fbo_graph = "classpath:/shared/tables/tcs/fbo";
 
+    WaterControlDiagram instance;
+
+    double expResult;
+    double result;
+
     public WaterControlDiagramTest() {
     }
 
@@ -40,6 +45,9 @@ public class WaterControlDiagramTest {
 
     @Before
     public void setUp() {
+        expResult = -1;
+        result = -1;
+        instance = null;
     }
 
     @After
@@ -62,7 +70,6 @@ public class WaterControlDiagramTest {
     public void testLoadFBO_graph() throws Exception {
         WaterControlDiagram instance = new WaterControlDiagram();
         instance.load_graph(fbo_graph);
-
     }
 
     /**
@@ -72,18 +79,23 @@ public class WaterControlDiagramTest {
      */
     @Test
     public void testGet_allowed_storage() throws Exception {
-        System.out.println("get_allowed_storage");
         int day = 0;
         double fcp = 0.0;
-        WaterControlDiagram instance = new WaterControlDiagram();
-
+        instance = new WaterControlDiagram();
         instance.load_graph(basic_graph);
-        double expResult = 0.0;
-        System.out.println("Bounding");
-        double result = instance.get_allowed_storage(day, fcp);
-        assertEquals(112253.0, result, 1.0);
+        expResult = 112253.0;
+        result = instance.get_allowed_storage(day, fcp);
+        assertEquals(expResult, result, 1.0);
 
-        result = instance.get_allowed_storage(day, 16.0);
+    }
+
+    @Test
+    public void testBounding() throws Exception {
+        instance = new WaterControlDiagram();
+        instance.load_graph(basic_graph);
+        int day = 0;
+        double fcp = 0;
+        result = instance.get_allowed_storage(day, fcp);
         assertEquals(112253, result, 1.0);
 
         result = instance.get_allowed_storage(80, 0.0);
@@ -91,7 +103,14 @@ public class WaterControlDiagramTest {
 
         result = instance.get_allowed_storage(80, 16.0);
         assertEquals(0.0, result, 1.0);
+    }
 
+    @Test
+    public void testControlPoints() throws Exception {
+        instance = new WaterControlDiagram();
+        instance.load_graph(basic_graph);
+        int day = 0;
+        double fcp = 0;
         System.out.println("Control Points");
         result = instance.get_allowed_storage(76, 3.0);
         assertEquals(29800.0, result, 1.0);
