@@ -46,6 +46,8 @@ public class CombineStream_AdvTest {
     Date t1 = null;
     Date t2 = null;
     Date t3 = null;
+    Date start = null;
+    Date end = null;
 
     public CombineStream_AdvTest() throws ParseException, Exception {
 
@@ -56,7 +58,9 @@ public class CombineStream_AdvTest {
         t1 = Fixtures.sdf.parse("2013-07-01T19:00:00+0000");
         t2 = Fixtures.sdf.parse("2016-01-28T18:00:00+0000");
         t3 = Fixtures.sdf.parse("2016-02-04T17:00:00+0000");
-
+        start = Fixtures.sdf.parse("2013-01-1T00:00:00+0000");
+        end = Fixtures.sdf.parse("2018-10-1T00:00:00+0000");
+        
     }
 
     @BeforeClass
@@ -88,7 +92,7 @@ public class CombineStream_AdvTest {
 
         for (DbCompParm p : comp.getParmList()) {
             CTimeSeries cts = new CTimeSeries(p);
-            tsdai.fillTimeSeries(cts, new Date(2013, 1, 1), new Date(2018, 8, 16));
+            tsdai.fillTimeSeries(cts, new Date(2013-1900, 1, 1), new Date(2018-1900, 8, 16));
             dc.addTimeSeries(cts);
         }
         
@@ -192,12 +196,8 @@ public class CombineStream_AdvTest {
         comp.setAlgorithm(dbca);
         comp.prepareForExec(db);
 
-        for (DbCompParm p : comp.getParmList()) {
-            CTimeSeries cts = new CTimeSeries(p);
-            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2018, 10, 1));
-            dc.addTimeSeries(cts);
-        }
-
+        
+        dc = UnitHelpers.getCompData(comp, tsdai, start, end);
         instance = (CombineStream_Adv) comp.getExecutive();
         instance.StationsDir = "classpath:/shared/stations/";
 
@@ -244,12 +244,13 @@ public class CombineStream_AdvTest {
         comp.setAlgorithm(dbca);
         comp.prepareForExec(db);
 
+        /*
         for (DbCompParm p : comp.getParmList()) {
             CTimeSeries cts = new CTimeSeries(p);
-            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2018, 10, 1));
+            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2018-1900, 10, 1));
             dc.addTimeSeries(cts);
-        }
-
+        }*/
+        dc = UnitHelpers.getCompData(comp, tsdai, start, end);
         instance = (CombineStream_Adv) comp.getExecutive();
         instance.StationsDir = "classpath:/shared/stations/";
 
@@ -297,12 +298,7 @@ public class CombineStream_AdvTest {
         comp.setAlgorithm(dbca);
         comp.prepareForExec(db);
 
-        for (DbCompParm p : comp.getParmList()) {
-            CTimeSeries cts = new CTimeSeries(p);
-            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2018, 10, 1));
-            dc.addTimeSeries(cts);
-        }
-
+        dc = UnitHelpers.getCompData(comp, tsdai, start, end);
         instance = (CombineStream_Adv) comp.getExecutive();
         instance.StationsDir = "classpath:/shared/stations/";
 
@@ -351,12 +347,7 @@ public class CombineStream_AdvTest {
         comp.setAlgorithm(dbca);
         comp.prepareForExec(db);
 
-        for (DbCompParm p : comp.getParmList()) {
-            CTimeSeries cts = new CTimeSeries(p);
-            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2018, 10, 1));
-            dc.addTimeSeries(cts);
-        }
-
+        dc = UnitHelpers.getCompData(comp, tsdai, start, end);
         instance = (CombineStream_Adv) comp.getExecutive();
         instance.StationsDir = "classpath:/shared/stations/";
 

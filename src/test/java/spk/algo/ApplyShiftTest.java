@@ -84,13 +84,14 @@ public class ApplyShiftTest {
         comp.setAlgorithmName("ApplyShift");
         comp.setAlgorithm(dbca);
         comp.prepareForExec(db);
-
+        /*
         for (DbCompParm p : comp.getParmList()) {
             CTimeSeries cts = new CTimeSeries(p);
-            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2014, 10, 1));
+            tsdai.fillTimeSeries(cts, new Date(2013, 1, 1), new Date(2014, 10, 1));
             dc.addTimeSeries(cts);
         }
-
+        */
+        dc = UnitHelpers.getCompData(comp, tsdai, new Date(2013-1900, 1, 1), new Date(2014-1900, 10, 1));
         instance = (ApplyShift) comp.getExecutive();
         instance.ShiftsDir = "classpath:/shared/stations/";
         //instance.prepForApply(dc);

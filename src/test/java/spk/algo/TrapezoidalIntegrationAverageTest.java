@@ -38,11 +38,15 @@ public class TrapezoidalIntegrationAverageTest {
     TestDatabase db = null;
     TimeSeriesDAI tsdai = null;
     Fixtures fixtures = null;
+    Date start = null;
+    Date end = null;
 
     public TrapezoidalIntegrationAverageTest() throws Exception {
         db = new TestDatabase();
         tsdai = db.makeTimeSeriesDAO();
         fixtures = Fixtures.getFixtures(db);
+        start = Fixtures.sdf.parse("2013-01-01T00:00:00+0000");
+        end = Fixtures.sdf.parse("2019-10-01T00:00:00+0000");
     }
 
     @BeforeClass
@@ -69,7 +73,7 @@ public class TrapezoidalIntegrationAverageTest {
         comp.addParm(parm);
 
         comp.prepareForExec(db);
-        DataCollection dc = UnitHelpers.getCompData(comp, tsdai, new Date(2013, 10, 1), new Date(2017, 10, 1));
+        DataCollection dc = UnitHelpers.getCompData(comp, tsdai, start, end);
 
         instance = (TrapezoidalIntegrationAverage) comp.getExecutive();
         UnitHelpers.prepForApply(instance, dc);
