@@ -184,6 +184,8 @@ public class Camanche_2017Tkt1222
                     if( gross_reservation > 200000){
                         gross_reservation = 200000;
                     }
+                    
+                    //section 2
                     double transferable_res = gross_reservation - non_transfer_res;
                     
                     
