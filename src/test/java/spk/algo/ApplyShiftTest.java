@@ -91,7 +91,7 @@ public class ApplyShiftTest {
             dc.addTimeSeries(cts);
         }
         */
-        dc = UnitHelpers.getCompData(comp, tsdai, new Date(2013-1900, 1, 1), new Date(2014-1900, 10, 1));
+        dc = UnitHelpers.getCompData(comp, tsdai, new Date(2013-1900, 1, 1), new Date(2020-1900, 10, 1));
         instance = (ApplyShift) comp.getExecutive();
         instance.ShiftsDir = "classpath:/shared/stations/";
         //instance.prepForApply(dc);
@@ -257,6 +257,45 @@ public class ApplyShiftTest {
 
         // 2ft in meters = 0.6096
         assertEquals("PZF value was not used", .6096, instance.output.getDoubleValue(), .0001);
+
+    }
+    
+    @Test
+    public void testNWO_USGS_Temp_Offset() throws Exception {
+        DbCompAlgorithm dbca = new DbCompAlgorithm("ApplyShift");
+        dbca.setExecClass("spk.algo.ApplyShift");
+        DataCollection dc = new DataCollection();
+        DbComputation comp = new DbComputation(DbKey.NullKey, "ApplyShiftTest");
+
+        DbCompParm parm = new DbCompParm("input", fixtures.getTimeSeriesKey("AWRO.Temp-Water.Inst.15Minutes.0.USGS-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        parm = new DbCompParm("output", fixtures.getTimeSeriesKey("TEST.Stage.Inst.15Minutes.0.calc"), "15Minutes", null, 0);
+        comp.addParm(parm);
+        //comp.setProperty("input_EU", "m");
+        comp.setAlgorithmName("ApplyShift");
+        comp.setAlgorithm(dbca);
+        comp.prepareForExec(db);
+
+        for (DbCompParm p : comp.getParmList()) {
+            CTimeSeries cts = new CTimeSeries(p);
+            tsdai.fillTimeSeries(cts, new Date(2013, 10, 1), new Date(2014, 10, 1));
+            dc.addTimeSeries(cts);
+        }
+
+        instance = (ApplyShift) comp.getExecutive();
+        instance.ShiftsDir = "classpath:/shared/stations/";
+        //instance.prepForApply(dc);
+        UnitHelpers.prepForApply(instance, dc);
+
+        //Date dt = df.parse("06/26/2018 23:00:00+0000");
+        Date dt = Fixtures.sdf.parse("2019-02-10T10:00:00+0000");
+        UnitHelpers.setBaseTime(instance, dt);
+        instance.input = 1;
+        instance.beforeTimeSlices();
+        instance.doAWTimeSlice();
+        assertEquals("Value Shifted", 0.9, instance.output.getDoubleValue(), .0001);
+        
 
     }
 

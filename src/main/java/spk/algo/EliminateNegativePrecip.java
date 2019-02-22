@@ -147,8 +147,8 @@ public class EliminateNegativePrecip
             first_run = false; // need to find a way to make this whole thing work better
         }
 
-        debug1("TimeSlice time is: " + df.format(_timeSliceBaseTime));
-        debug2(" prev_rain = " + prev_rain + ", BadRain = " + BadRain);
+        debug3("TimeSlice time is: " + df.format(_timeSliceBaseTime));
+        debug3(" prev_rain = " + prev_rain + ", BadRain = " + BadRain);
 
         
         debug3("begining logic");
@@ -161,18 +161,18 @@ public class EliminateNegativePrecip
             }
         } else if (isMissing(prev_rain) && !isMissing(BadRain)) {
             //TODO: this will really cause problems if data starts not being there
-            debug2("This is the first good rain value, starting from here");
+            debug3("This is the first good rain value, starting from here");
             prev_rain = BadRain;
         } else if (isMissing(BadRain)) {
-            debug2("Input rain is missing, using previous value");
+            debug3("Input rain is missing, using previous value");
         } else if (Math.abs(BadRain - prev_rain) > 2.0) {
-            debug2("difference between current and previous value too large: |" + BadRain + " - " + prev_rain + "| = " + Math.abs(BadRain - prev_rain));
+            debug3("difference between current and previous value too large: |" + BadRain + " - " + prev_rain + "| = " + Math.abs(BadRain - prev_rain));
         } else if (BadRain > prev_rain) {
-            debug2("Current rain value is larger than previous, using current value.");
+            debug3("Current rain value is larger than previous, using current value.");
 
             prev_rain = BadRain;
         } else {
-            debug2("not start of wateryear and new value < old value, keep previous value");
+            debug3("not start of wateryear and new value < old value, keep previous value");
         }
         if (!isMissing(prev_rain) && prev_rain < 0.0) {
             prev_rain = 0.0;

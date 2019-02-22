@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -92,7 +93,7 @@ public class Fixtures {
                 String parts[] = line.split(",");
                 DbKey key = DbKey.createDbKey(Long.parseLong(parts[0]));
                 String tsname = parts[1];
-                URI uri = URI.create("classpath:/data/" + tsname + ".csv");
+                URI uri = URI.create("classpath:/data/" + tsname.replace(" ","%20") + ".csv");
                 String units = parts[2];
 
                 String tsname_parts[] = tsname.split("\\.");

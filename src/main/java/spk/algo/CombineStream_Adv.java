@@ -142,7 +142,7 @@ public class CombineStream_Adv
                 location = tsid.getSiteName() + "." + tsid.getDataType().getCode(); //+"." + tsid.getPart("paramtype")+"."+tsid.getInterval();
                 debug3("getting station information for: " + location);
                 try{
-                map = StationData.loadData( StationsDir + "/"+ location+".station");
+                    map = StationData.loadData( StationsDir + "/"+ location+".station");
                 } catch( Exception ex ){
                     throw new DbCompException(ex.getLocalizedMessage());
                 }
@@ -304,7 +304,7 @@ public class CombineStream_Adv
                         // any error means the data doesn't exist yet so we have to right it out
                 } 
                 debug3( "existing output= " + currentout);
-                if( have_an_output && !ReleaseChangeNotice.fequals(currentout,output,0.0001) )
+                if( have_an_output && (!ReleaseChangeNotice.fequals(currentout,output,0.0001) || isMissing(currentout) ) )
                 {
                     debug3( "output= " + output );
                     setOutput( this.output, output );

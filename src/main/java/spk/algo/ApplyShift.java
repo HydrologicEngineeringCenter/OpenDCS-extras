@@ -1,5 +1,6 @@
 package spk.algo;
 
+import spk.exceptions.FormatException;
 import decodes.db.CompositeConverter;
 import decodes.db.EngineeringUnit;
 import decodes.db.UnitConverter;
@@ -106,12 +107,11 @@ public class ApplyShift
         debug3("  in directory " + ShiftsDir);
         base_units = getInputUnitsAbbr("input");
         try {
-            map = StationData.loadData(ShiftsDir + "/" + location + ".station");
-            
-            
+            map = StationData.loadData(ShiftsDir + "/" + location + ".station");                        
+        } catch (FormatException ex) {
+            throw new DbCompException(ex.getLocalizedMessage());
         } catch (Exception ex) {
             throw new DbCompException(ex.getLocalizedMessage());
- 
         }
         //AW:BEFORE_TIMESLICES_END
     }

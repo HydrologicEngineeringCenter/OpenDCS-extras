@@ -10,6 +10,7 @@ import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.DataCollection;
 import decodes.tsdb.DbAlgorithmExecutive;
 import decodes.tsdb.DbCompAlgorithm;
+import decodes.tsdb.DbCompException;
 import decodes.tsdb.DbCompParm;
 import decodes.tsdb.DbComputation;
 import decodes.tsdb.ParmRef;
@@ -23,6 +24,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
 import spk.db.test.Fixtures;
 import spk.db.test.TestDatabase;
 import spk.db.test.TestDbTimeSeriesDAO;
@@ -38,6 +41,10 @@ public class CombineStream_AdvTest {
     TestDatabase db = null;
     TimeSeriesDAI tsdai = null;
     Fixtures fixtures = null;
+    
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+    
     /**
      * Dates of Interest 02/04/2016 17:00:00, 0.12, goes, 02/04/2016 16:37:38,
      * user1 01/28/2016 18:00:00, 0.07, goes, 01/28/2016 17:35:32, user1
@@ -89,12 +96,16 @@ public class CombineStream_AdvTest {
         comp.setAlgorithmName("CombStream");
         comp.setAlgorithm(dbca);
         comp.prepareForExec(db);
-
+        Date start = new Date(2013-1900, 1, 1);
+        Date end = new Date(2018-1900, 8, 16);
+        
+        dc = UnitHelpers.getCompData(comp, tsdai, start, end);
+                /*
         for (DbCompParm p : comp.getParmList()) {
             CTimeSeries cts = new CTimeSeries(p);
-            tsdai.fillTimeSeries(cts, new Date(2013-1900, 1, 1), new Date(2018-1900, 8, 16));
+            tsdai.fillTimeSeries(cts, 
             dc.addTimeSeries(cts);
-        }
+        }*/
         
         instance = (CombineStream_Adv) comp.getExecutive();
         instance.StationsDir = "classpath:/shared/stations/";
@@ -108,12 +119,7 @@ public class CombineStream_AdvTest {
     public void tearDown() {
     }
 
-    /**
-     * Test of initAWAlgorithm method, of class CombineStream_Adv.
-     */
-    @Test
-    public void testInitAWAlgorithm() throws Exception {
-    }
+   
 
     /**
      * Test of beforeTimeSlices method, of class CombineStream_Adv.
@@ -371,4 +377,48 @@ public class CombineStream_AdvTest {
         assertEquals("GOES value wasn't used", 30, instance.output.getDoubleValue(), .0001);
     }
 
+    
+    @Test
+    public void testNoStationsDataFile() throws Exception {
+        DbCompAlgorithm dbca = new DbCompAlgorithm("CombineStream_Adv");
+        dbca.setExecClass("spk.algo.CombineStream_Adv");
+        DataCollection dc = new DataCollection();
+
+        DbComputation comp = new DbComputation(DbKey.NullKey, "CombineStreamTest");
+
+        DbCompParm parm = new DbCompParm("goes", fixtures.getTimeSeriesKey("TEST SPACE.Stage.Inst.15Minutes.0.GOES-raw"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        //parm = new DbCompParm("los", fixtures.getTimeSeriesKey("TEST SPACE.Stage.Inst.15Minutes.0.LOS-raw"), "15Minutes", null, 0);
+        //comp.addParm(parm);
+        
+        //parm = new DbCompParm("ip", fixtures.getTimeSeriesKey("TEST SPACE.Stage.Inst.15Minutes.0.IP-raw"), "15Minutes", null, 0);
+        //comp.addParm(parm);
+        
+        parm = new DbCompParm("output", fixtures.getTimeSeriesKey("TEST.Stage.Inst.15Minutes.0.Combined-raw_missing"), "15Minutes", null, 0);
+        comp.addParm(parm);
+
+        comp.setAlgorithmName("CombStream");
+        comp.setAlgorithm(dbca);
+        comp.prepareForExec(db);
+
+        dc = UnitHelpers.getCompData(comp, tsdai, start, end);
+        instance = (CombineStream_Adv) comp.getExecutive();
+        instance.StationsDir = "classpath:/shared/stations/";
+
+        UnitHelpers.prepForApply(instance, dc);
+        UnitHelpers.determineBaseTimes(instance);
+
+        
+        UnitHelpers.setBaseTime(instance, t3);
+        instance.goes = 30;
+        instance.ip = 30;
+        instance.los = 30;
+        instance.beforeTimeSlices();                
+        instance.doAWTimeSlice();       
+        
+        assertEquals("GOES value wasn't used", 30, instance.output.getDoubleValue(), .0001);
+    }
+    
+    
 }

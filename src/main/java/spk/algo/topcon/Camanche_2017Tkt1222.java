@@ -165,12 +165,12 @@ public class Camanche_2017Tkt1222
 
                     // section 1
                     double tcs_rain                    = graph.get_allowed_storage(wy_day-1, 0);
-                    double tcs_snow                    = Math.min( tcs_rain, graph.get_allowed_storage(wy_day-1, RemainingRunoff, true) ); // TCS snow can never be higher than TCS rain, however in the
-                                                                                                                                           // it has to be to line things up.
-                    // The DIFL requires Snow TCS values above the Snow Parm 0 
-                    // line to line things up, this keeps us from going completely 
-                    // out of whack.
-                    tcs_snow = Math.max( tcs_snow, tcs_rain ); 
+                    double tcs_snow                    = graph.get_allowed_storage(wy_day-1, RemainingRunoff, true);                     
+                    double tcs_snow_lower_bound        = graph.get_allowed_storage(wy_day-1, 2);
+                    tcs_snow = Math.min( tcs_snow, tcs_rain);
+                    tcs_snow = Math.max( tcs_snow, tcs_snow_lower_bound);
+                    
+                    
                     double non_transferable_space      = graph.get_allowed_storage(wy_day-1, 1);
                     
                     double snow_gross_res = tcs_rain - tcs_snow;
@@ -191,7 +191,7 @@ public class Camanche_2017Tkt1222
                     
                     
                     //section 2
-                    double transferable_space      = gross_reservation - (graph.gross_pool()-non_transferable_space);
+                    //double transferable_space      = gross_reservation - (graph.gross_pool()-non_transferable_space);
                     //transferable_space = Math.max( transferable_space, 0 );
                     // rain credits
                     //section 3 a
@@ -263,7 +263,7 @@ public class Camanche_2017Tkt1222
                         setOutput(NonTransferableSpace, non_transferable_space );
                         setOutput(SnowCredit, snow_credit);
                         setOutput(RainCredit, rain_credit);
-                        setOutput(TransferableSpace, transferable_space);
+                        setOutput(TransferableSpace, transferable_res);
                         setOutput(AllowedStorageRain, tcs_rain);
                         setOutput(AllowedStorageSnow, tcs_snow);
                         setOutput(AllowedStorageUnbound, camanche_unbound);                                                

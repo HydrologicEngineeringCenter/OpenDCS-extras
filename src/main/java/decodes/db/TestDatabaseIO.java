@@ -36,6 +36,7 @@ import ilex.util.Logger;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,7 +82,9 @@ public class TestDatabaseIO extends XmlDatabaseIO {
             }
             return listing.toArray(new String[listing.size()]);
 
-        } catch (Exception ex) {
+        } catch( FileNotFoundException ex) {
+            return null;
+        }catch (Exception ex) {
             throw new IOException("Could not access resource", ex);
         } finally {
 

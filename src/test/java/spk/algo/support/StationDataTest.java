@@ -48,8 +48,8 @@ public class StationDataTest {
 
     @After
     public void tearDown() {
-    }
-
+    }    
+    
     /**
      * Test of loadData method, of class StationData.
      */

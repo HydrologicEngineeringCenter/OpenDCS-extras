@@ -69,8 +69,9 @@ public class WaterControlDiagram {
      */
     public void load_graph(String graph_file) throws Exception {
 
-        InputStream is = Resource.fromURI(URI.create(graph_file));
-
+        //InputStream is = Resource.fromURI(URI.create(graph_file));
+        InputStream is = Resource.fromURI(graph_file);
+        
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         try {
             String line = null;
