@@ -129,7 +129,7 @@ public class TopConSnowOnly
                     debug3( " TCS for snow is " + tcs_snow );
                     double min_of_allowed = Math.min( tcs_rain, tcs_snow);
                     
-                    allowed_storage = graph.bound(wy_day, min_of_allowed);
+                    allowed_storage = graph.bound(wy_day-1, min_of_allowed);
                     debug3( " bounded storage is " + allowed_storage );
                     
                     setOutput(AllowedStorage, allowed_storage);
