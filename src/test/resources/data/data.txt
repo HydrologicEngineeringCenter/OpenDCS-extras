@@ -26,3 +26,4 @@
 25,TEST.Stor-In.Ave.1Day.1Day.raw,ac-ft
 26,TEST SPACE.Stage.Inst.15Minutes.0.GOES-raw,ft
 27,AWRO.Temp-Water.Inst.15Minutes.0.USGS-raw,C
+28,LowessInput.Stor.Inst.15Minutes.0.raw,acft

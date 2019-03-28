@@ -162,7 +162,7 @@ public class Success
                     adjustment = calculate_irrigation();
                     //adjustment = graph.normal_irrigation(_timeSliceBaseTime);
                     
-                    if( wy_day >= dates.March31 && wy_day <= dates.July31){                            
+                    if( wy_day >= dates.January31 && wy_day <= dates.July31){                            
                             space_required = Math.max( 0.0, tcs_snow - adjustment  );
                             // This is allowed to go below zero, it will be bounded below
                             allowed_storage_unbounded =  graph.get_max_snowspace() - space_required;
