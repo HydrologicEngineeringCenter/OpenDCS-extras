@@ -167,7 +167,7 @@ public class CombineStream_Adv
                 try {
                     //this.baseTimes
                     TreeSet<Date> allInputData = this.baseTimes;
-                    start = allInputData.first();
+                    start = new Date(allInputData.first().getTime());
                     start.setDate(start.getDate()-1);
                     timeSeriesDAO.fillTimeSeries(outputTS, start, allInputData.last() );
                 } catch (DbIoException ex) {
