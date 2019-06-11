@@ -27,3 +27,7 @@
 26,TEST SPACE.Stage.Inst.15Minutes.0.GOES-raw,ft
 27,AWRO.Temp-Water.Inst.15Minutes.0.USGS-raw,C
 28,LowessInput.Stor.Inst.15Minutes.0.raw,acft
+# Marker contains a zero value for each day from 1940 to 2040
+29,Marker.Count.Inst.1Day.0.raw,acft
+30,TEST-Diversion.Stor-Runoff.Inst.0.0.raw,ac-ft
+31,TEST-PercentageReduction.Stor-Runoff.Inst.1Day.0.calc,ac-ft
