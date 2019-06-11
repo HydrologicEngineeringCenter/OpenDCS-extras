@@ -166,5 +166,14 @@ public class UnitHelpers {
         fldComp.setAccessible(true);
         return (DbComputation) fldComp.get(instance);
     }
+
+    public static void setAggPeriodEnd(DbAlgorithmExecutive instance, Date date) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        Class<?> clz = instance.getClass().getSuperclass();//.getSuperclass();
+        Field fld = clz.getDeclaredField("_aggregatePeriodEnd");
+        fld.setAccessible(true);
+        fld.set(instance, date);
+    }
+
+   
     
 }
