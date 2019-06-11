@@ -56,6 +56,7 @@ public class LowessSmoother
 	LoessInterpolator loess = null;
 	Date beginTime = null;
 	Date endTime = null;
+        Date lastTimeSlice = null;
 	ArrayList<Long> indepTimes = new ArrayList<Long>();
 	ArrayList<Double> indepValues = new ArrayList<Double>();		
 //AW:LOCALVARS_END
@@ -66,9 +67,10 @@ public class LowessSmoother
 //AW:OUTPUTS_END
 
 //AW:PROPERTIES
-        public Double fraction = 1.0;       
-        public int  iterations = 3;
-	public String _propertyNames[] = { "fraction", "iterations"  };
+        public double fraction = 1.0;       
+        public long  iterations = 3;
+        public long  minSamplesNeeded = 72;
+	public String _propertyNames[] = { "fraction", "iterations", "minSamplesNeeded"  };
 //AW:PROPERTIES_END
 
 	// Allow javac to generate a no-args constructor.
@@ -82,7 +84,7 @@ public class LowessSmoother
 //AW:INIT
 		_awAlgoType = AWAlgoType.RUNNING_AGGREGATE;
                 _aggPeriodVarRoleName = "smooth";
-                loess = new LoessInterpolator(fraction, iterations);
+                loess = new LoessInterpolator(fraction, (int)iterations);
 //AW:INIT_END
 
 //AW:USERINIT
@@ -116,9 +118,12 @@ public class LowessSmoother
 		throws DbCompException
 	{
 //AW:TIMESLICE		
-		// Just collect the times & values. We do the rating after Time Slices.
+            // Just collect the times & values. We do the rating after Time Slices.
+            if(!isMissing(rough)){
 		indepTimes.add(_timeSliceBaseTime.getTime());
 		indepValues.add(rough);
+                lastTimeSlice = _timeSliceBaseTime;
+            }
 //AW:TIMESLICE_END
 	}
 
@@ -128,17 +133,22 @@ public class LowessSmoother
 	protected void afterTimeSlices()
 	{
 //AW:AFTER_TIMESLICES
-		double []times = new double[indepTimes.size()];
-		double []vals = new double[indepTimes.size()];
-		for(int i=0; i<times.length; i++)
-		{
-			times[i] = indepTimes.get(i);
-			vals[i] = indepValues.get(i);
-		}
-                
-                double smoothed_data[] = loess.smooth(times, vals);
-                setOutput(smooth, smoothed_data[smoothed_data.length-1]);
-		
+                if( indepValues.size() >= minSamplesNeeded ){
+                    double []times = new double[indepTimes.size()];
+                    double []vals = new double[indepTimes.size()];
+                    for(int i=0; i<times.length; i++)
+                    {
+                            times[i] = indepTimes.get(i);
+                            vals[i] = indepValues.get(i);
+                    }
+
+                    double smoothed_data[] = loess.smooth(times, vals);
+                    if( !_aggregatePeriodEnd.after(lastTimeSlice) ){
+                        setOutput(smooth, smoothed_data[smoothed_data.length-1]);
+                    }
+                } else {
+                    debug1("Insufficient valid data for this timeslice");
+                }
 		
 //AW:AFTER_TIMESLICES_END
 	}

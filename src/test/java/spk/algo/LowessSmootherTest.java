@@ -111,6 +111,7 @@ public class LowessSmootherTest {
         CTimeSeries cts = dc.getTimeSeriesByUniqueSdi(fixtures.getTimeSeriesKey(tsname));
         // no actually come up with a window here
         instance.beforeTimeSlices();
+        UnitHelpers.setAggPeriodEnd(instance,Fixtures.sdf.parse("2019-3-12T15:00:00+0000") );
         for (int i = 0; i < cts.size(); i++ ) {
             TimedVariable tv = cts.sampleAt(i);
             UnitHelpers.setBaseTime(instance, tv.getTime());
