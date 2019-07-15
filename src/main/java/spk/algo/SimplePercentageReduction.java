@@ -326,8 +326,8 @@ public class SimplePercentageReduction
                                  cal2.setTime(end_day);
                                  int _end =cal2.get(Calendar.DAY_OF_YEAR);
                                  count = (_end-_start)+1; // count is inclusive of the day we are on
-                                 
-                                 double remaining = Math.max(0, runoff*(count*percent_per_day/100.0)); // negative remaining runoff is impossible
+                                 double reduction_factor= 1 - (count*percent_per_day/100.0);
+                                 double remaining = Math.max(0, runoff*reduction_factor); // negative remaining runoff is impossible
                                  setOutput( reduced, remaining, d);
                              }
                              catch( Exception err){
