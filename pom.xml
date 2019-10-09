@@ -4,12 +4,12 @@
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
  
-  <groupId>mil.army.usace.spk</groupId>
+  <groupId>mil.army.usace</groupId>
   <artifactId>algos</artifactId>
   <version>6.5RC02-SNAPSHOT</version>
   <packaging>jar</packaging>
  
-  <name>SPK Computation Algorithms</name>
+  <name>OpenDCS Extra Computation Algorithms</name>
  
   <dependencies>
     <dependency>
