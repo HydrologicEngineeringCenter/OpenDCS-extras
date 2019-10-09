@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spk.db.test;
+package opendcs.db.test;
 
 import decodes.db.IntervalList;
 import decodes.tsdb.DbIoException;

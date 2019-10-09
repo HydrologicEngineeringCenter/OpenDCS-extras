@@ -12,7 +12,7 @@ import decodes.tsdb.TimeSeriesDb;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import spk.db.test.TestDatabase;
+import opendcs.db.test.TestDatabase;
 
 /**
  *

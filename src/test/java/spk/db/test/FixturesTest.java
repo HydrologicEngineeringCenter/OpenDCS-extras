@@ -5,6 +5,8 @@
  */
 package spk.db.test;
 
+import opendcs.db.test.Fixtures;
+import opendcs.db.test.TestDatabase;
 import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.TimeSeriesDb;
 import opendcs.dai.TimeSeriesDAI;

@@ -16,7 +16,7 @@ import java.util.GregorianCalendar;
 import java.util.Calendar;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
-import spk.db.test.Fixtures;
+import opendcs.db.test.Fixtures;
 
 /**
  *

@@ -19,10 +19,10 @@ import java.util.TimeZone;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import spk.db.test.Fixtures;
-import spk.db.test.TestDatabase;
-import spk.db.test.TestDbTimeSeriesDAO;
-import spk.db.test.UnitHelpers;
+import opendcs.db.test.Fixtures;
+import opendcs.db.test.TestDatabase;
+import opendcs.db.test.TestDbTimeSeriesDAO;
+import opendcs.db.test.UnitHelpers;
 
 /**
  *
