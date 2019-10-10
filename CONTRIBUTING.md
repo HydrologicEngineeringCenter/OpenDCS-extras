@@ -118,11 +118,13 @@ Please [fork](https://help.github.com/en/articles/fork-a-repo) the repository on
 
 The recommended branch naming is the version followed by a simple name. E.G. 6.6RC03_newinflow.
 
-If you are submitting an entire new OpenDCS algorithms working on the main branch is fine, though a branch is preferred. 
+If you are submitting an entire new OpenDCS algorithms working on the main branch is fine, though a branch is preferred. When submitting an algorithm, if you have made the xml file that is used to let your install know the input, outputs, and parameters or the algorithm please place that file in src/main/resources/yourpackage/youralgorithmname.xml
 
 Once you have made your changes submit a [pull request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork).
 
+
 Barring nothing working at all or the code not being related to OpenDCS your contributions will be accepted.
+
 
 ### Check Your Changes
 
