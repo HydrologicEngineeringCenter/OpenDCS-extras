@@ -1,4 +1,4 @@
-= OpenDCS Extras
+# OpenDCS Extras
 
 This project is for anyone using the OpenDCS DECODES or computation system to share custom work that was done to extend that system.
 
