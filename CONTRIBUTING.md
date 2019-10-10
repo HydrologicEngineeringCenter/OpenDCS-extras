@@ -79,9 +79,13 @@ Unfortunately at this time there are some issues with distributing OpenDCS sourc
 
 The maven build system is used. Many of the dependencies will be found automatically, for the rest you will need to download them manually and use the mvn install:install-file to identify it as shown.
 
-**NOTE: If is is too complicated and you have verify that the code compiles with algoedit, please indicate so in your pull request. I understand that this will be very new to most contributing code but this a standard way to handle things and over time this will get easier to deal with as we adapt.
+**NOTE: If this is too complicated and you have verified that the code compiles with algoedit, please indicate so in your pull request. I understand that this will be very new to most contributing code but this a standard way to handle things and over time this will get easier to deal with as we adapt.
 
 **NOTE2: Even if you do not use maven, when submitting the request please structure the code as shown java code goes in src/main/java/ and then the directory structure follows your pacakage name. 
+
+The the code is organized into several branches. The master branch will always be for building against the newest version of OpenDCS. There will also be a branch for each named release.
+
+
 
 ### Making Changes
 
@@ -113,11 +117,13 @@ When submitting a bug report, please be sure to include accurate and thorough in
 
 Please [fork](https://help.github.com/en/articles/fork-a-repo) the repository on github and create a [branch in Git](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging) if you are making changes to existing code.
 
+The recommended branch naming is the version followed by a simple name. E.G. 6.6RC03_newinflow.
+
 If you are submitting an entire new OpenDCS algorithms working on the main branch is fine, though a branch is preferred. 
 
 Once you have made your changes submit a [pull request](https://help.github.com/en/articles/creating-a-pull-request-from-a-fork).
 
-Barring nothing working at all or the code not being related to OpenDCS your contribution will be accepted.
+Barring nothing working at all or the code not being related to OpenDCS your contributions will be accepted.
 
 ### Check Your Changes
 
