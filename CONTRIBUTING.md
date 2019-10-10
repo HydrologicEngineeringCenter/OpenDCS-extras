@@ -75,16 +75,15 @@ By making a contribution to this project, I certify that:
 ## Getting Started
 
 The code in this repository is to extend the features available in the OpenDCS utility (from http://covesw.net/). To build this library you will need a least a copy of the main jar that is provided in that software.
-Unfortunately at this time there are some issues with distributing OpenDCS source code. While anyone is welcome to contribute, the intended audience must being the agencies that currently use the tool.
+Unfortunately at this time there are some issues with distributing OpenDCS source code. While anyone is welcome to contribute, for the time being, the intended audience must be the agencies that currently use the tool.
 
-The maven build system is used. Many of the dependencies will be found automatically, for the rest you will need to download them manually and use the mvn install:install-file to identify it as shown.
+The maven build system is used. Many of the dependencies will be found and downloaded automatically for you, for the rest you will need to download them manually and use the mvn install:install-file to identify it as shown.
 
 **NOTE: If this is too complicated and you have verified that the code compiles with algoedit, please indicate so in your pull request. I understand that this will be very new to most contributing code but this a standard way to handle things and over time this will get easier to deal with as we adapt.
 
-**NOTE2: Even if you do not use maven, when submitting the request please structure the code as shown java code goes in src/main/java/ and then the directory structure follows your pacakage name. 
+`**NOTE2: Even if you do not use maven please structure the code as shown java code goes in src/main/java/, and then the directory structure follows from your package name when submitting the request. 
 
-The the code is organized into several branches. The master branch will always be for building against the newest version of OpenDCS. There will also be a branch for each named release.
-
+The the code is organized into several branches. The master branch will always be for building against the development version of OpenDCS. There will also be a branch for each named release.
 
 
 ### Making Changes
@@ -135,7 +134,7 @@ The project is setup as a maven project and using either the command line or any
 mvn compile
 ```
 
-There is a method of unit test avaiable for testing algorithms, it is not complete, if possible please create tests and run them to verify operation.
+There is a method of unit test available for testing algorithms, it is not complete, if possible please create tests and run them to verify operation.
 
 If you are unsure how to make the test but have enough information (input time series, correct output time series, at various parameters) submit an issue with that information and we will help you set it up.
 
