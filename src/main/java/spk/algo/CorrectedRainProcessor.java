@@ -1,5 +1,7 @@
 package spk.algo;
 
+import com.sun.tools.corba.se.idl.constExpr.GreaterEqual;
+import decodes.cwms.CwmsFlags;
 import decodes.tsdb.BadTimeSeriesException;
 import decodes.tsdb.algo.*;
 import java.util.Date;
@@ -16,6 +18,11 @@ import decodes.tsdb.ParmRef;
 import ilex.var.TimedVariable;
 import decodes.tsdb.TimeSeriesIdentifier;
 import ilex.var.NoConversionException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import opendcs.dai.TimeSeriesDAI;
@@ -25,7 +32,7 @@ import opendcs.dai.TimeSeriesDAI;
 //AW:JAVADOC
 /**
  * This computation includes it's output in its input. This input MUST be
- * specified to be 1 interval previous or you WILL get stuck in and endless
+ * specified to be 1 interval accumulator or you WILL get stuck in and endless
  * loop.
  */
 //AW:JAVADOC_END
@@ -33,13 +40,17 @@ public class CorrectedRainProcessor
         extends decodes.tsdb.algo.AW_AlgorithmBase {
 //AW:INPUTS
 
-    public double orig;	//AW:TYPECODE=id
+    public double raw_in;   //AW:TYPECODE=i
+    public double orig_delta;	//AW:TYPECODE=id
     public double rev_in;	//AW:TYPECODE=i
-    String _inputNames[] = {"orig", "rev_in"};
+    String _inputNames[] = {"raw_in", "orig_delta", "rev_in"};
 //AW:INPUTS_END
 
 //AW:LOCALVARS
-    double previous;
+    private SimpleDateFormat df = new SimpleDateFormat("ddMMMyyyy HHmm"); // basic standard HEC Format; // used to dispay dates in the debug output    
+    private GregorianCalendar calStartOfWaterYear; // we don't care about what year we are in, just that we are at the start time (day/month/hour) of the new water year
+    private GregorianCalendar slice = null;
+    double accumulator;
     CTimeSeries output_ts;
 //AW:LOCALVARS_END
 //AW:OUTPUTS
@@ -48,7 +59,8 @@ public class CorrectedRainProcessor
 //AW:OUTPUTS_END
 
 //AW:PROPERTIES
-    String _propertyNames[] = {};
+    private String waterYearStartUTC = "01Oct2019 0700";
+    String _propertyNames[] = {"waterYearStartUTC"};
 //AW:PROPERTIES_END
 
     // Allow javac to generate a no-args constructor.
@@ -60,7 +72,16 @@ public class CorrectedRainProcessor
 //AW:INIT
         _awAlgoType = AWAlgoType.TIME_SLICE;
 //AW:INIT_END
-        previous = Double.NEGATIVE_INFINITY;
+        accumulator = Double.NEGATIVE_INFINITY;
+        try {
+            Date startWY = this.df.parse(this.waterYearStartUTC);
+            calStartOfWaterYear = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            calStartOfWaterYear.setTime(startWY);
+        } catch (ParseException ex) {
+            debug3("unable to parse water year start date: " + ex.getLocalizedMessage());
+            throw new DbCompException(ex.getLocalizedMessage());
+        }
+
 //AW:USERINIT
 //AW:USERINIT_END
     }
@@ -70,7 +91,7 @@ public class CorrectedRainProcessor
      */
     protected void beforeTimeSlices()
             throws DbCompException {
-        previous = Double.NEGATIVE_INFINITY;
+        accumulator = Double.NEGATIVE_INFINITY;
         try {
             //AW:BEFORE_TIMESLICES
             ParmRef p = this.getParmRef("rev_out");
@@ -99,19 +120,29 @@ public class CorrectedRainProcessor
     protected void doAWTimeSlice()
             throws DbCompException {
 //AW:TIMESLICE
-        if (!isMissing(orig)) {
+        if (!isMissing(orig_delta)) {
+            orig_delta = Math.max(0,orig_delta);
             // logic to check flags
             // logic to check for start of water year
-            if (!isMissing(rev_in)) {
-                previous = rev_in; // TODO: this should also be a water year start check
-            } else if (isMissing(previous)) {
-                previous = 0.0;
+            if (isStartOfWaterYear()) { // force reset
+                accumulator = 0.0;
+                setOutput(rev_out, accumulator);
+                return;
+            } else if (!isMissing(rev_in) && isMissing(accumulator)) { // e.g. the accumulator hasn't been initialized yet
+                accumulator = rev_in; // TODO: this should also be a water year start check
+            } else if (isMissing(accumulator)) {
+                accumulator = 0.0;
             }
 
-            int flags = this.getInputFlagBits("orig");
+            int flags = this.getInputFlagBits("raw_in");
             debug3("Flags are " + flags);
-            
-            previous = previous + orig;
+            int cflags = CwmsFlags.flag2CwmsQualityCode(flags);
+            if ((cflags & (CwmsFlags.PROTECTED | CwmsFlags.REPLACEMENT_MASK)) > 0) {
+                accumulator = raw_in; // the user set a value, use it.
+            } else {
+                accumulator = accumulator + orig_delta; // new data, just use difference
+            }
+
             TimedVariable tv = output_ts.findWithin(_timeSliceBaseTime, roundSec);
             double cur_out = Double.NEGATIVE_INFINITY;
             try {
@@ -119,10 +150,11 @@ public class CorrectedRainProcessor
             } catch (NullPointerException | NoConversionException ex) {
                 Logger.getLogger(CorrectedRainProcessor.class.getName()).log(Level.SEVERE, null, ex);
             }
-            if (!isMissing(cur_out) && nearlyEqual(cur_out, previous, .001)) {
+
+            if (!isMissing(cur_out) && nearlyEqual(cur_out, accumulator, .001)) {
                 // do nothing
             } else {
-                setOutput(rev_out, previous);
+                setOutput(rev_out, accumulator);
             }
 
         }
@@ -184,6 +216,18 @@ public class CorrectedRainProcessor
         } else { // use relative error
             return diff / (absA + absB) < epsilon;
         }
+    }
+
+    private boolean isStartOfWaterYear() {
+        if( slice == null ){
+            slice = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        }
+        slice.setTime(_timeSliceBaseTime);
+        return (calStartOfWaterYear.get(Calendar.MONTH) == slice.get(Calendar.MONTH ) )
+                && (calStartOfWaterYear.get(Calendar.DATE) == slice.get(Calendar.DATE ) )
+                && (calStartOfWaterYear.get(Calendar.HOUR_OF_DAY) == slice.get(Calendar.HOUR_OF_DAY ) )
+                && (calStartOfWaterYear.get(Calendar.MINUTE) == slice.get(Calendar.MINUTE ) ) ;
+                
     }
 
 }
