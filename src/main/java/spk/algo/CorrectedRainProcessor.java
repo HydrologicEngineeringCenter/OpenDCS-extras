@@ -137,7 +137,7 @@ public class CorrectedRainProcessor
             int flags = this.getInputFlagBits("raw_in");
             debug3("Flags are " + flags);
             int cflags = CwmsFlags.flag2CwmsQualityCode(flags);
-            if ((cflags & (CwmsFlags.PROTECTED | CwmsFlags.REPLACEMENT_MASK)) > 0) {
+            if ((cflags & (CwmsFlags.PROTECTED | CwmsFlags.REPLACEMENT_MASK)) > 0 && (raw_in >= accumulator)) {
                 accumulator = raw_in; // the user set a value, use it.
             } else {
                 accumulator = accumulator + orig_delta; // new data, just use difference
@@ -148,7 +148,7 @@ public class CorrectedRainProcessor
             try {
                 cur_out = tv.getDoubleValue();
             } catch (NullPointerException | NoConversionException ex) {
-                Logger.getLogger(CorrectedRainProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                debug3("not current output value");
             }
 
             if (!isMissing(cur_out) && nearlyEqual(cur_out, accumulator, .001)) {
@@ -157,6 +157,9 @@ public class CorrectedRainProcessor
                 setOutput(rev_out, accumulator);
             }
 
+        } else {
+            debug3("a value is missing in the window, that shouldn't happen");
+            throw new DbCompException("gap in window");
         }
         // else do nothing, we are either and the end or someone needs to get in an edit data.
 //AW:TIMESLICE_END
