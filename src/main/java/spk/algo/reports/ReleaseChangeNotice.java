@@ -149,7 +149,7 @@ public class ReleaseChangeNotice
             session = Session.getDefaultInstance( properties );
             
             String site_name = getSiteName( "from", "cwms" );
-            project_name = site_name.split("\\s+")[0];
+            project_name = site_name; //.split("\\s+")[0];
 //AW:BEFORE_TIMESLICES_END
 	}
 
