@@ -12,7 +12,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import org.lobobrowser.util.OS;
 
 /**
  * Idea pulled from: https://stackoverflow.com/questions/861500/url-to-load-resources-from-the-classpath-in-java

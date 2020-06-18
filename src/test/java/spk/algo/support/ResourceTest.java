@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.lobobrowser.util.OS;
 
 /**
  *

@@ -532,7 +532,7 @@ import decodes.cwms.CwmsTimeSeriesDAO;
 import decodes.cwms.CwmsTimeSeriesDb;
 import decodes.cwms.CwmsTsId;
 
-import oracle.jdbc.OraclePreparedStatement;
+//import oracle.jdbc.OraclePreparedStatement;
 
 import ilex.util.Logger;
 import ilex.util.StringPair;
@@ -549,6 +549,7 @@ import decodes.tsdb.*;
 import static decodes.tsdb.TimeSeriesDb.module;
 import static decodes.tsdb.TimeSeriesDb.sdiIsUnique;
 import decodes.util.DecodesSettings;
+import java.sql.*;
 
 /**
 This is the base class for the time-series database implementation.
@@ -567,7 +568,7 @@ public class CwmsTimeSeriesDb_SPK
 	private String dbOfficePrivilege = null;
 
 //	private SimpleDateFormat rwdf;
-	private OraclePreparedStatement storeTsStmt = null;
+	private PreparedStatement storeTsStmt = null;
 	//private TasklistQueueFile tasklistQueueFile = null;
 	private int tasklistQueueThresholdHours = 8;
 	private int numTasklistQueueErrors = 0;
@@ -588,7 +589,7 @@ public class CwmsTimeSeriesDb_SPK
 	public static final int CWMS_V_3_0 = 30;
 	private int cwmsSchemaVersion = 0;
         
-        private OraclePreparedStatement getMinStmt = null, getTaskListStmt;
+    private PreparedStatement getMinStmt = null, getTaskListStmt;
 	String getMinStmtQuery = null, getTaskListStmtQuery = null;
 	
 	/**
@@ -696,7 +697,7 @@ public class CwmsTimeSeriesDb_SPK
 			failure(msg);
 		}
 		
-		determineTsdbVersion();
+		determineTsdbVersion(conn,this);
 		cwmsSchemaVersion = determineCwmsSchemaVersion(getConnection(), tsdbVersion);
                 debug3( "This is the SPK version for some special processing" );
 		if (cwmsSchemaVersion >= CWMS_V_2_2)
@@ -768,7 +769,7 @@ public class CwmsTimeSeriesDb_SPK
 
 		postConnectInit(appName);
 		
-		keyGenerator = new CwmsSequenceKeyGenerator(CwmsTimeSeriesDb.CWMS_V_3_0,cwmsSchemaVersion);
+		keyGenerator = new CwmsSequenceKeyGenerator(getDecodesDatabaseVersion());
 
 		if (dbOfficeId != null && dbOfficeId.length() > 0)
 		{
@@ -1132,7 +1133,7 @@ public class CwmsTimeSeriesDb_SPK
 				getMinStmtQuery = "select min(a.record_num) from cp_comp_tasklist a "
 					+ "where a.LOADING_APPLICATION_ID = " + applicationId
 					+ failTimeClause;
-				getMinStmt = (OraclePreparedStatement)conn.prepareStatement(getMinStmtQuery);
+				getMinStmt = conn.prepareStatement(getMinStmtQuery);
 	
 				// 2nd query gets tasklist recs within record_num range.
 				getTaskListStmtQuery = 
@@ -1143,7 +1144,7 @@ public class CwmsTimeSeriesDb_SPK
 					+ " and ROWNUM < 20000" //a.record_num between :1 /* minRecNum */ and :2 /* maxRecNum */"
 					+ failTimeClause
 					+ " ORDER BY a.site_datatype_id, a.start_date_time";
-				getTaskListStmt = (OraclePreparedStatement)conn.prepareStatement(getTaskListStmtQuery);
+				getTaskListStmt = conn.prepareStatement(getTaskListStmtQuery);
 			}
 
 			debug3("Executing prepared stmt '" + getMinStmtQuery + "'");
@@ -1894,7 +1895,7 @@ for(CTimeSeries ts : allts)
 		throws DbIoException
 	{
 		String errMsg = null;
-		OraclePreparedStatement storeProcStmt = null;
+		PreparedStatement storeProcStmt = null;
 		
 		try
 		{
@@ -1908,7 +1909,7 @@ for(CTimeSeries ts : allts)
 				q = 
 					"begin cwms_ccp_vpd.set_ccp_session_ctx(" +
 					":1 /* office code */, :2 /* priv level*/, :3 /* officeId */); end;";
-				storeProcStmt  = (OraclePreparedStatement)conn.prepareStatement(q);
+				storeProcStmt  = conn.prepareStatement(q);
 				storeProcStmt.setInt(1, (int)dbOfficeCode.getValue());
 				storeProcStmt.setInt(2, privLevel);
 				storeProcStmt.setString(3, dbOfficeId);
@@ -1920,7 +1921,7 @@ for(CTimeSeries ts : allts)
 			else
 			{
 				q = "begin cwms_ccp_vpd.set_session_office_id(:1  /*Office ID */ ); end;"; 
-				storeProcStmt  = (OraclePreparedStatement)conn.prepareStatement(q);
+				storeProcStmt  = conn.prepareStatement(q);
 				storeProcStmt.setString(1, dbOfficeId);
 				Logger.instance().debug1("Executing '" + q + "' with "
 					+ "dbOfficeId='" + dbOfficeId + "'");

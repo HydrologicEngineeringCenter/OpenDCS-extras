@@ -198,4 +198,10 @@ public class TestDbTimeSeriesDAO implements TimeSeriesDAI {
     public void setAppModule(String module) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void modifyTSID(TimeSeriesIdentifier tsi) throws DbIoException, NoSuchObjectException, BadTimeSeriesException
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

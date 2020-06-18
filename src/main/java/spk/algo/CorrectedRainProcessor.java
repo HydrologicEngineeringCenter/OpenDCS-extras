@@ -1,30 +1,22 @@
 package spk.algo;
 
-import com.sun.tools.corba.se.idl.constExpr.GreaterEqual;
 import decodes.cwms.CwmsFlags;
 import decodes.tsdb.BadTimeSeriesException;
-import decodes.tsdb.algo.*;
 import java.util.Date;
 
-import ilex.var.NamedVariableList;
 import ilex.var.NamedVariable;
-import decodes.tsdb.DbAlgorithmExecutive;
 import decodes.tsdb.DbCompException;
 import decodes.tsdb.DbIoException;
-import decodes.tsdb.VarFlags;
 import decodes.tsdb.algo.AWAlgoType;
 import decodes.tsdb.CTimeSeries;
 import decodes.tsdb.ParmRef;
 import ilex.var.TimedVariable;
-import decodes.tsdb.TimeSeriesIdentifier;
 import ilex.var.NoConversionException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import opendcs.dai.TimeSeriesDAI;
 
 //AW:IMPORTS
